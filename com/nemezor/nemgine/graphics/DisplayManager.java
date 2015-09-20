@@ -68,4 +68,8 @@ public class DisplayManager {
 	public static void finishRender() {
 		Display.update();
 	}
+	
+	public static void changeTitle(String newTitle) {
+		NemgineLoader.setTitle(newTitle);
+	}
 }

@@ -11,11 +11,9 @@ import java.util.Iterator;
 import javax.imageio.ImageIO;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
 
 import com.nemezor.nemgine.misc.NemgineTextureException;
 import com.nemezor.nemgine.misc.Registry;
-import com.nemezor.nemgine.misc.Texture;
 
 public class TextureManager {
 
@@ -24,9 +22,9 @@ public class TextureManager {
 	private static int textureCounter = 0;
 	private static int currentTexture = 0;
 	
-	public static int generateTextures() {
+	public static synchronized int generateTextures() {
 		textureCounter++;
-		textures.put(textureCounter, null);
+		textures.put(textureCounter, new Texture(Registry.INVALID, Registry.INVALID, Registry.INVALID));
 		return textureCounter;
 	}
 	
@@ -35,10 +33,9 @@ public class TextureManager {
 			return;
 		}
 		Texture tex = textures.get(id);
-		GL13.glActiveTexture(GL13.GL_TEXTURE0);
-		if (tex == null) {
-			if (currentTexture != invalidTexture) {
-				currentTexture = invalidTexture;
+		if (tex == null || tex.getId() == Registry.INVALID) {
+			if (currentTexture != Registry.INVALID) {
+				currentTexture = Registry.INVALID;
 				GL11.glBindTexture(GL11.GL_TEXTURE_2D, invalidTexture);
 			}
 			return;
@@ -62,7 +59,10 @@ public class TextureManager {
 		if (tex == null) {
 			return;
 		}
-		GL11.glDeleteTextures(tex.getId());
+		if (tex.getId() != Registry.INVALID) {
+			GL11.glDeleteTextures(tex.getId());
+		}
+		textures.remove(id);
 	}
 	
 	public static void disposeAll() {
@@ -71,7 +71,9 @@ public class TextureManager {
 		
 		while (keys.hasNext()) {
 			Texture tex = textures.get(keys.next());
-			GL11.glDeleteTextures(tex.getId());
+			if (tex.getId() != Registry.INVALID) {
+				GL11.glDeleteTextures(tex.getId());
+			}
 		}
 		textures.clear();
 	}
@@ -81,7 +83,7 @@ public class TextureManager {
 			return false;
 		}
 		Texture tex = textures.get(id);
-		if (tex != null) {
+		if (tex == null || tex.getId() != Registry.INVALID) {
 			return false;
 		}
 		tex = loadTexture(file);

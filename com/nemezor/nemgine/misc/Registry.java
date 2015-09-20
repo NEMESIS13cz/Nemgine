@@ -44,4 +44,8 @@ public class Registry {
 	public static final String TEXTURE_MANAGER_LOADER_GLOBAL_ERROR = "An error occured while loading textures, aborting";
 	public static final String TEXTURE_MISSING_PATH = "com/nemezor/nemgine/graphics/missing.png";
 	public static final String TEXTURE_LOADER_MISSING_ERROR = "Failed to load 'invalid' texture!";
+	public static final String MODEL_LOADER_NOT_FOUND = "Model failed to load!";
+	public static final String MODEL_LOADER_NAME = "Nemgine Model Loader";
+	public static final String MODEL_MANAGER_NAME = "Nemgine Model Manager";
+	public static final String MODEL_MANAGER_LOADER_GLOBAL_ERROR = "An error occured while loading models, aborting";
 }

@@ -1,9 +1,10 @@
 package com.nemezor.nemgine.graphics;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -28,7 +29,7 @@ public class ShaderManager {
 	private static int currentShader = 0;
 	private static Shader currentShaderData = null;
 
-	public static int generateShaders() {
+	public static synchronized int generateShaders() {
 		shaderCounter++;
 		shaders.put(shaderCounter, new Shader());
 		return shaderCounter;
@@ -72,7 +73,7 @@ public class ShaderManager {
 		if (shader == null) {
 			return;
 		}
-		currentShader = shader.progID;
+		currentShader = id;
 		currentShaderData = shader;
 		GL20.glUseProgram(shader.progID);
 	}
@@ -151,8 +152,8 @@ public class ShaderManager {
 		GL20.glUniform1f(currentShaderData.data.get(name), data ? 1.0f : 0.0f);
 	}
 
-	public static boolean initializeShader(int id, String vertexFile, String fragmentFile, String[] uniforms, int[] binds) {
-		if (uniforms.length != binds.length) {
+	public static boolean initializeShader(int id, String vertexFile, String fragmentFile, String[] uniforms, String[] attribNames, int[] attribBinds) {
+		if (attribBinds.length != attribNames.length) {
 			return false;
 		}
 		if (currentShader == id) {
@@ -181,8 +182,8 @@ public class ShaderManager {
 		shader.progID = GL20.glCreateProgram();
 		GL20.glAttachShader(shader.progID, shader.vertID);
 		GL20.glAttachShader(shader.progID, shader.fragID);
-		for (int i = 0; i < uniforms.length; i++) {
-			GL20.glBindAttribLocation(shader.progID, binds[i], uniforms[i]);
+		for (int i = 0; i < attribNames.length; i++) {
+			GL20.glBindAttribLocation(shader.progID, attribBinds[i], attribNames[i]);
 		}
 		GL20.glLinkProgram(shader.progID);
 		GL20.glValidateProgram(shader.progID);
@@ -196,7 +197,7 @@ public class ShaderManager {
 	private static int loadShader(String file, EnumShaderType type) {
 		StringBuilder shaderSrc = new StringBuilder();
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader(file));
+			BufferedReader reader = Files.newBufferedReader(Paths.get(ClassLoader.getSystemResource(file).getPath()));
 			String line;
 			while ((line = reader.readLine()) != null) {
 				shaderSrc.append(line).append("\n");

@@ -127,6 +127,10 @@ public class NemgineLoader {
 		return appTitle;
 	}
 
+	public static void setTitle(String s) {
+		displayFrame.setTitle(s);
+	}
+	
 	public static synchronized void stop() {
 		isLoading = false;
 		panel.switchToOpenGL();

@@ -18,7 +18,7 @@ public class ImmediateRender {
 
 	private ImmediateRender() {}
 
-	public static void setup() {
+	public static void initialize() {
 		isImmediate = true;
 		try {
 			Dimension size = NemgineLoader.getSize();

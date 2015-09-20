@@ -1,5 +1,11 @@
 package com.nemezor.nemgine.graphics;
 
+import java.nio.FloatBuffer;
+
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL20;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -36,5 +42,17 @@ public class GLHelper {
 		mat.m33 = 0.0f;
 		
 		return mat;
+	}
+	
+	public static int createBufferAndStore(int attrNum, int size, float[] data) {
+		int vbo = GL15.glGenBuffers();
+		FloatBuffer buf = BufferUtils.createFloatBuffer(data.length);
+		buf.put(data);
+		buf.flip();
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
+		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buf, GL15.GL_STATIC_DRAW);
+		GL20.glVertexAttribPointer(attrNum, size, GL11.GL_FLOAT, false, 0, 0);
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+		return vbo;
 	}
 }

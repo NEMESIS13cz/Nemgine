@@ -13,10 +13,10 @@ import com.nemezor.nemgine.debug.ImmediateGraphics;
  */
 public class Cube {
 	
-	private float		size;
-	private Vector3f	location;
-	private Vector3f	rotation;
-	private Vector3f	velocity;
+	private float size;
+	private Vector3f location;
+	private Vector3f rotation;
+	private Vector3f velocity;
 	
 	protected boolean wasChecked = false;
 	
@@ -36,6 +36,18 @@ public class Cube {
 	
 	public float getSize() {
 		return size;
+	}
+	
+	public Vector3f getRenderLocation() {
+		Vector3f temp = new Vector3f(location);
+		temp.setX(temp.getX() + size / 2);
+		temp.setY(temp.getY() - size / 2);
+		temp.setZ(temp.getZ() - size / 2);
+		return temp;
+	}
+	
+	public Vector3f getRenderSize() {
+		return new Vector3f(size / 2, size / 2, size / 2);
 	}
 	
 	public void setSize(float size) {

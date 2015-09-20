@@ -31,7 +31,7 @@ public class NemgineTextureException extends Exception {
 		this.thrower = thrower;
 	}
 	
-	public String getShaderName() {
+	public String getTextureName() {
 		return name;
 	}
 	

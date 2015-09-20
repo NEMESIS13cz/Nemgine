@@ -2,9 +2,15 @@ package com.nemezor.nemgine.tests;
 
 import java.util.ArrayList;
 
+import org.lwjgl.LWJGLException;
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-import com.nemezor.nemgine.debug.ImmediateRender;
+import com.nemezor.nemgine.graphics.DisplayManager;
+import com.nemezor.nemgine.graphics.GLHelper;
+import com.nemezor.nemgine.graphics.ModelManager;
+import com.nemezor.nemgine.graphics.NemGL;
+import com.nemezor.nemgine.graphics.ShaderManager;
 import com.nemezor.nemgine.main.Application;
 import com.nemezor.nemgine.main.IMainRenderLoop;
 import com.nemezor.nemgine.main.IMainTickLoop;
@@ -15,24 +21,32 @@ import com.nemezor.nemgine.misc.Registry;
 public class PhysicsPrototypeGame implements IMainRenderLoop, IMainTickLoop {
 	
 	private ArrayList<Cube> cubes = new ArrayList<Cube>();
+	private int shader;
+	private int model;
 	
 	@Application(width = Registry.LOADING_SCREEN_WIDTH, height = Registry.LOADING_SCREEN_HEIGHT, name = "Physics Prototype Test Game")
 	public void AppEntryPoint() {
 		int id = Nemgine.generateThreads("Main Thread", true);
 		Nemgine.bindRenderLoop(id, this);
 		Nemgine.bindTickLoop(id, this);
-		Nemgine.startThread(id);
+		Nemgine.startThread(id);/*
 		Cube cube1 = new Cube(new Vector3f(-25, -5, -50), new Vector3f(0.5f, 0.2f, 0), 5);
 		Cube cube2 = new Cube(new Vector3f(20, 0, -50), new Vector3f(-0.5f, 0, 0), 10);
 		Cube cube3 = new Cube(new Vector3f(-20, 14, -50), new Vector3f(0, 0, 0), 7);
 		
 		cubes.add(cube1);
 		cubes.add(cube2);
-		cubes.add(cube3);
+		cubes.add(cube3);*/
+		Cube cube = new Cube(new Vector3f(0, -10, -50), new Vector3f(0, 0, 0), 5);
+		cubes.add(cube);
 	}
 	
 	public void setUpRender() {
-		ImmediateRender.setup();
+		try {
+			DisplayManager.initialize(70.0f, 0.002f, 500.0f);
+		} catch (LWJGLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void loadResources() {
@@ -41,20 +55,34 @@ public class PhysicsPrototypeGame implements IMainRenderLoop, IMainTickLoop {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		shader = ShaderManager.generateShaders();
+		ShaderManager.initializeShader(shader, "com/nemezor/nemgine/tests/vertex.shader", "com/nemezor/nemgine/tests/fragment.shader", new String[] {"projection", "translation", "light"}, new String[] {"vertex", "texCoords", "normal"}, new int[] {0, 1, 2});
+		ShaderManager.bindShader(shader);
+		ShaderManager.loadMatrix4(shader, "projection", NemGL.getCurrentPerspectiveProjectionMatrix());
+		ShaderManager.loadMatrix4(shader, "translation", new Matrix4f());
+		ShaderManager.loadVector3(shader, "light", new Vector3f(-100, 50, 10));
+		ShaderManager.unbindShader();
+		model = ModelManager.generateModels();
+		ModelManager.initializeModel(model, "com/nemezor/nemgine/tests/dragon.obj");
 	}
 	
 	public void render() {
-		if (ImmediateRender.closeRequested()) {
+		if (DisplayManager.closeRequested()) {
 			Nemgine.shutDown();
 		}
-		ImmediateRender.resize();
-		ImmediateRender.prepareRender();
+		DisplayManager.resize();
+		DisplayManager.prepareRender();
+		
+		Matrix4f projection = NemGL.getCurrentPerspectiveProjectionMatrix();
 		
 		for (Cube c : cubes) {
-			c.render();
+			Matrix4f transformation = GLHelper.initTransformationMatrix(c.getRenderLocation(), c.getRotation(), c.getRenderSize());
+			ModelManager.renderModel(model, Registry.INVALID, shader, transformation, projection, "translation", "projection");
+			//c.render();
 		}
+		ModelManager.finishRendering();
 		
-		ImmediateRender.finishRender();
+		DisplayManager.finishRender();
 	}
 	
 	public void cleanUpRender() {
@@ -62,16 +90,19 @@ public class PhysicsPrototypeGame implements IMainRenderLoop, IMainTickLoop {
 	}
 	
 	public void updateRenderSecond(int frames, long interval) {
-	
+		DisplayManager.changeTitle("Physics Prototype Test Game | FPS: " + frames);
 	}
 	
 	public void setUpTick() {
-	
+		
 	}
 	
 	int startCounter = 0;
 	
 	public void tick() {
+		for (Cube c : cubes) {
+			c.getRotation().y += 0.05f;
+		}
 		if (startCounter > 2) {
 			for (Cube c : cubes) {
 				c.setLocation(Vector3f.add(c.getLocation(), c.getVelocity(), null));
@@ -165,7 +196,7 @@ public class PhysicsPrototypeGame implements IMainRenderLoop, IMainTickLoop {
 	}
 	
 	public long getRenderSleepInterval() {
-		return 20;
+		return 16;
 	}
 	
 	public int getRenderFrameskipTreshold() {

@@ -9,7 +9,7 @@ public class NemGL {
 	protected static float aspect;
 	protected static float FOV;
 	
-	private static Matrix4f projection;
+	private static Matrix4f projection = new Matrix4f();
 	
 	protected static void updatePerspectiveProjection() {
 		projection = GLHelper.initPerspectiveProjectionMatrix(FOV, aspect, zNear, zFar);
