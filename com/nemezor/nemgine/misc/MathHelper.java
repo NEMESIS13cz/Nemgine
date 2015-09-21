@@ -1,7 +1,9 @@
 package com.nemezor.nemgine.misc;
 
 public class MathHelper {
-
+	
+	private MathHelper() {}
+	
 	public static float difference(float a, float b) {
 		float aa = Math.abs(a);
 		float ab = Math.abs(b);

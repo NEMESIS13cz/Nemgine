@@ -7,8 +7,11 @@ import java.util.Iterator;
 
 import com.nemezor.nemgine.debug.ImmediateRender;
 import com.nemezor.nemgine.graphics.DisplayManager;
+import com.nemezor.nemgine.graphics.ModelManager;
 import com.nemezor.nemgine.graphics.ShaderManager;
 import com.nemezor.nemgine.graphics.TextureManager;
+import com.nemezor.nemgine.misc.InputParams;
+import com.nemezor.nemgine.misc.Logger;
 import com.nemezor.nemgine.misc.NemgineThreadException;
 import com.nemezor.nemgine.misc.Registry;
 
@@ -19,8 +22,7 @@ public class Nemgine {
 	private static boolean isRunning = true;
 	private static Runtime runtime = Runtime.getRuntime();
 
-	private Nemgine() {
-	};
+	private Nemgine() {}
 
 	public static void start(String[] args, Class<?> application) {
 		EventQueue.invokeLater(new Runnable() {
@@ -31,7 +33,7 @@ public class Nemgine {
 				for (Method method : application.getDeclaredMethods()) {
 					if (method.getAnnotation(Application.class) != null) {
 						if (entry != null) {
-							System.err.println("[" + Registry.NEMGINE_NAME + "]: Multiple entry points specified!");
+							Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_RESOLVE_MULTIPLE);
 							System.exit(Registry.INVALID);
 						}
 						ann = method.getAnnotation(Application.class);
@@ -39,15 +41,24 @@ public class Nemgine {
 					}
 				}
 				if (entry == null) {
-					System.err.println("[" + Registry.NEMGINE_NAME + "]: No entry point specified!");
+					Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_RESOLVE_NONE);
 					System.exit(Registry.INVALID);
 				}
-				NemgineLoader.initialize(ann.width(), ann.height(), ann.name());
+				
+				InputParams.resolve(args);
+				int w = InputParams.containsEntry("width") ? InputParams.getInteger("width") : ann.width();
+				int h = InputParams.containsEntry("height") ? InputParams.getInteger("height") : ann.height();
+				boolean contained = InputParams.containsEntry("contained") ? InputParams.getBoolean("contained") : ann.contained();
+				
+				if (!contained) {
+					Logger.initialize(ann.path().endsWith("/") ? ann.path().substring(0, ann.path().length() - 1) : ann.path());
+				}
+				NemgineLoader.initialize(w, h, ann.name());
 				
 				try {
 					entry.invoke(application.newInstance());
 				} catch (Exception e) {
-					System.err.println("[" + Registry.NEMGINE_NAME + "]: Application execution failed!");
+					Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_EXECUTION_FAIL);
 					e.printStackTrace();
 					System.exit(Registry.INVALID);
 				}
@@ -61,14 +72,19 @@ public class Nemgine {
 
 	public static void exit(int exitCode) {
 		if (!isRunning()) {
+			Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_SHUTDOWN_DISPOSE);
 			TextureManager.disposeAll();
 			if (ImmediateRender.isRenderModeImmediate()) {
 				ImmediateRender.dispose();
 			} else {
 				ShaderManager.disposeAll();
+				ModelManager.disposeAll();
 				DisplayManager.dispose();
 			}
 			NemgineLoader.dispose();
+			Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_SHUTDOWN_EXIT + exitCode);
+			System.gc();
+			Logger.close();
 			System.exit(exitCode);
 		}
 	}
@@ -194,7 +210,7 @@ public class Nemgine {
 		return true;
 	}
 
-	protected static synchronized boolean isRunning() {
+	public static synchronized boolean isRunning() {
 		return isRunning;
 	}
 

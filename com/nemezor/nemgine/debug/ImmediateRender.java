@@ -86,4 +86,8 @@ public class ImmediateRender {
 	public static synchronized boolean isRenderModeImmediate() {
 		return isImmediate;
 	}
+	
+	public static void changeTitle(String newTitle) {
+		NemgineLoader.setTitle(newTitle);
+	}
 }

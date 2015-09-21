@@ -55,7 +55,7 @@ public class NemgineThreadException extends Exception {
 	}
 	
 	public void printStackTrace() {
-		System.err.println("[" + (thrower != null ? thrower.getName() : Registry.THREAD_BIND_EXCEPTION_NO_THROWER) + "]: " + getLocalizedMessage());
+		Logger.log(thrower != null ? thrower.getName() : Registry.THREAD_BIND_EXCEPTION_NO_THROWER, getLocalizedMessage());
 		String msg = null;
 		if (getBindCauseRender() != null) {
 			msg = getBindCauseRender().getStacktraceRenderName();
@@ -65,7 +65,7 @@ public class NemgineThreadException extends Exception {
 			msg = getBindCauseAux().getStacktraceAuxName();
 		}
 		if (msg != null) {
-			System.err.println(" >>> " + msg);
+			Logger.log(null, msg);
 		}
 	}
 }

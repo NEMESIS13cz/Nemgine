@@ -12,6 +12,7 @@ import javax.imageio.ImageIO;
 
 import org.lwjgl.opengl.GL11;
 
+import com.nemezor.nemgine.misc.Logger;
 import com.nemezor.nemgine.misc.NemgineTextureException;
 import com.nemezor.nemgine.misc.Registry;
 
@@ -21,6 +22,8 @@ public class TextureManager {
 	private static int invalidTexture = 0;
 	private static int textureCounter = 0;
 	private static int currentTexture = 0;
+	
+	private TextureManager() {}
 	
 	public static synchronized int generateTextures() {
 		textureCounter++;
@@ -153,7 +156,7 @@ public class TextureManager {
 			pixels = new int[w * h];
 			image.getRGB(0, 0, w, h, pixels, 0, w);
 		} catch (IOException e) {
-			System.err.println("[" + Registry.NEMGINE_NAME + "]: " + Registry.TEXTURE_LOADER_MISSING_ERROR);
+			Logger.log(Registry.NEMGINE_NAME, Registry.TEXTURE_LOADER_MISSING_ERROR);
 			System.exit(Registry.INVALID);
 		}
 

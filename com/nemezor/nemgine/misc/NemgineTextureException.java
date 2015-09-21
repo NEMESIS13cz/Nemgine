@@ -48,12 +48,12 @@ public class NemgineTextureException extends Exception {
 	}
 	
 	public void printStackTrace() {
-		System.err.println("[" + (thrower == null ? Registry.TEXTURE_EXCEPTION_NO_ACCESSOR : thrower) + "]: " + getLocalizedMessage());
+		Logger.log(thrower == null ? Registry.TEXTURE_EXCEPTION_NO_ACCESSOR : thrower, getLocalizedMessage());
 		if (name != null) {
 			if (width == Registry.INVALID || height == Registry.INVALID) {
-				System.err.println(" >>> " + name);
+				Logger.log(null, name);
 			}else{
-				System.err.println(" >>> " + name + " (" + width + "x" + height + ")");
+				Logger.log(null, name + " (" + width + "x" + height + ")");
 			}
 		}
 	}

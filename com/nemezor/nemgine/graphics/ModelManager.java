@@ -27,6 +27,8 @@ public class ModelManager {
 	private static HashMap<Integer, Model> models = new HashMap<Integer, Model>();
 	private static int modelCounter = 0;
 	
+	private ModelManager() {}
+	
 	public static synchronized int generateModels() {
 		modelCounter++;
 		models.put(modelCounter, new Model(Registry.INVALID, null, null));

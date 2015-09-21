@@ -29,6 +29,8 @@ public class NemgineLoader {
 	private static int appW;
 	private static int appH;
 	private static String appTitle;
+	
+	private NemgineLoader() {}
 
 	protected static synchronized void initialize(int appWidth, int appHeight, String title) {
 		w = Registry.LOADING_SCREEN_WIDTH;
@@ -114,7 +116,7 @@ public class NemgineLoader {
 	}
 	
 	public static Dimension getSize() {
-		return new Dimension(appW, appH);
+		return new Dimension(w, h);
 	}
 
 	public static Point getLocation() {

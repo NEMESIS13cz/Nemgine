@@ -12,6 +12,8 @@ import org.lwjgl.opengl.GL11;
 import com.nemezor.nemgine.main.NemgineLoader;
 
 public class DisplayManager {
+	
+	private DisplayManager() {}
 
 	public static void initialize(float fieldOfView, float zNear, float zFar) throws LWJGLException {
 		initialize();
@@ -31,18 +33,18 @@ public class DisplayManager {
 
 	public static void initializeOpenGL(float fieldOfView, float zNear, float zFar) {
 		GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
-		NemGL.FOV = fieldOfView;
-		NemGL.aspect = (float) Display.getWidth() / (float) Display.getHeight();
-		NemGL.zFar = zFar;
-		NemGL.zNear = zNear;
-		NemGL.updatePerspectiveProjection();
+		GLHelper.FOV = fieldOfView;
+		GLHelper.aspect = (float) Display.getWidth() / (float) Display.getHeight();
+		GLHelper.zFar = zFar;
+		GLHelper.zNear = zNear;
+		GLHelper.updatePerspectiveProjection();
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 	}
 
 	private static void reinitializeOpenGL() {
 		GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
-		NemGL.aspect = (float) Display.getWidth() / (float) Display.getHeight();
-		NemGL.updatePerspectiveProjection();
+		GLHelper.aspect = (float) Display.getWidth() / (float) Display.getHeight();
+		GLHelper.updatePerspectiveProjection();
 	}
 
 	public static boolean closeRequested() {

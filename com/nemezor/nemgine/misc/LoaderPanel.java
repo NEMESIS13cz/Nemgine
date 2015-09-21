@@ -32,7 +32,7 @@ public class LoaderPanel extends Canvas {
 		try {
 			logo = ImageIO.read(ClassLoader.getSystemResource(Registry.LOGO_IMAGE_PATH));
 		} catch (IOException e) {
-			System.err.println("[" + Registry.NEMGINE_NAME + "]: Failed to load logo image!");
+			Logger.log(Registry.NEMGINE_NAME, Registry.LOGO_IMAGE_LOAD_ERROR);
 			e.printStackTrace();
 			Nemgine.shutDown();
 		}

@@ -1,4 +1,4 @@
-package com.nemezor.nemgine.tests;
+package com.nemezor.nemgine.tests.cube_collision;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector3f;

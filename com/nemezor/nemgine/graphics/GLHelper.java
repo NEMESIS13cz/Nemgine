@@ -10,6 +10,23 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 public class GLHelper {
+
+	protected static float zNear;
+	protected static float zFar;
+	protected static float aspect;
+	protected static float FOV;
+	
+	private static Matrix4f projection = new Matrix4f();
+	
+	private GLHelper() {}
+	
+	protected static void updatePerspectiveProjection() {
+		projection = initPerspectiveProjectionMatrix(FOV, aspect, zNear, zFar);
+	}
+	
+	public static Matrix4f getCurrentPerspectiveProjectionMatrix() {
+		return projection;
+	}
 	
 	public static Matrix4f initTransformationMatrix(Vector3f translation, Vector3f rotation, Vector3f scale) {
 		Matrix4f mat = new Matrix4f();

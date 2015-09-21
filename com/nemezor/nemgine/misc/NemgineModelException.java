@@ -33,9 +33,9 @@ public class NemgineModelException extends Exception {
 	}
 	
 	public void printStackTrace() {
-		System.err.println("[" + (thrower == null ? Registry.TEXTURE_EXCEPTION_NO_ACCESSOR : thrower) + "]: " + getLocalizedMessage());
+		Logger.log(thrower == null ? Registry.TEXTURE_EXCEPTION_NO_ACCESSOR : thrower, getLocalizedMessage());
 		if (name != null) {
-			System.err.println(" >>> " + name);
+			Logger.log(null, name);
 		}
 	}
 }

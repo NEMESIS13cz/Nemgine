@@ -39,9 +39,9 @@ public class NemgineShaderException extends Exception {
 	}
 	
 	public void printStackTrace() {
-		System.err.println("[" + (thrower == null ? Registry.SHADER_EXCEPTION_NO_ACCESSOR : thrower) + "]: " + getLocalizedMessage());
+		Logger.log(thrower == null ? Registry.SHADER_EXCEPTION_NO_ACCESSOR : thrower, getLocalizedMessage());
 		if (type != null) {
-			System.err.println(" >>> " + name + " (" + type.toString() + ")");
+			Logger.log(null, name + " (" + type.toString() + ")");
 		}
 	}
 }

@@ -5,6 +5,8 @@ import com.nemezor.nemgine.misc.DefaultLoaderMessages;
 
 public class LoadingSequence {
 	
+	private LoadingSequence() {}
+	
 	public static void run(String[] additional, boolean skipBuiltIn) {
 		try{
 			if (!skipBuiltIn) {

@@ -9,10 +9,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Application {
 	
+	boolean contained();
 	int width();
-	
 	int height();
-	
 	String name();
-	
+	String path();
 }

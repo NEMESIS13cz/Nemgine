@@ -19,6 +19,7 @@ import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
 import com.nemezor.nemgine.misc.EnumShaderType;
+import com.nemezor.nemgine.misc.Logger;
 import com.nemezor.nemgine.misc.NemgineShaderException;
 import com.nemezor.nemgine.misc.Registry;
 
@@ -28,6 +29,8 @@ public class ShaderManager {
 	private static int shaderCounter = 0;
 	private static int currentShader = 0;
 	private static Shader currentShaderData = null;
+	
+	private ShaderManager() {}
 
 	public static synchronized int generateShaders() {
 		shaderCounter++;
@@ -219,7 +222,7 @@ public class ShaderManager {
 			ex.setShaderInfo(file, type);
 			ex.setThrower(Registry.SHADER_LOADER_NAME);
 			ex.printStackTrace();
-			System.err.println(GL20.glGetShaderInfoLog(shaderID, Registry.SHADER_ERROR_LOG_SIZE));
+			Logger.log(null, GL20.glGetShaderInfoLog(shaderID, Registry.SHADER_ERROR_LOG_SIZE));
 			return Registry.INVALID;
 		}
 		return shaderID;
