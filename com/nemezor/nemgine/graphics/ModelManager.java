@@ -61,6 +61,33 @@ public class ModelManager {
 		models.clear();
 	}
 	
+	public static void renderModelWithFrameBufferTexture(int id, int frameBuffer, int texture, int shaderID, Matrix4f transformation, Matrix4f projection, String transformationAttribName, String projectionAttribName) {
+		Model model = models.get(id);
+		if (model == null || model.id == Registry.INVALID) {
+			return;
+		}
+		ShaderManager.bindShader(shaderID);
+		ShaderManager.loadMatrix4(shaderID, projectionAttribName, projection);
+		ShaderManager.loadMatrix4(shaderID, transformationAttribName, transformation);
+		GL30.glBindVertexArray(model.id);
+		GL20.glEnableVertexAttribArray(0);
+		if (model.isTextured()) {
+			GL20.glEnableVertexAttribArray(1);
+		}
+		GL20.glEnableVertexAttribArray(2);
+		if (model.isTextured()) {
+			GL13.glActiveTexture(GL13.GL_TEXTURE0);
+			FrameBufferManager.bindFrameBufferTexture(frameBuffer, texture);
+		}
+		GL11.glDrawElements(GL11.GL_TRIANGLES, model.data.indices.length, GL11.GL_UNSIGNED_INT, 0);
+		GL20.glDisableVertexAttribArray(0);
+		if (model.isTextured()) {
+			GL20.glDisableVertexAttribArray(1);
+		}
+		GL20.glDisableVertexAttribArray(2);
+		GL30.glBindVertexArray(0);
+	}
+	
 	public static void renderModel(int id, int textureID, int shaderID, Matrix4f transformation, Matrix4f projection, String transformationAttribName, String projectionAttribName) {
 		Model model = models.get(id);
 		if (model == null || model.id == Registry.INVALID) {
@@ -71,20 +98,27 @@ public class ModelManager {
 		ShaderManager.loadMatrix4(shaderID, transformationAttribName, transformation);
 		GL30.glBindVertexArray(model.id);
 		GL20.glEnableVertexAttribArray(0);
-		GL20.glEnableVertexAttribArray(1);
+		if (model.isTextured()) {
+			GL20.glEnableVertexAttribArray(1);
+		}
 		GL20.glEnableVertexAttribArray(2);
-		GL13.glActiveTexture(GL13.GL_TEXTURE0);
-		TextureManager.bindTexture(textureID);
+		if (model.isTextured()) {
+			GL13.glActiveTexture(GL13.GL_TEXTURE0);
+			TextureManager.bindTexture(textureID);
+		}
 		GL11.glDrawElements(GL11.GL_TRIANGLES, model.data.indices.length, GL11.GL_UNSIGNED_INT, 0);
-		GL20.glEnableVertexAttribArray(0);
-		GL20.glEnableVertexAttribArray(1);
-		GL20.glEnableVertexAttribArray(2);
+		GL20.glDisableVertexAttribArray(0);
+		if (model.isTextured()) {
+			GL20.glDisableVertexAttribArray(1);
+		}
+		GL20.glDisableVertexAttribArray(2);
 		GL30.glBindVertexArray(0);
 	}
 	
 	public static void finishRendering() {
 		ShaderManager.unbindShader();
 		TextureManager.unbindTexture();
+		FrameBufferManager.unbindFrameBufferTexture();
 	}
 	
 	public static boolean initializeModel(int id, String file) {
@@ -194,12 +228,14 @@ public class ModelManager {
 	}
 	
 	private static void processVertex(String[] vertexData, ArrayList<Integer> indices, ArrayList<Vector2f> textures, ArrayList<Vector3f> normals, float[] textureArray, float[] normalsArray) {
-		int current = Integer.parseInt(vertexData[0]) - 1;
+		int current = vertexData[0].equals("") ? 0 : (Integer.parseInt(vertexData[0]) - 1);
 		indices.add(current);
-		Vector2f currentTex = textures.get(Integer.parseInt(vertexData[1]) - 1);
-		textureArray[current * 2] = currentTex.getX();
-		textureArray[current * 2 + 1] = 1 - currentTex.getY();
-		Vector3f currentNorm = normals.get(Integer.parseInt(vertexData[2]) - 1);
+		if (textures.size() > 0) {
+			Vector2f currentTex = textures.get(vertexData[1].equals("") ? 0 : (Integer.parseInt(vertexData[1]) - 1));
+			textureArray[current * 2] = currentTex.getX();
+			textureArray[current * 2 + 1] = 1 - currentTex.getY();
+		}
+		Vector3f currentNorm = normals.get(vertexData[2].equals("") ? 0 : (Integer.parseInt(vertexData[2]) - 1));
 		normalsArray[current * 3] = currentNorm.getX();
 		normalsArray[current * 3 + 1] = currentNorm.getY();
 		normalsArray[current * 3 + 2] = currentNorm.getZ();

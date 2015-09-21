@@ -25,4 +25,8 @@ public class Model {
 	protected ModelData getData() {
 		return data;
 	}
+	
+	protected boolean isTextured() {
+		return data.textures.length > 0;
+	}
 }

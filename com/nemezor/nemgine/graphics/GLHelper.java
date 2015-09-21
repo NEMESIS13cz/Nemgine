@@ -28,13 +28,31 @@ public class GLHelper {
 		return projection;
 	}
 	
-	public static Matrix4f initTransformationMatrix(Vector3f translation, Vector3f rotation, Vector3f scale) {
+	public static Matrix4f initTransformationMatrix(Camera camera, Vector3f translation, Vector3f rotation, Vector3f scale) {
+		Matrix4f mat = initTransformationMatrix(translation, rotation, scale);
+		Matrix4f mat2 = initViewMatrix(camera);
+		return Matrix4f.mul(mat2, mat, new Matrix4f());
+	}
+	
+	public static Matrix4f initViewMatrix(Camera camera) {
 		Matrix4f mat = new Matrix4f();
+		Vector3f rotation = camera.getRotation();
 		
-		Matrix4f.translate(translation, mat, mat);
 		Matrix4f.rotate(rotation.getX(), new Vector3f(1, 0, 0), mat, mat);
 		Matrix4f.rotate(rotation.getY(), new Vector3f(0, 1, 0), mat, mat);
 		Matrix4f.rotate(rotation.getZ(), new Vector3f(0, 0, 1), mat, mat);
+		Matrix4f.translate(camera.getPosition().negate(new Vector3f()), mat, mat);
+		
+		return mat;
+	}
+	
+	public static Matrix4f initTransformationMatrix(Vector3f translation, Vector3f rotation, Vector3f scale) {
+		Matrix4f mat = new Matrix4f();
+
+		Matrix4f.translate(translation, mat, mat);
+		Matrix4f.rotate(rotation.getY(), new Vector3f(0, 1, 0), mat, mat);
+		Matrix4f.rotate(rotation.getZ(), new Vector3f(0, 0, 1), mat, mat);
+		Matrix4f.rotate(rotation.getX(), new Vector3f(1, 0, 0), mat, mat);
 		Matrix4f.scale(scale, mat, mat);
 		
 		return mat;

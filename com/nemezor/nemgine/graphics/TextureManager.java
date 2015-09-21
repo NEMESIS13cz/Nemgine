@@ -1,5 +1,6 @@
 package com.nemezor.nemgine.graphics;
 
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -36,7 +37,7 @@ public class TextureManager {
 			return;
 		}
 		Texture tex = textures.get(id);
-		if (tex == null || tex.getId() == Registry.INVALID) {
+		if (tex == null || tex.id == Registry.INVALID) {
 			if (currentTexture != Registry.INVALID) {
 				currentTexture = Registry.INVALID;
 				GL11.glBindTexture(GL11.GL_TEXTURE_2D, invalidTexture);
@@ -44,7 +45,8 @@ public class TextureManager {
 			return;
 		}
 		currentTexture = id;
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex.getId());
+		FrameBufferManager.unbindFrameBufferTexture();
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex.id);
 	}
 	
 	public static void unbindTexture() {
@@ -62,8 +64,8 @@ public class TextureManager {
 		if (tex == null) {
 			return;
 		}
-		if (tex.getId() != Registry.INVALID) {
-			GL11.glDeleteTextures(tex.getId());
+		if (tex.id != Registry.INVALID) {
+			GL11.glDeleteTextures(tex.id);
 		}
 		textures.remove(id);
 	}
@@ -74,11 +76,19 @@ public class TextureManager {
 		
 		while (keys.hasNext()) {
 			Texture tex = textures.get(keys.next());
-			if (tex.getId() != Registry.INVALID) {
-				GL11.glDeleteTextures(tex.getId());
+			if (tex.id != Registry.INVALID) {
+				GL11.glDeleteTextures(tex.id);
 			}
 		}
 		textures.clear();
+	}
+	
+	public static Dimension textureDimensions(int id) {
+		Texture tex = textures.get(id);
+		if (tex == null) {
+			return null;
+		}
+		return new Dimension(tex.width, tex.height);
 	}
 	
 	public static boolean initializeTexture(int id, String file) {
@@ -86,7 +96,7 @@ public class TextureManager {
 			return false;
 		}
 		Texture tex = textures.get(id);
-		if (tex == null || tex.getId() != Registry.INVALID) {
+		if (tex == null || tex.id != Registry.INVALID) {
 			return false;
 		}
 		tex = loadTexture(file);

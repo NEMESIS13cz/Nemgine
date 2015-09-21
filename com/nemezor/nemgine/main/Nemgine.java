@@ -7,6 +7,7 @@ import java.util.Iterator;
 
 import com.nemezor.nemgine.debug.ImmediateRender;
 import com.nemezor.nemgine.graphics.DisplayManager;
+import com.nemezor.nemgine.graphics.FrameBufferManager;
 import com.nemezor.nemgine.graphics.ModelManager;
 import com.nemezor.nemgine.graphics.ShaderManager;
 import com.nemezor.nemgine.graphics.TextureManager;
@@ -74,17 +75,18 @@ public class Nemgine {
 		if (!isRunning()) {
 			Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_SHUTDOWN_DISPOSE);
 			TextureManager.disposeAll();
+			ShaderManager.disposeAll();
+			ModelManager.disposeAll();
+			FrameBufferManager.disposeAll();
 			if (ImmediateRender.isRenderModeImmediate()) {
 				ImmediateRender.dispose();
 			} else {
-				ShaderManager.disposeAll();
-				ModelManager.disposeAll();
 				DisplayManager.dispose();
 			}
 			NemgineLoader.dispose();
 			Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_SHUTDOWN_EXIT + exitCode);
-			System.gc();
 			Logger.close();
+			System.gc();
 			System.exit(exitCode);
 		}
 	}

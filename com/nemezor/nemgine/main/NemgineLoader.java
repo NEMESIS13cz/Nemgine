@@ -66,7 +66,7 @@ public class NemgineLoader {
 				while (isLoading) {
 
 					panel.render(currentState);
-
+					
 					try {
 						sleep(20);
 					} catch (InterruptedException e) {
