@@ -1,10 +1,12 @@
-package com.nemezor.nemgine.misc;
+package com.nemezor.nemgine.exceptions;
 
 import com.nemezor.nemgine.main.IAuxLoop;
 import com.nemezor.nemgine.main.IMainRenderLoop;
 import com.nemezor.nemgine.main.IMainTickLoop;
+import com.nemezor.nemgine.misc.Logger;
+import com.nemezor.nemgine.misc.Registry;
 
-public class NemgineThreadException extends Exception {
+public class ThreadException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
@@ -13,11 +15,11 @@ public class NemgineThreadException extends Exception {
 	private IAuxLoop aux;
 	private Thread thrower;
 	
-	public NemgineThreadException(String message) {
+	public ThreadException(String message) {
 		super(message);
 	}
 	
-	public NemgineThreadException(String message, Thread thrower) {
+	public ThreadException(String message, Thread thrower) {
 		super(message);
 		this.thrower = thrower;
 	}

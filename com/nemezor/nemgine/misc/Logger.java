@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.nemezor.nemgine.console.Console;
+
 public class Logger {
 
 	private Logger() {}
@@ -61,10 +63,14 @@ public class Logger {
 		}
 	}
 	
+	public static synchronized void log(String msg) {
+		log(Thread.currentThread().getName(), msg);
+	}
+	
 	public static synchronized void log(String sender, String msg) {
 		String time = getCurrentMessageTime();
 		String message = "|" + time + "|" + (sender == null ? " >>> " : " [" + sender + "]: ") + msg;
-		System.out.println(message);
+		Console.out.println(message);
 		if (initialized) {
 			String curr = getCurrentLogName();
 			if (!lastDate.equals(curr)) {
@@ -73,7 +79,7 @@ public class Logger {
 			}
 			try {
 				if (initialized) {
-					writer.append(message + "\n");
+					writer.append(message + System.lineSeparator());
 				}
 			} catch (IOException e) {}
 		}

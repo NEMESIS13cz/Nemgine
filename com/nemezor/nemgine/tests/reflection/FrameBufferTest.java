@@ -69,7 +69,6 @@ public class FrameBufferTest implements IMainRenderLoop {
 		ModelManager.renderModel(model, 0, shader, transform, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
 		ModelManager.renderModel(logo, 0, logoShader, logoTransform, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
 		ModelManager.renderModelWithFrameBufferTexture(square, frame, FrameBuffer.TEXTURE_BUFFER, water, waterTransform, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
-		//ModelManager.renderModel(square, 69, water, waterTransform, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
 		
 		
 		ModelManager.finishRendering();
@@ -95,7 +94,7 @@ public class FrameBufferTest implements IMainRenderLoop {
 	public void cleanUpRender() {
 		Nemgine.exit(0);
 	}
-
+	
 	@Override
 	public void loadResources() {
 		NemgineLoader.updateState("Loading Shaders");
@@ -142,7 +141,7 @@ public class FrameBufferTest implements IMainRenderLoop {
 	public void updateRenderSecond(int frames, long averageInterval) {
 		DisplayManager.changeTitle("FrameBuffer Renderer | FPS: " + frames + " | AVG: " + averageInterval + "ms");
 	}
-
+	
 	@Override
 	public long getRenderSleepInterval() {
 		return 16;

@@ -1,6 +1,10 @@
-package com.nemezor.nemgine.misc;
+package com.nemezor.nemgine.exceptions;
 
-public class NemgineShaderException extends Exception {
+import com.nemezor.nemgine.misc.EnumShaderType;
+import com.nemezor.nemgine.misc.Logger;
+import com.nemezor.nemgine.misc.Registry;
+
+public class ShaderException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
@@ -8,11 +12,11 @@ public class NemgineShaderException extends Exception {
 	private String name;
 	private EnumShaderType type;
 	
-	public NemgineShaderException(String message) {
+	public ShaderException(String message) {
 		super(message);
 	}
 
-	public NemgineShaderException(String message, String thrower) {
+	public ShaderException(String message, String thrower) {
 		super(message);
 		this.thrower = thrower;
 	}

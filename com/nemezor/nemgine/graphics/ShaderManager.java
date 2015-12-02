@@ -18,9 +18,9 @@ import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
+import com.nemezor.nemgine.exceptions.ShaderException;
 import com.nemezor.nemgine.misc.EnumShaderType;
 import com.nemezor.nemgine.misc.Logger;
-import com.nemezor.nemgine.misc.NemgineShaderException;
 import com.nemezor.nemgine.misc.Registry;
 
 public class ShaderManager {
@@ -168,7 +168,7 @@ public class ShaderManager {
 		}
 		shader.vertID = loadShader(vertexFile, EnumShaderType.VERTEX);
 		if (shader.vertID == Registry.INVALID) {
-			NemgineShaderException ex = new NemgineShaderException(Registry.SHADER_MANAGER_LOADER_GLOBAL_ERROR);
+			ShaderException ex = new ShaderException(Registry.SHADER_MANAGER_LOADER_GLOBAL_ERROR);
 			ex.setShaderInfo(vertexFile, EnumShaderType.VERTEX);
 			ex.setThrower(Registry.SHADER_MANAGER_NAME);
 			ex.printStackTrace();
@@ -176,7 +176,7 @@ public class ShaderManager {
 		}
 		shader.fragID = loadShader(fragmentFile, EnumShaderType.FRAGMENT);
 		if (shader.fragID == Registry.INVALID) {
-			NemgineShaderException ex = new NemgineShaderException(Registry.SHADER_MANAGER_LOADER_GLOBAL_ERROR);
+			ShaderException ex = new ShaderException(Registry.SHADER_MANAGER_LOADER_GLOBAL_ERROR);
 			ex.setShaderInfo(fragmentFile, EnumShaderType.FRAGMENT);
 			ex.setThrower(Registry.SHADER_MANAGER_NAME);
 			ex.printStackTrace();
@@ -207,7 +207,7 @@ public class ShaderManager {
 			}
 			reader.close();
 		} catch (IOException e) {
-			NemgineShaderException ex = new NemgineShaderException(Registry.SHADER_LOADER_LOAD_ERROR);
+			ShaderException ex = new ShaderException(Registry.SHADER_LOADER_LOAD_ERROR);
 			ex.setShaderInfo(file, type);
 			ex.setThrower(Registry.SHADER_LOADER_NAME);
 			ex.printStackTrace();
@@ -218,7 +218,7 @@ public class ShaderManager {
 		GL20.glShaderSource(shaderID, shaderSrc);
 		GL20.glCompileShader(shaderID);
 		if (GL20.glGetShaderi(shaderID, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
-			NemgineShaderException ex = new NemgineShaderException(Registry.SHADER_LOADER_COMPILE_ERROR);
+			ShaderException ex = new ShaderException(Registry.SHADER_LOADER_COMPILE_ERROR);
 			ex.setShaderInfo(file, type);
 			ex.setThrower(Registry.SHADER_LOADER_NAME);
 			ex.printStackTrace();

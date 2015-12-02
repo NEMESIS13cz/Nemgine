@@ -13,8 +13,8 @@ import javax.imageio.ImageIO;
 
 import org.lwjgl.opengl.GL11;
 
+import com.nemezor.nemgine.exceptions.TextureException;
 import com.nemezor.nemgine.misc.Logger;
-import com.nemezor.nemgine.misc.NemgineTextureException;
 import com.nemezor.nemgine.misc.Registry;
 
 public class TextureManager {
@@ -101,7 +101,7 @@ public class TextureManager {
 		}
 		tex = loadTexture(file);
 		if (tex == null) {
-			NemgineTextureException ex = new NemgineTextureException(Registry.TEXTURE_MANAGER_LOADER_GLOBAL_ERROR);
+			TextureException ex = new TextureException(Registry.TEXTURE_MANAGER_LOADER_GLOBAL_ERROR);
 			ex.setThrower(Registry.TEXTURE_MANAGER_NAME);
 			ex.setTextureInfo(file);
 			ex.printStackTrace();
@@ -123,7 +123,7 @@ public class TextureManager {
 			pixels = new int[w * h];
 			image.getRGB(0, 0, w, h, pixels, 0, w);
 		} catch (IOException e) {
-			NemgineTextureException ex = new NemgineTextureException(Registry.TEXTURE_LOADER_NOT_FOUND);
+			TextureException ex = new TextureException(Registry.TEXTURE_LOADER_NOT_FOUND);
 			ex.setThrower(Registry.TEXTURE_LOADER_NAME);
 			ex.setTextureInfo(file);
 			ex.printStackTrace();

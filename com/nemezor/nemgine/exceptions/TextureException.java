@@ -1,6 +1,9 @@
-package com.nemezor.nemgine.misc;
+package com.nemezor.nemgine.exceptions;
 
-public class NemgineTextureException extends Exception {
+import com.nemezor.nemgine.misc.Logger;
+import com.nemezor.nemgine.misc.Registry;
+
+public class TextureException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
@@ -9,11 +12,11 @@ public class NemgineTextureException extends Exception {
 	private int width = Registry.INVALID;
 	private int height = Registry.INVALID;
 	
-	public NemgineTextureException(String message) {
+	public TextureException(String message) {
 		super(message);
 	}
 	
-	public NemgineTextureException(String message, String thrower) {
+	public TextureException(String message, String thrower) {
 		super(message);
 		this.thrower = thrower;
 	}

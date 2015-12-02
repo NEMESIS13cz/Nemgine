@@ -4,8 +4,6 @@ import java.awt.Font;
 
 public final class Registry {
 	
-	// Main
-	
 	// Misc
 	public static final int ONE_SECOND_IN_MILLIS = 1000;
 	public static final int INVALID = -1;
@@ -15,12 +13,8 @@ public final class Registry {
 	public static final int DEFAULT_TICKSKIP_TRESHOLD = 5;
 	public static final int MAX_TIME_BEHIND_OFFSET = 2000;
 	
-	// Textures
-	
 	// Shaders
 	public static final int SHADER_ERROR_LOG_SIZE = 4096;
-	
-	// Models
 	
 	// Loading
 	public static final int LOADING_SCREEN_REFRESH_RATE = 10;
@@ -38,6 +32,10 @@ public final class Registry {
 	public static final int LOADING_SCREEN_INDICATOR_Y = 380;
 	public static final int LOADING_SCREEN_INDICATOR_LENGTH = 3;
 	
+	// Network
+	public static final int IP_ADDRESS_MAXIMUM_PORT_VALUE = 65535;
+	public static final int IP_ADDRESS_MINIMUM_PORT_VALUE = 0;
+	
 	////////////////////////////////////////////////////////////////////////////////////////
 	
 	// Main
@@ -49,8 +47,10 @@ public final class Registry {
 	public static final String NEMGINE_EXECUTION_FAIL = "Application execution failed!";
 	
 	// Misc
-	public static final String LOGO_IMAGE_PATH = "com/nemezor/nemgine/graphics/logo.png";
+	public static final String LOGO_IMAGE_PATH = "com/nemezor/nemgine/resources/logo.png";
 	public static final String LOGO_IMAGE_LOAD_ERROR = "Failed to load logo image!";
+	
+	// Logging
 	public static final String LOG_FILE_PATH = "/logs";
 	public static final String LOG_FILE_DATE_FORMAT = "yyyy-M-dd";
 	public static final String LOG_MESSAGE_DATE_FORMAT = "HH:mm:ss";
@@ -72,7 +72,7 @@ public final class Registry {
 	public static final String TEXTURE_LOADER_NAME = "Nemgine Texture Loader";
 	public static final String TEXTURE_MANAGER_NAME = "Nemgine Texture Manager";
 	public static final String TEXTURE_MANAGER_LOADER_GLOBAL_ERROR = "An error occured while loading textures, aborting";
-	public static final String TEXTURE_MISSING_PATH = "com/nemezor/nemgine/graphics/missing.png";
+	public static final String TEXTURE_MISSING_PATH = "com/nemezor/nemgine/resources/missing.png";
 	public static final String TEXTURE_LOADER_MISSING_ERROR = "Failed to load 'invalid' texture!";
 	
 	// Shaders
@@ -86,7 +86,7 @@ public final class Registry {
 	public static final String SHADER_LOADER_NAME = "Nemgine Shader Loader";
 	
 	// Models
-	public static final String MODEL_LOADER_NOT_FOUND = "Model failed to load!";
+	public static final String MODEL_LOADER_NOT_FOUND = "Failed to load model!";
 	public static final String MODEL_LOADER_NAME = "Nemgine Model Loader";
 	public static final String MODEL_MANAGER_NAME = "Nemgine Model Manager";
 	public static final String MODEL_MANAGER_LOADER_GLOBAL_ERROR = "An error occured while loading models, aborting";
@@ -96,4 +96,12 @@ public final class Registry {
 	public static final String PARAMS_ARG_PREFIX_1 = "-";
 	public static final String PARAMS_ARG_PREFIX_2 = "--";
 	public static final String PARAMS_SEPARATOR = "=";
+	
+	// Network
+	public static final String NETWORK_MANAGER_NAME = "Nemgine Network Manager";
+	public static final String NETWORK_MANAGER_UNKNOWN_HOST_ERROR = "Failed to resolve host name!";
+	public static final String NETWORK_MANAGER_IO_ERROR = "I/O error has occured!";
+	public static final String IP_ADDRESS_INVALID_PORT = "Port out of range!";
+	public static final String IP_ADDRESS_NAME = "IP Address Checker";
+	public static final String NETWORK_EXCEPTION_NO_ACCESSOR = "Anonymous Network Accessor";
 }

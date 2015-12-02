@@ -1,17 +1,20 @@
-package com.nemezor.nemgine.misc;
+package com.nemezor.nemgine.exceptions;
 
-public class NemgineModelException extends Exception {
+import com.nemezor.nemgine.misc.Logger;
+import com.nemezor.nemgine.misc.Registry;
+
+public class ModelException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
 	private String thrower;
 	private String name;
 	
-	public NemgineModelException(String message) {
+	public ModelException(String message) {
 		super(message);
 	}
 	
-	public NemgineModelException(String message, String thrower) {
+	public ModelException(String message, String thrower) {
 		super(message);
 		this.thrower = thrower;
 	}

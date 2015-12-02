@@ -59,12 +59,12 @@ public class NemgineLoader {
 		frame.pack();
 		frame.setSize(new Dimension(w, h));
 		frame.setLocationRelativeTo(null);
-
+		
 		Thread t = new Thread() {
 
 			public void run() {
 				while (isLoading) {
-
+					
 					panel.render(currentState);
 					
 					try {
@@ -83,7 +83,7 @@ public class NemgineLoader {
 		t.start();
 	}
 
-	public static void initializeOpenGL(boolean imm, ContextAttribs a) {
+	public static synchronized void initializeOpenGL(boolean imm, ContextAttribs a) {
 		Canvas c = new Canvas();
 		displayFrame = new JFrame();
 		displayFrame.getContentPane().add(c);

@@ -2,17 +2,17 @@ package com.nemezor.nemgine.main;
 
 import java.util.ArrayList;
 
+import com.nemezor.nemgine.exceptions.ThreadException;
 import com.nemezor.nemgine.graphics.TextureManager;
-import com.nemezor.nemgine.misc.NemgineThreadException;
 import com.nemezor.nemgine.misc.Registry;
 
 public class BindableThread extends Thread {
 	
-	protected IMainRenderLoop		render;
-	protected IMainTickLoop			tick;
-	protected ArrayList<Object[]>	aux	= new ArrayList<Object[]>();
-	protected long					renderInterval;
-	protected long					tickInterval;
+	protected IMainRenderLoop render;
+	protected IMainTickLoop tick;
+	protected ArrayList<Object[]> aux = new ArrayList<Object[]>();
+	protected long renderInterval;
+	protected long tickInterval;
 	
 	private boolean isRunning = false;
 	
@@ -64,7 +64,7 @@ public class BindableThread extends Thread {
 				render.render();
 				
 				if (NEXT_RENDER + (RENDER_SLEEP * FRAME_SKIP) < System.currentTimeMillis()) {
-					NemgineThreadException e = new NemgineThreadException(Registry.THREAD_RENDER_KEEPUP_1 + ((System.currentTimeMillis() - NEXT_RENDER) / (RENDER_SLEEP != 0 ? RENDER_SLEEP : 1)) + Registry.THREAD_RENDER_KEEPUP_2);
+					ThreadException e = new ThreadException(Registry.THREAD_RENDER_KEEPUP_1 + ((System.currentTimeMillis() - NEXT_RENDER) / (RENDER_SLEEP != 0 ? RENDER_SLEEP : 1)) + Registry.THREAD_RENDER_KEEPUP_2);
 					e.setBindCause(render);
 					e.setThrower(this);
 					e.printStackTrace();
@@ -81,7 +81,7 @@ public class BindableThread extends Thread {
 				tick.tick();
 				
 				if (NEXT_TICK + (TICK_SLEEP * TICK_SKIP) < System.currentTimeMillis()) {
-					NemgineThreadException e = new NemgineThreadException(Registry.THREAD_TICK_KEEPUP_1 + ((System.currentTimeMillis() - NEXT_TICK) / (TICK_SLEEP != 0 ? TICK_SLEEP : 1)) + Registry.THREAD_TICK_KEEPUP_2);
+					ThreadException e = new ThreadException(Registry.THREAD_TICK_KEEPUP_1 + ((System.currentTimeMillis() - NEXT_TICK) / (TICK_SLEEP != 0 ? TICK_SLEEP : 1)) + Registry.THREAD_TICK_KEEPUP_2);
 					e.setBindCause(tick);
 					e.setThrower(this);
 					e.printStackTrace();
@@ -98,7 +98,7 @@ public class BindableThread extends Thread {
 					sleep(sleep_amount);
 				}
 			} catch (InterruptedException ex) {
-				NemgineThreadException e = new NemgineThreadException(Registry.THREAD_INTERRUPT);
+				ThreadException e = new ThreadException(Registry.THREAD_INTERRUPT);
 				e.setThrower(this);
 				e.printStackTrace();
 				ex.printStackTrace();
@@ -107,7 +107,7 @@ public class BindableThread extends Thread {
 				NEXT_SECOND += Registry.ONE_SECOND_IN_MILLIS;
 				
 				if (NEXT_SECOND + Registry.MAX_TIME_BEHIND_OFFSET < System.currentTimeMillis()) {
-					NemgineThreadException e = new NemgineThreadException(Registry.THREAD_TIME_KEEPUP_1 + ((System.currentTimeMillis() - NEXT_SECOND) / Registry.ONE_SECOND_IN_MILLIS) + Registry.THREAD_TIME_KEEPUP_2);
+					ThreadException e = new ThreadException(Registry.THREAD_TIME_KEEPUP_1 + ((System.currentTimeMillis() - NEXT_SECOND) / Registry.ONE_SECOND_IN_MILLIS) + Registry.THREAD_TIME_KEEPUP_2);
 					e.setThrower(this);
 					e.printStackTrace();
 					NEXT_SECOND = System.currentTimeMillis() + Registry.ONE_SECOND_IN_MILLIS;
@@ -180,7 +180,7 @@ public class BindableThread extends Thread {
 					sleep(sleep_amount);
 				}
 			} catch (InterruptedException ex) {
-				NemgineThreadException e = new NemgineThreadException(Registry.THREAD_INTERRUPT);
+				ThreadException e = new ThreadException(Registry.THREAD_INTERRUPT);
 				e.setThrower(this);
 				e.printStackTrace();
 				ex.printStackTrace();

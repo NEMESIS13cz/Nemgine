@@ -19,7 +19,7 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
-import com.nemezor.nemgine.misc.NemgineModelException;
+import com.nemezor.nemgine.exceptions.ModelException;
 import com.nemezor.nemgine.misc.Registry;
 
 public class ModelManager {
@@ -128,7 +128,7 @@ public class ModelManager {
 		}
 		ModelData data = loadModel(file);
 		if (data == null) {
-			NemgineModelException ex = new NemgineModelException(Registry.MODEL_MANAGER_LOADER_GLOBAL_ERROR);
+			ModelException ex = new ModelException(Registry.MODEL_MANAGER_LOADER_GLOBAL_ERROR);
 			ex.setThrower(Registry.MODEL_MANAGER_NAME);
 			ex.setModelInfo(file);
 			ex.printStackTrace();
@@ -219,7 +219,7 @@ public class ModelManager {
 			}
 			return new ModelData(verticesArray, normalsArray, texturesArray, indicesArray);
 		} catch (IOException e) {
-			NemgineModelException ex = new NemgineModelException(Registry.MODEL_LOADER_NOT_FOUND);
+			ModelException ex = new ModelException(Registry.MODEL_LOADER_NOT_FOUND);
 			ex.setThrower(Registry.MODEL_LOADER_NAME);
 			ex.setModelInfo(file);
 			ex.printStackTrace();

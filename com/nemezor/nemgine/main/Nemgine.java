@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import com.nemezor.nemgine.debug.ImmediateRender;
+import com.nemezor.nemgine.exceptions.ThreadException;
 import com.nemezor.nemgine.graphics.DisplayManager;
 import com.nemezor.nemgine.graphics.FrameBufferManager;
 import com.nemezor.nemgine.graphics.ModelManager;
@@ -13,8 +14,8 @@ import com.nemezor.nemgine.graphics.ShaderManager;
 import com.nemezor.nemgine.graphics.TextureManager;
 import com.nemezor.nemgine.misc.InputParams;
 import com.nemezor.nemgine.misc.Logger;
-import com.nemezor.nemgine.misc.NemgineThreadException;
 import com.nemezor.nemgine.misc.Registry;
+import com.nemezor.nemgine.network.NetworkManager;
 
 public class Nemgine {
 
@@ -74,6 +75,7 @@ public class Nemgine {
 	public static void exit(int exitCode) {
 		if (!isRunning()) {
 			Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_SHUTDOWN_DISPOSE);
+			NetworkManager.disposeAll();
 			TextureManager.disposeAll();
 			ShaderManager.disposeAll();
 			ModelManager.disposeAll();
@@ -99,11 +101,11 @@ public class Nemgine {
 			threads[index] = threadPool.get(keys.next());
 			index++;
 		}
-		boolean repeat = true;
-		repeat = false;
+		boolean repeat = false;
 		for (BindableThread thread : threads) {
 			if (thread.isAlive()) {
 				repeat = true;
+				break;
 			}
 		}
 		return repeat;
@@ -115,6 +117,7 @@ public class Nemgine {
 			return;
 		}
 		thread.stopThread();
+		threadPool.remove(id);
 	}
 
 	public static synchronized int generateThreads(String threadName, boolean prefix) {
@@ -131,7 +134,7 @@ public class Nemgine {
 			return false;
 		}
 		if (thread.isRunning()) {
-			NemgineThreadException e = new NemgineThreadException("Thread is already running!");
+			ThreadException e = new ThreadException("Thread is already running!");
 			e.printStackTrace();
 			return false;
 		}
@@ -148,17 +151,16 @@ public class Nemgine {
 			return false;
 		}
 		if (thread.render != null || thread.tick != null) {
-			NemgineThreadException e = new NemgineThreadException(
-					"Thread is already a main render or main tick thread!");
+			ThreadException e = new ThreadException("Thread is already a main render or main tick thread!");
 			e.printStackTrace();
 			return false;
 		}
 		if (thread.isRunning()) {
-			NemgineThreadException e = new NemgineThreadException("Thread is already running!");
+			ThreadException e = new ThreadException("Thread is already running!");
 			e.printStackTrace();
 			return false;
 		}
-		thread.aux.add(new Object[] { loop, -1L });
+		thread.aux.add(new Object[] {loop, -1L});
 		return true;
 	}
 
@@ -174,12 +176,12 @@ public class Nemgine {
 			return false;
 		}
 		if (thread.aux.size() > 0) {
-			NemgineThreadException e = new NemgineThreadException("Thread is already auxiliary thread!");
+			ThreadException e = new ThreadException("Thread is already auxiliary thread!");
 			e.printStackTrace();
 			return false;
 		}
 		if (thread.isRunning()) {
-			NemgineThreadException e = new NemgineThreadException("Thread is already running!");
+			ThreadException e = new ThreadException("Thread is already running!");
 			e.printStackTrace();
 			return false;
 		}
@@ -199,12 +201,12 @@ public class Nemgine {
 			return false;
 		}
 		if (thread.aux.size() > 0) {
-			NemgineThreadException e = new NemgineThreadException("Thread is already auxiliary thread!");
+			ThreadException e = new ThreadException("Thread is already auxiliary thread!");
 			e.printStackTrace();
 			return false;
 		}
 		if (thread.isRunning()) {
-			NemgineThreadException e = new NemgineThreadException("Thread is already running!");
+			ThreadException e = new ThreadException("Thread is already running!");
 			e.printStackTrace();
 			return false;
 		}
