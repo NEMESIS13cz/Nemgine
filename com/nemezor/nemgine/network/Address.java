@@ -1,7 +1,5 @@
 package com.nemezor.nemgine.network;
 
-import java.net.Socket;
-
 import com.nemezor.nemgine.exceptions.NetworkException;
 import com.nemezor.nemgine.misc.Registry;
 
@@ -22,7 +20,7 @@ public class Address {
 	}
 	
 	public Address(Socket socket) {
-		IP = socket.getRemoteSocketAddress().toString();
+		IP = socket.getAddress();
 		port = socket.getPort();
 	}
 	
