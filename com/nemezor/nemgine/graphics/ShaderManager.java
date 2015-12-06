@@ -19,9 +19,11 @@ import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
 import com.nemezor.nemgine.exceptions.ShaderException;
+import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.EnumShaderType;
 import com.nemezor.nemgine.misc.Logger;
 import com.nemezor.nemgine.misc.Registry;
+import com.nemezor.nemgine.misc.Side;
 
 public class ShaderManager {
 
@@ -33,12 +35,18 @@ public class ShaderManager {
 	private ShaderManager() {}
 
 	public static synchronized int generateShaders() {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return Registry.INVALID;
+		}
 		shaderCounter++;
 		shaders.put(shaderCounter, new Shader());
 		return shaderCounter;
 	}
 
 	public static void disposeShader(int id) {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return;
+		}
 		if (currentShader == id) {
 			GL20.glUseProgram(0);
 		}
@@ -55,6 +63,9 @@ public class ShaderManager {
 	}
 
 	public static void disposeAll() {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return;
+		}
 		GL20.glUseProgram(0);
 		Iterator<Integer> keys = shaders.keySet().iterator();
 		while (keys.hasNext()) {
@@ -82,7 +93,7 @@ public class ShaderManager {
 	}
 
 	public static void unbindShader() {
-		if (currentShader == 0) {
+		if (currentShader == 0 || Nemgine.getSide() == Side.SERVER) {
 			return;
 		}
 		currentShader = 0;
@@ -91,7 +102,7 @@ public class ShaderManager {
 	}
 
 	public static void loadMatrix4(int id, String name, Matrix4f data) {
-		if (id != currentShader) {
+		if (id != currentShader || Nemgine.getSide() == Side.SERVER) {
 			return;
 		}
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
@@ -101,7 +112,7 @@ public class ShaderManager {
 	}
 
 	public static void loadMatrix3(int id, String name, Matrix3f data) {
-		if (id != currentShader) {
+		if (id != currentShader || Nemgine.getSide() == Side.SERVER) {
 			return;
 		}
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(9);
@@ -111,7 +122,7 @@ public class ShaderManager {
 	}
 
 	public static void loadMatrix2(int id, String name, Matrix2f data) {
-		if (id != currentShader) {
+		if (id != currentShader || Nemgine.getSide() == Side.SERVER) {
 			return;
 		}
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(4);
@@ -121,35 +132,35 @@ public class ShaderManager {
 	}
 
 	public static void loadVector4(int id, String name, Vector4f data) {
-		if (id != currentShader) {
+		if (id != currentShader || Nemgine.getSide() == Side.SERVER) {
 			return;
 		}
 		GL20.glUniform4f(currentShaderData.data.get(name), data.getX(), data.getY(), data.getZ(), data.getW());
 	}
 
 	public static void loadVector3(int id, String name, Vector3f data) {
-		if (id != currentShader) {
+		if (id != currentShader || Nemgine.getSide() == Side.SERVER) {
 			return;
 		}
 		GL20.glUniform3f(currentShaderData.data.get(name), data.getX(), data.getY(), data.getZ());
 	}
 
 	public static void loadVector2(int id, String name, Vector2f data) {
-		if (id != currentShader) {
+		if (id != currentShader || Nemgine.getSide() == Side.SERVER) {
 			return;
 		}
 		GL20.glUniform2f(currentShaderData.data.get(name), data.getX(), data.getY());
 	}
 
 	public static void loadFloat(int id, String name, float data) {
-		if (id != currentShader) {
+		if (id != currentShader || Nemgine.getSide() == Side.SERVER) {
 			return;
 		}
 		GL20.glUniform1f(currentShaderData.data.get(name), data);
 	}
 
 	public static void loadBoolean(int id, String name, boolean data) {
-		if (id != currentShader) {
+		if (id != currentShader || Nemgine.getSide() == Side.SERVER) {
 			return;
 		}
 		GL20.glUniform1f(currentShaderData.data.get(name), data ? 1.0f : 0.0f);

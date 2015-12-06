@@ -7,31 +7,42 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import com.nemezor.nemgine.misc.Registry;
+import com.nemezor.nemgine.misc.Side;
 
-public class Socket {
+public class Socket implements ISocket {
 
 	private java.net.Socket sock;
 	private int state;
+	private NetworkObject obj;
 	protected ArrayList<IPacket> queue = new ArrayList<IPacket>();
 	
-	public Socket(Address addr) throws UnknownHostException, IOException {
+	public Socket(int id, Address addr) throws UnknownHostException, IOException {
 		sock = new java.net.Socket(addr.getIp(), addr.getPort());
 		startThread(sock.getInputStream(), sock.getOutputStream());
+		obj = new NetworkObject(id);
+		NetworkManager.objects.add(obj);
 	}
 	
 	protected Socket(int state) {
 		this.state = state;
 	}
 	
-	protected void conn(Address addr) throws UnknownHostException, IOException {
+	public NetworkObject conn(int id, Address addr) throws UnknownHostException, IOException {
 		if (state == Registry.INVALID) {
 			state = 0;
 			sock = new java.net.Socket(addr.getIp(), addr.getPort());
 			startThread(sock.getInputStream(), sock.getOutputStream());
+			obj = new NetworkObject(id);
+			NetworkManager.callPacketReceivedEvent(obj, null);
+			return obj;
 		}
+		return null;
 	}
 	
 	public boolean isClosed() {
+		if (sock == null) {
+			return true;
+		}
 		return sock.isClosed();
 	}
 	
@@ -47,33 +58,37 @@ public class Socket {
 		return sock.getPort();
 	}
 	
-	protected int getState() {
+	public int getState() {
 		return state;
 	}
-	
-	protected java.net.Socket getInternalSocket() {
-		return sock;
+
+	public boolean isConnected() {
+		return sock.isConnected();
 	}
 	
-	protected synchronized void sendPacket(IPacket packet) {
+	public synchronized void sendPacket(NetworkObject client, IPacket packet) {
 		queue.add(packet);
 	}
 	
-	protected synchronized IPacket pop() {
-		while (queue.size() == 0) {
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+	public synchronized IPacket pop(NetworkObject client) {
+		if (queue.size() > 0) {
+			return queue.remove(0);
 		}
-		return queue.remove(0);
+		return null;
 	}
 	
-	private void startThread(InputStream input, OutputStream output) {
-		Thread threadIn = new ReceiverThread(this, input);
+	protected void startThread(InputStream input, OutputStream output) {
+		Thread threadIn = new ReceiverThread(obj, this, input);
 		Thread threadOut = new TransmitterThread(this, output);
 		threadIn.start();
 		threadOut.start();
+	}
+	
+	public Side type() {
+		return Side.CLIENT;
+	}
+	
+	public NetworkObject getObj() {
+		return obj;
 	}
 }

@@ -14,8 +14,10 @@ import javax.imageio.ImageIO;
 import org.lwjgl.opengl.GL11;
 
 import com.nemezor.nemgine.exceptions.TextureException;
+import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.Logger;
 import com.nemezor.nemgine.misc.Registry;
+import com.nemezor.nemgine.misc.Side;
 
 public class TextureManager {
 
@@ -27,6 +29,9 @@ public class TextureManager {
 	private TextureManager() {}
 	
 	public static synchronized int generateTextures() {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return Registry.INVALID;
+		}
 		textureCounter++;
 		textures.put(textureCounter, new Texture(Registry.INVALID, Registry.INVALID, Registry.INVALID));
 		return textureCounter;
@@ -50,7 +55,7 @@ public class TextureManager {
 	}
 	
 	public static void unbindTexture() {
-		if (currentTexture != 0) {
+		if (currentTexture != 0 && Nemgine.getSide() == Side.CLIENT) {
 			currentTexture = 0;
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		}
@@ -71,6 +76,9 @@ public class TextureManager {
 	}
 	
 	public static void disposeAll() {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return;
+		}
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		Iterator<Integer> keys = textures.keySet().iterator();
 		
@@ -111,7 +119,7 @@ public class TextureManager {
 		return true;
 	}
 	
-	public static Texture loadTexture(String file) {
+	private static Texture loadTexture(String file) {
 		int[] pixels = null;
 		int w = Registry.INVALID;
 		int h = Registry.INVALID;

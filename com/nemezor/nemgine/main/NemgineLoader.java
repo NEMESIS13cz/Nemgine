@@ -15,6 +15,7 @@ import org.lwjgl.opengl.PixelFormat;
 
 import com.nemezor.nemgine.misc.LoaderPanel;
 import com.nemezor.nemgine.misc.Registry;
+import com.nemezor.nemgine.misc.Side;
 
 public class NemgineLoader {
 
@@ -38,6 +39,9 @@ public class NemgineLoader {
 		appW = appWidth;
 		appH = appHeight;
 		appTitle = title;
+		if (Nemgine.getSide() == Side.SERVER) {
+			return;
+		}
 		
 		panel = new LoaderPanel(w, h);
 		
@@ -84,6 +88,9 @@ public class NemgineLoader {
 	}
 
 	public static synchronized void initializeOpenGL(boolean imm, ContextAttribs a) {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return;
+		}
 		Canvas c = new Canvas();
 		displayFrame = new JFrame();
 		displayFrame.getContentPane().add(c);
@@ -116,10 +123,16 @@ public class NemgineLoader {
 	}
 	
 	public static Dimension getSize() {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return new Dimension(Registry.INVALID, Registry.INVALID);
+		}
 		return new Dimension(w, h);
 	}
 
 	public static Point getLocation() {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return new Point(Registry.INVALID, Registry.INVALID);
+		}
 		frame.setSize(getSize());
 		frame.setLocationRelativeTo(null);
 		return frame.getLocation();
@@ -130,10 +143,16 @@ public class NemgineLoader {
 	}
 
 	public static void setTitle(String s) {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return;
+		}
 		displayFrame.setTitle(s);
 	}
 	
 	public static synchronized void stop() {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return;
+		}
 		isLoading = false;
 		panel.switchToOpenGL();
 		frame.dispose();
@@ -141,11 +160,17 @@ public class NemgineLoader {
 	}
 
 	public static synchronized void dispose() {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return;
+		}
 		displayFrame.setVisible(false);
 		displayFrame.dispose();
 	}
 
 	public static synchronized void updateState(String state) {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return;
+		}
 		currentState = state;
 	}
 

@@ -19,7 +19,7 @@ public class Address {
 		}
 	}
 	
-	public Address(Socket socket) {
+	public Address(ISocket socket) {
 		IP = socket.getAddress();
 		port = socket.getPort();
 	}

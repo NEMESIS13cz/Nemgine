@@ -1,5 +1,8 @@
 package com.nemezor.nemgine.network;
 
-public interface IPacket {
+import java.io.Serializable;
 
+public interface IPacket extends Serializable {
+
+	
 }

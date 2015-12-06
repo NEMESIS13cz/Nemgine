@@ -15,6 +15,7 @@ import com.nemezor.nemgine.graphics.TextureManager;
 import com.nemezor.nemgine.misc.InputParams;
 import com.nemezor.nemgine.misc.Logger;
 import com.nemezor.nemgine.misc.Registry;
+import com.nemezor.nemgine.misc.Side;
 import com.nemezor.nemgine.network.NetworkManager;
 
 public class Nemgine {
@@ -23,6 +24,7 @@ public class Nemgine {
 	private static int threadCounter = 0;
 	private static boolean isRunning = true;
 	private static Runtime runtime = Runtime.getRuntime();
+	private static boolean headless = false;
 
 	private Nemgine() {}
 
@@ -51,11 +53,14 @@ public class Nemgine {
 				int w = InputParams.containsEntry("width") ? InputParams.getInteger("width") : ann.width();
 				int h = InputParams.containsEntry("height") ? InputParams.getInteger("height") : ann.height();
 				boolean contained = InputParams.containsEntry("contained") ? InputParams.getBoolean("contained") : ann.contained();
+				headless = InputParams.containsEntry("server") ? InputParams.getBoolean("server") : ann.side() == Side.SERVER;
 				
 				if (!contained) {
 					Logger.initialize(ann.path().endsWith("/") ? ann.path().substring(0, ann.path().length() - 1) : ann.path());
 				}
-				NemgineLoader.initialize(w, h, ann.name());
+				if (!headless) {
+					NemgineLoader.initialize(w, h, ann.name());
+				}
 				
 				try {
 					entry.invoke(application.newInstance());
@@ -76,16 +81,18 @@ public class Nemgine {
 		if (!isRunning()) {
 			Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_SHUTDOWN_DISPOSE);
 			NetworkManager.disposeAll();
-			TextureManager.disposeAll();
-			ShaderManager.disposeAll();
-			ModelManager.disposeAll();
-			FrameBufferManager.disposeAll();
-			if (ImmediateRender.isRenderModeImmediate()) {
-				ImmediateRender.dispose();
-			} else {
-				DisplayManager.dispose();
+			if (Nemgine.getSide() == Side.CLIENT) {
+				TextureManager.disposeAll();
+				ShaderManager.disposeAll();
+				ModelManager.disposeAll();
+				FrameBufferManager.disposeAll();
+				if (ImmediateRender.isRenderModeImmediate()) {
+					ImmediateRender.dispose();
+				} else {
+					DisplayManager.dispose();
+				}
+				NemgineLoader.dispose();
 			}
-			NemgineLoader.dispose();
 			Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_SHUTDOWN_EXIT + exitCode);
 			Logger.close();
 			System.gc();
@@ -165,6 +172,9 @@ public class Nemgine {
 	}
 
 	public static synchronized boolean bindRenderLoop(int id, IMainRenderLoop loop) {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return false;
+		}
 		BindableThread thread = threadPool.get(id);
 		if (thread == null) {
 			return false;
@@ -244,5 +254,9 @@ public class Nemgine {
 
 	public static void freeUpMemory() {
 		runtime.gc();
+	}
+	
+	public static Side getSide() {
+		return headless ? Side.SERVER : Side.CLIENT;
 	}
 }

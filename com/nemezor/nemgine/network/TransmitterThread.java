@@ -9,12 +9,19 @@ import com.nemezor.nemgine.misc.Registry;
 
 public class TransmitterThread extends Thread {
 
-	private Socket sock;
+	private ISocket sock;
 	private OutputStream output;
+	private NetworkObject client;
 	
-	protected TransmitterThread(Socket sock, OutputStream output) {
+	protected TransmitterThread(ISocket sock, OutputStream output) {
 		this.output = output;
 		this.sock = sock;
+	}
+
+	protected TransmitterThread(NetworkObject client, ISocket sock, OutputStream output) {
+		this.output = output;
+		this.sock = sock;
+		this.client = client;
 	}
 	
 	public void run() {
@@ -30,8 +37,11 @@ public class TransmitterThread extends Thread {
 			return;
 		}
 		try {
-			while (sock.getInternalSocket().isConnected() && !sock.isClosed()) {
-				objectOutput.writeObject(sock.pop());
+			while (sock.isConnected() && !sock.isClosed()) {
+				IPacket packet = sock.pop(client);
+				if (packet != null) {
+					objectOutput.writeObject(packet);
+				}
 			}
 		} catch (IOException e) {
 			NetworkException ex = new NetworkException(Registry.NETWORK_MANAGER_IO_ERROR);

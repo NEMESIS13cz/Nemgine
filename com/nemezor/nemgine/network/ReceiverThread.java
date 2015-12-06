@@ -10,11 +10,13 @@ import com.nemezor.nemgine.misc.Registry;
 public class ReceiverThread extends Thread {
 
 	private InputStream input;
-	private Socket sock;
-	
-	protected ReceiverThread(Socket sock, InputStream input) {
+	private ISocket sock;
+	private NetworkObject obj;
+
+	protected ReceiverThread(NetworkObject obj, ISocket sock, InputStream input) {
 		this.input = input;
 		this.sock = sock;
+		this.obj = obj;
 	}
 	
 	public void run() {
@@ -30,11 +32,11 @@ public class ReceiverThread extends Thread {
 			return;
 		}
 		try {
-			while (sock.getInternalSocket().isConnected() && !sock.isClosed()) {
+			while (sock.isConnected() && !sock.isClosed()) {
 				try {
 					IPacket next = (IPacket) objectInput.readObject();
 					if (next != null) {
-						NetworkManager.callPacketReceivedEvent(next);
+						NetworkManager.callPacketReceivedEvent(obj, next);
 					}
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();

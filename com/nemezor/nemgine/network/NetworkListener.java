@@ -13,10 +13,10 @@ public class NetworkListener {
 		this.instance = instance;
 	}
 	
-	protected void invoke(IPacket packet) {
+	protected void invoke(NetworkObject netObject, IPacket packet) {
 		for (Method m : methods) {
 			try {
-				m.invoke(instance, packet);
+				m.invoke(instance, netObject, packet);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 				e.printStackTrace();
 			}

@@ -9,6 +9,10 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import com.nemezor.nemgine.main.Nemgine;
+import com.nemezor.nemgine.misc.Registry;
+import com.nemezor.nemgine.misc.Side;
+
 public class GLHelper {
 
 	protected static float zNear;
@@ -80,6 +84,9 @@ public class GLHelper {
 	}
 	
 	public static int createBufferAndStore(int attrNum, int size, float[] data) {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return Registry.INVALID;
+		}
 		int vbo = GL15.glGenBuffers();
 		FloatBuffer buf = BufferUtils.createFloatBuffer(data.length);
 		buf.put(data);

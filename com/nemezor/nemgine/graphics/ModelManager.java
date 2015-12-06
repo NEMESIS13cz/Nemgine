@@ -20,7 +20,9 @@ import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import com.nemezor.nemgine.exceptions.ModelException;
+import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.Registry;
+import com.nemezor.nemgine.misc.Side;
 
 public class ModelManager {
 
@@ -30,6 +32,9 @@ public class ModelManager {
 	private ModelManager() {}
 	
 	public static synchronized int generateModels() {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return Registry.INVALID;
+		}
 		modelCounter++;
 		models.put(modelCounter, new Model(Registry.INVALID, null, null));
 		return modelCounter;
@@ -47,6 +52,9 @@ public class ModelManager {
 	}
 	
 	public static void disposeAll() {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return;
+		}
 		Iterator<Integer> keys = models.keySet().iterator();
 		
 		while (keys.hasNext()) {
@@ -116,6 +124,9 @@ public class ModelManager {
 	}
 	
 	public static void finishRendering() {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return;
+		}
 		ShaderManager.unbindShader();
 		TextureManager.unbindTexture();
 		FrameBufferManager.unbindFrameBufferTexture();

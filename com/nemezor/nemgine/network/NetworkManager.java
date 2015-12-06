@@ -10,25 +10,37 @@ import java.util.Iterator;
 
 import com.nemezor.nemgine.exceptions.NetworkException;
 import com.nemezor.nemgine.misc.Registry;
+import com.nemezor.nemgine.misc.Side;
 
 public class NetworkManager {
 
-	private static HashMap<Integer, Socket> sockets = new HashMap<Integer, Socket>();
+	private static HashMap<Integer, ISocket> sockets = new HashMap<Integer, ISocket>();
 	private static int socketCounter = 0;
 	private static ArrayList<NetworkListener> listeners = new ArrayList<NetworkListener>();
+	protected static ArrayList<NetworkObject> objects = new ArrayList<NetworkObject>();
 	
-	public static synchronized int generateSockets() {
+	public static synchronized int generateSockets(Side type) {
 		socketCounter++;
-		sockets.put(socketCounter, new Socket(Registry.INVALID));
+		if (type == Side.CLIENT) {
+			sockets.put(socketCounter, new Socket(Registry.INVALID));
+		}else{
+			sockets.put(socketCounter, new ServerSocket(Registry.INVALID));
+		}
 		return socketCounter;
 	}
 	
 	public static synchronized boolean connect(int id, Address address) {
-		if (sockets.get(id) != null || sockets.get(id).getState() != Registry.INVALID) {
+		if (sockets.get(id) != null && sockets.get(id).getState() != Registry.INVALID) {
 			return false;
 		}
 		try {
-			sockets.get(id).conn(address);
+			NetworkObject obj = sockets.get(id).conn(id, address);
+			if (sockets.get(id).type() == Side.CLIENT) {
+				if (obj == null) {
+					return false;
+				}
+				objects.add(obj);
+			}
 		} catch (UnknownHostException e) {
 			NetworkException ex = new NetworkException(Registry.NETWORK_MANAGER_UNKNOWN_HOST_ERROR);
 			ex.setThrower(Registry.NETWORK_MANAGER_NAME);
@@ -47,16 +59,17 @@ public class NetworkManager {
 		return true;
 	}
 	
-	public static boolean sendPacket(int id, IPacket packet) {
-		if (sockets.get(id) == null || sockets.get(id).getState() == Registry.INVALID) {
+	protected static boolean sendPacket(NetworkObject netObject, int id, IPacket packet) {
+		ISocket socket = sockets.get(id);
+		if (socket == null || socket.getState() == Registry.INVALID) {
 			return false;
 		}
-		sockets.get(id).sendPacket(packet);
+		socket.sendPacket(netObject, packet);
 		return true;
 	}
 	
 	public static void dispose(int id) {
-		Socket sock = sockets.get(id);
+		ISocket sock = sockets.get(id);
 		if (sock != null && !sock.isClosed()) {
 			try {
 				sock.close();
@@ -69,13 +82,16 @@ public class NetworkManager {
 			}
 		}
 		sockets.remove(id);
+		if (sock.getObj() != null) {
+			objects.remove(sock.getObj());
+		}
 	}
 	
 	public static void disposeAll() {
 		Iterator<Integer> i = sockets.keySet().iterator();
 		
 		while (i.hasNext()) {
-			Socket sock = sockets.get(i.next());
+			ISocket sock = sockets.get(i.next());
 			if (sock != null && !sock.isClosed()) {
 				try {
 					sock.close();
@@ -89,6 +105,7 @@ public class NetworkManager {
 			}
 		}
 		sockets.clear();
+		objects.clear();
 	}
 	
 	public static synchronized void registerListenerClass(Object listener) {
@@ -96,7 +113,7 @@ public class NetworkManager {
 		ArrayList<Method> temp = new ArrayList<Method>();
 		for (Method m : methods) {
 			Annotation[] ann = m.getDeclaredAnnotationsByType(Network.class);
-			if (ann.length > 0 && m.getParameterCount() == 1 && m.getParameters()[0].getType() == IPacket.class) {
+			if (ann.length > 0 && m.getParameterCount() == 2 && m.getParameters()[0].getType() == NetworkObject.class && m.getParameters()[1].getType() == IPacket.class) {
 				temp.add(m);
 			}
 		}
@@ -107,9 +124,9 @@ public class NetworkManager {
 		listeners.add(new NetworkListener(listener, methods_));
 	}
 	
-	protected static synchronized void callPacketReceivedEvent(IPacket packet) {
+	protected static synchronized void callPacketReceivedEvent(NetworkObject netObject, IPacket packet) {
 		for (NetworkListener m : listeners) {
-			m.invoke(packet);
+			m.invoke(netObject, packet);
 		}
 	}
 }

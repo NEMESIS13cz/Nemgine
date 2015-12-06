@@ -11,7 +11,9 @@ import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL32;
 
+import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.Registry;
+import com.nemezor.nemgine.misc.Side;
 
 public class FrameBufferManager {
 
@@ -24,6 +26,9 @@ public class FrameBufferManager {
 	private static FrameBuffer currentBufferData = null;
 
 	public static synchronized int generateFrameBuffers() {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return Registry.INVALID;
+		}
 		bufferCounter++;
 		buffers.put(bufferCounter, new FrameBuffer(Registry.INVALID));
 		return bufferCounter;
@@ -46,7 +51,7 @@ public class FrameBufferManager {
 	}
 	
 	public static void unbindFrameBuffer() {
-		if (currentBuffer == 0) {
+		if (currentBuffer == 0 || Nemgine.getSide() == Side.SERVER) {
 			return;
 		}
 		currentBuffer = 0;
@@ -77,7 +82,7 @@ public class FrameBufferManager {
 	}
 	
 	public static void unbindFrameBufferTexture() {
-		if (currentBufferTex == 0) {
+		if (currentBufferTex == 0 || Nemgine.getSide() == Side.SERVER) {
 			return;
 		}
 		currentBufferTex = 0;
@@ -85,7 +90,7 @@ public class FrameBufferManager {
 	}
 	
 	public static void dispose(int id) {
-		if (currentBuffer == id) {
+		if (currentBuffer == id || Nemgine.getSide() == Side.SERVER) {
 			return;
 		}
 		FrameBuffer buffer = buffers.get(id);
@@ -99,6 +104,9 @@ public class FrameBufferManager {
 	}
 	
 	public static Dimension getFrameBufferResolution(int id) {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return new Dimension(Registry.INVALID, Registry.INVALID);
+		}
 		if (currentBuffer == id) {
 			return new Dimension(currentBufferData.w, currentBufferData.h);
 		}
@@ -110,6 +118,9 @@ public class FrameBufferManager {
 	}
 	
 	public static void disposeAll() {
+		if (Nemgine.getSide() == Side.SERVER) {
+			return;
+		}
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
 		GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
 		Iterator<Integer> keys = buffers.keySet().iterator();
