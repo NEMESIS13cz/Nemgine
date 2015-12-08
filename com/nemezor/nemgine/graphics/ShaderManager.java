@@ -1,7 +1,9 @@
 package com.nemezor.nemgine.graphics;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -19,6 +21,7 @@ import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
 import com.nemezor.nemgine.exceptions.ShaderException;
+import com.nemezor.nemgine.graphics.util.Shader;
 import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.EnumShaderType;
 import com.nemezor.nemgine.misc.Logger;
@@ -40,10 +43,13 @@ public class ShaderManager {
 		}
 		shaderCounter++;
 		shaders.put(shaderCounter, new Shader());
+		if (Loader.loading()) {
+			Loader.shaderCounter += 2;
+		}
 		return shaderCounter;
 	}
 
-	public static void disposeShader(int id) {
+	public static void dispose(int id) {
 		if (Nemgine.getSide() == Side.SERVER) {
 			return;
 		}
@@ -177,13 +183,23 @@ public class ShaderManager {
 		if (shader == null) {
 			return false;
 		}
+		if (Loader.loading()) {
+			Loader.loadingShader(new File(vertexFile).getName());
+		}
 		shader.vertID = loadShader(vertexFile, EnumShaderType.VERTEX);
 		if (shader.vertID == Registry.INVALID) {
 			ShaderException ex = new ShaderException(Registry.SHADER_MANAGER_LOADER_GLOBAL_ERROR);
 			ex.setShaderInfo(vertexFile, EnumShaderType.VERTEX);
 			ex.setThrower(Registry.SHADER_MANAGER_NAME);
 			ex.printStackTrace();
+			if (Loader.loading()) { 
+				Loader.failedToLoadResource(Registry.LOADING_SCREEN_ERROR);
+			}
 			return false;
+		}
+		if (Loader.loading()) {
+			Loader.shaderLoaded();
+			Loader.loadingShader(new File(fragmentFile).getName());
 		}
 		shader.fragID = loadShader(fragmentFile, EnumShaderType.FRAGMENT);
 		if (shader.fragID == Registry.INVALID) {
@@ -191,7 +207,13 @@ public class ShaderManager {
 			ex.setShaderInfo(fragmentFile, EnumShaderType.FRAGMENT);
 			ex.setThrower(Registry.SHADER_MANAGER_NAME);
 			ex.printStackTrace();
+			if (Loader.loading()) { 
+				Loader.failedToLoadResource(Registry.LOADING_SCREEN_ERROR);
+			}
 			return false;
+		}
+		if (Loader.loading()) {
+			Loader.shaderLoaded();
 		}
 		shader.progID = GL20.glCreateProgram();
 		GL20.glAttachShader(shader.progID, shader.vertID);
@@ -211,7 +233,11 @@ public class ShaderManager {
 	private static int loadShader(String file, EnumShaderType type) {
 		StringBuilder shaderSrc = new StringBuilder();
 		try {
-			BufferedReader reader = Files.newBufferedReader(Paths.get(ClassLoader.getSystemResource(file).getPath()));
+			URL url = ClassLoader.getSystemResource(file);
+			if (url == null) {
+				return Registry.INVALID;
+			}
+			BufferedReader reader = Files.newBufferedReader(Paths.get(url.getPath()));
 			String line;
 			while ((line = reader.readLine()) != null) {
 				shaderSrc.append(line).append("\n");
@@ -237,5 +263,17 @@ public class ShaderManager {
 			return Registry.INVALID;
 		}
 		return shaderID;
+	}
+	
+	protected static int loadLogoShaders() {
+		int id = generateShaders();
+		initializeShader(id, Registry.SHADER_LOGO_VERTEX, Registry.SHADER_LOGO_FRAGMENT, new String[] {"projection", "transformation"}, new String[] {"position"}, new int[] {0});
+		return id;
+	}
+	
+	protected static int loadProgressBarShaders() {
+		int id = generateShaders();
+		initializeShader(id, Registry.SHADER_PROGRESS_BAR_VERTEX, Registry.SHADER_PROGRESS_BAR_FRAGMENT, new String[] {"projection", "transformation", "progress"}, new String[] {"position"}, new int[] {0});
+		return id;
 	}
 }

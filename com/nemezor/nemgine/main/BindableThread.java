@@ -2,8 +2,10 @@ package com.nemezor.nemgine.main;
 
 import java.util.ArrayList;
 
+import org.lwjgl.opengl.ContextAttribs;
+
 import com.nemezor.nemgine.exceptions.ThreadException;
-import com.nemezor.nemgine.graphics.TextureManager;
+import com.nemezor.nemgine.graphics.Loader;
 import com.nemezor.nemgine.misc.Registry;
 
 public class BindableThread extends Thread {
@@ -27,17 +29,21 @@ public class BindableThread extends Thread {
 	
 	private void runMain() {
 		if (render != null) {
+			ContextAttribs attribs = new ContextAttribs(3, 2).withForwardCompatible(true).withProfileCore(true);
+			Loader.initialize(Nemgine.w, Nemgine.h, Nemgine.name, attribs);
 			render.setUpRender();
-			TextureManager.loadMissingTexture();
+			Loader.postInitialize();
 			render.loadResources();
 		}
 		
 		if (tick != null) {
 			tick.setUpTick();
 		}
-		
-		NemgineLoader.stop();
 
+		if (render != null) {
+			Loader.finish();
+		}
+		
 		long SLEEP = 0;
 		long RENDER_SLEEP = 0;
 		long TICK_SLEEP = 0;

@@ -3,7 +3,6 @@ package com.nemezor.nemgine.network;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -16,8 +15,16 @@ public class ServerSocket implements ISocket {
 	private int state;
 	protected HashMap<NetworkObject, ArrayList<IPacket>> queue = new HashMap<NetworkObject, ArrayList<IPacket>>();
 	
-	public ServerSocket(int id, Address addr) throws IOException {
-		sock = new java.net.ServerSocket(addr.getPort());
+	public ServerSocket(int id, Address addr) {
+		try {
+			sock = new java.net.ServerSocket(addr.getPort());
+		} catch (IOException e) {
+			NetworkManager.callInfoEvent(null, new NetworkInfo(NetworkInfoType.IO_ERROR, e));
+			return;
+		} catch (SecurityException e) {
+			NetworkManager.callInfoEvent(null, new NetworkInfo(NetworkInfoType.SECURITY, e));
+			return;
+		}
 		startAcceptorThread(id);
 	}
 	
@@ -25,10 +32,18 @@ public class ServerSocket implements ISocket {
 		this.state = state;
 	}
 	
-	public NetworkObject conn(int id, Address addr) throws UnknownHostException, IOException {
+	public NetworkObject conn(int id, Address addr) {
 		if (state == Registry.INVALID) {
 			state = 0;
-			sock = new java.net.ServerSocket(addr.getPort());
+			try {
+				sock = new java.net.ServerSocket(addr.getPort());
+			} catch (IOException e) {
+				NetworkManager.callInfoEvent(null, new NetworkInfo(NetworkInfoType.IO_ERROR, e));
+				return new NetworkObject(Registry.INVALID);
+			} catch (SecurityException e) {
+				NetworkManager.callInfoEvent(null, new NetworkInfo(NetworkInfoType.SECURITY, e));
+				return new NetworkObject(Registry.INVALID);
+			}
 			startAcceptorThread(id);
 		}
 		return null;
@@ -80,17 +95,22 @@ public class ServerSocket implements ISocket {
 		Thread t = new Thread() {
 			
 			public void run() {
+				NetworkObject obj = null;
+				
 				while (!sock.isClosed()) {
 					try {
 						java.net.Socket client = sock.accept();
-						NetworkObject obj = new NetworkObject(id);
+						obj = new NetworkObject(id);
 						queue.put(obj, new ArrayList<IPacket>());
 						NetworkManager.objects.add(obj);
 						startThread(obj, client.getInputStream(), client.getOutputStream());
-						NetworkManager.callPacketReceivedEvent(obj, null);
+						NetworkManager.callConnectionEstablishedEvent(obj);
 					} catch (IOException e) {
-						
+						NetworkManager.callInfoEvent(obj, new NetworkInfo(NetworkInfoType.IO_ERROR, e));
+					} catch (SecurityException e) {
+						NetworkManager.callInfoEvent(obj, new NetworkInfo(NetworkInfoType.SECURITY, e));
 					}
+					obj = null;
 				}
 			}
 		};

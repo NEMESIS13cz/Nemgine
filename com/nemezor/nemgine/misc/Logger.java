@@ -55,6 +55,10 @@ public class Logger {
 		initialized = true;
 	}
 	
+	public static boolean isContained() {
+		return !initialized;
+	}
+	
 	public static void close() {
 		if (initialized) {
 			try {

@@ -1,0 +1,11 @@
+#version 330 core
+
+in float progressOut;
+
+out vec4 finalColor;
+
+void main() {
+
+	finalColor = vec4(progressOut * 0.5, 0.5, 1, 1);
+	
+}

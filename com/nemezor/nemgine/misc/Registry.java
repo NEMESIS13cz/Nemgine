@@ -4,6 +4,10 @@ import java.awt.Font;
 
 public final class Registry {
 	
+	// Main
+	public static final int ERROR_SCREEN_WIDTH = 600;
+	public static final int ERROR_SCREEN_HEIGHT = 400;
+	
 	// Misc
 	public static final int ONE_SECOND_IN_MILLIS = 1000;
 	public static final int INVALID = -1;
@@ -17,8 +21,6 @@ public final class Registry {
 	public static final int SHADER_ERROR_LOG_SIZE = 4096;
 	
 	// Loading
-	public static final int LOADING_SCREEN_REFRESH_RATE = 10;
-	public static final int LOADING_SCREEN_INDICATOR_REFRESH = 1;
 	public static final int LOADING_SCREEN_WIDTH = 800;
 	public static final int LOADING_SCREEN_HEIGHT = 450;
 	public static final int LOADING_SCREEN_FONT_SIZE = 16;
@@ -26,15 +28,11 @@ public final class Registry {
 	public static final int LOADING_SCREEN_FONT_Y = 340;
 	public static final int LOADING_SCREEN_FONT_PROPERTIES = Font.BOLD;
 	public static final int LOADING_SCREEN_FONT_COLOR = 0x6a9df9;
-	public static final int LOADING_SCREEN_INDICATOR_SIZE = 10;
-	public static final int LOADING_SCREEN_INDICATOR_PADDING = 3;
-	public static final int LOADING_SCREEN_INDICATOR_X = 400;
-	public static final int LOADING_SCREEN_INDICATOR_Y = 380;
-	public static final int LOADING_SCREEN_INDICATOR_LENGTH = 3;
 	
 	// Network
 	public static final int IP_ADDRESS_MAXIMUM_PORT_VALUE = 65535;
 	public static final int IP_ADDRESS_MINIMUM_PORT_VALUE = 0;
+	public static final int SOCKET_DEFAULT_TIMEOUT = 5000;
 	
 	////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -45,6 +43,8 @@ public final class Registry {
 	public static final String NEMGINE_RESOLVE_NONE = "No entry point specified!";
 	public static final String NEMGINE_RESOLVE_MULTIPLE = "Multiple entry points specified!";
 	public static final String NEMGINE_EXECUTION_FAIL = "Application execution failed!";
+	public static final String NEMGINE_EXCEPTION_SHUTDOWN = "The application has encountered an unexpected exception.";
+	public static final String NEMGINE_EXCEPTION_SHUTDOWN_MORE = "More information can be found in the logs.";
 	
 	// Misc
 	public static final String LOGO_IMAGE_PATH = "com/nemezor/nemgine/resources/logo.png";
@@ -73,7 +73,9 @@ public final class Registry {
 	public static final String TEXTURE_MANAGER_NAME = "Nemgine Texture Manager";
 	public static final String TEXTURE_MANAGER_LOADER_GLOBAL_ERROR = "An error occured while loading textures, aborting";
 	public static final String TEXTURE_MISSING_PATH = "com/nemezor/nemgine/resources/missing.png";
+	public static final String TEXTURE_LOGO_PATH = "com/nemezor/nemgine/resources/logo.png";
 	public static final String TEXTURE_LOADER_MISSING_ERROR = "Failed to load 'invalid' texture!";
+	public static final String TEXTURE_LOADER_LOGO_ERROR = "Failed to load 'logo' texture!";
 	
 	// Shaders
 	public static final String SHADER_EXCEPTION_NO_ACCESSOR = "Anonymous Shader Accessor";
@@ -84,18 +86,24 @@ public final class Registry {
 	public static final String SHADER_LOADER_LOAD_ERROR = "Failed to load shader file!";
 	public static final String SHADER_LOADER_COMPILE_ERROR = "Failed to compile shader program!";
 	public static final String SHADER_LOADER_NAME = "Nemgine Shader Loader";
+	public static final String SHADER_LOGO_VERTEX = "com/nemezor/nemgine/resources/logo.vertex";
+	public static final String SHADER_LOGO_FRAGMENT = "com/nemezor/nemgine/resources/logo.fragment";
+	public static final String SHADER_PROGRESS_BAR_VERTEX = "com/nemezor/nemgine/resources/loader_bar.vertex";
+	public static final String SHADER_PROGRESS_BAR_FRAGMENT = "com/nemezor/nemgine/resources/loader_bar.fragment";
 	
 	// Models
 	public static final String MODEL_LOADER_NOT_FOUND = "Failed to load model!";
 	public static final String MODEL_LOADER_NAME = "Nemgine Model Loader";
 	public static final String MODEL_MANAGER_NAME = "Nemgine Model Manager";
 	public static final String MODEL_MANAGER_LOADER_GLOBAL_ERROR = "An error occured while loading models, aborting";
+	public static final String MODEL_SQUARE = "com/nemezor/nemgine/resources/square.obj";
 	
 	// Loading
 	public static final String LOADING_SCREEN_FONT = "Courier New";
 	public static final String PARAMS_ARG_PREFIX_1 = "-";
 	public static final String PARAMS_ARG_PREFIX_2 = "--";
 	public static final String PARAMS_SEPARATOR = "=";
+	public static final String LOADING_SCREEN_ERROR = "Failed to load resources.";
 	
 	// Network
 	public static final String NETWORK_MANAGER_NAME = "Nemgine Network Manager";

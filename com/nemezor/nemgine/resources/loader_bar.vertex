@@ -1,0 +1,18 @@
+#version 330 core
+
+in vec3 position;
+in vec2 texCoords;
+in vec3 normal;
+
+out float progressOut;
+
+uniform mat4 projection;
+uniform mat4 transformation;
+uniform float progress;
+
+void main() {
+
+	progressOut = progress;
+	vec4 world = projection * (transformation * vec4(position, 1.0));
+	gl_Position = world;
+}

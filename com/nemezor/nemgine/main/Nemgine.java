@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import com.nemezor.nemgine.debug.ImmediateRender;
 import com.nemezor.nemgine.exceptions.ThreadException;
 import com.nemezor.nemgine.graphics.DisplayManager;
 import com.nemezor.nemgine.graphics.FrameBufferManager;
@@ -14,6 +13,7 @@ import com.nemezor.nemgine.graphics.ShaderManager;
 import com.nemezor.nemgine.graphics.TextureManager;
 import com.nemezor.nemgine.misc.InputParams;
 import com.nemezor.nemgine.misc.Logger;
+import com.nemezor.nemgine.misc.Platform;
 import com.nemezor.nemgine.misc.Registry;
 import com.nemezor.nemgine.misc.Side;
 import com.nemezor.nemgine.network.NetworkManager;
@@ -26,6 +26,10 @@ public class Nemgine {
 	private static Runtime runtime = Runtime.getRuntime();
 	private static boolean headless = false;
 
+	protected static boolean hasRenderThread = false;
+	protected static int w, h;
+	protected static String name;
+	
 	private Nemgine() {}
 
 	public static void start(String[] args, Class<?> application) {
@@ -50,17 +54,16 @@ public class Nemgine {
 				}
 				
 				InputParams.resolve(args);
-				int w = InputParams.containsEntry("width") ? InputParams.getInteger("width") : ann.width();
-				int h = InputParams.containsEntry("height") ? InputParams.getInteger("height") : ann.height();
+				w = InputParams.containsEntry("width") ? InputParams.getInteger("width") : ann.width();
+				h = InputParams.containsEntry("height") ? InputParams.getInteger("height") : ann.height();
 				boolean contained = InputParams.containsEntry("contained") ? InputParams.getBoolean("contained") : ann.contained();
 				headless = InputParams.containsEntry("server") ? InputParams.getBoolean("server") : ann.side() == Side.SERVER;
+				name = ann.name();
 				
 				if (!contained) {
 					Logger.initialize(ann.path().endsWith("/") ? ann.path().substring(0, ann.path().length() - 1) : ann.path());
 				}
-				if (!headless) {
-					NemgineLoader.initialize(w, h, ann.name());
-				}
+				Platform.initialize(headless);
 				
 				try {
 					entry.invoke(application.newInstance());
@@ -86,12 +89,7 @@ public class Nemgine {
 				ShaderManager.disposeAll();
 				ModelManager.disposeAll();
 				FrameBufferManager.disposeAll();
-				if (ImmediateRender.isRenderModeImmediate()) {
-					ImmediateRender.dispose();
-				} else {
-					DisplayManager.dispose();
-				}
-				NemgineLoader.dispose();
+				DisplayManager.dispose();
 			}
 			Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_SHUTDOWN_EXIT + exitCode);
 			Logger.close();
@@ -172,7 +170,7 @@ public class Nemgine {
 	}
 
 	public static synchronized boolean bindRenderLoop(int id, IMainRenderLoop loop) {
-		if (Nemgine.getSide() == Side.SERVER) {
+		if (Nemgine.getSide() == Side.SERVER || hasRenderThread) {
 			return false;
 		}
 		BindableThread thread = threadPool.get(id);
@@ -196,6 +194,7 @@ public class Nemgine {
 			return false;
 		}
 		thread.render = loop;
+		hasRenderThread = true;
 		return true;
 	}
 

@@ -2,6 +2,7 @@ package com.nemezor.nemgine.graphics;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -14,6 +15,7 @@ import javax.imageio.ImageIO;
 import org.lwjgl.opengl.GL11;
 
 import com.nemezor.nemgine.exceptions.TextureException;
+import com.nemezor.nemgine.graphics.util.Texture;
 import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.Logger;
 import com.nemezor.nemgine.misc.Registry;
@@ -22,9 +24,9 @@ import com.nemezor.nemgine.misc.Side;
 public class TextureManager {
 
 	private static HashMap<Integer, Texture> textures = new HashMap<Integer, Texture>();
-	private static int invalidTexture = 0;
 	private static int textureCounter = 0;
 	private static int currentTexture = 0;
+	private static int invalidTexture = 0;
 	
 	private TextureManager() {}
 	
@@ -34,6 +36,9 @@ public class TextureManager {
 		}
 		textureCounter++;
 		textures.put(textureCounter, new Texture(Registry.INVALID, Registry.INVALID, Registry.INVALID));
+		if (Loader.loading()) {
+			Loader.textureCounter++;
+		}
 		return textureCounter;
 	}
 	
@@ -107,15 +112,24 @@ public class TextureManager {
 		if (tex == null || tex.id != Registry.INVALID) {
 			return false;
 		}
+		if (Loader.loading()) {
+			Loader.loadingTexture(new File(file).getName());
+		}
 		tex = loadTexture(file);
 		if (tex == null) {
 			TextureException ex = new TextureException(Registry.TEXTURE_MANAGER_LOADER_GLOBAL_ERROR);
 			ex.setThrower(Registry.TEXTURE_MANAGER_NAME);
 			ex.setTextureInfo(file);
 			ex.printStackTrace();
+			if (Loader.loading()) { 
+				Loader.failedToLoadResource(Registry.LOADING_SCREEN_ERROR);
+			}
 			return false;
 		}
 		textures.put(id, tex);
+		if (Loader.loading()) {
+			Loader.textureLoaded();
+		}
 		return true;
 	}
 	
@@ -162,7 +176,7 @@ public class TextureManager {
 		return new Texture(id, w, h);
 	}
 	
-	public static void loadMissingTexture() {
+	protected static int loadMissingTextureAndLogo() {
 		int[] pixels = null;
 		int w = Registry.INVALID;
 		int h = Registry.INVALID;
@@ -197,5 +211,9 @@ public class TextureManager {
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, w, h, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, res);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+
+		int id = generateTextures();
+		initializeTexture(id, Registry.TEXTURE_LOGO_PATH);
+		return id;
 	}
 }

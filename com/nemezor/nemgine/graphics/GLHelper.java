@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import com.nemezor.nemgine.graphics.util.Camera;
 import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.Registry;
 import com.nemezor.nemgine.misc.Side;
@@ -79,6 +80,19 @@ public class GLHelper {
 		mat.m23 = -1.0f;
 		mat.m32 = -(2.0f * zFar * zNear) / zm;
 		mat.m33 = 0.0f;
+		
+		return mat;
+	}
+	
+	public static Matrix4f initOrthographicProjectionMatrix(float left, float right, float top, float bottom, float zNear, float zFar) {
+		Matrix4f mat = new Matrix4f();
+		
+		mat.m00 = 2.0f / (right - left);
+		mat.m11 = 2.0f / (top - bottom);
+		mat.m22 = -2.0f / (zFar - zNear);
+		mat.m30 = -((right + left) / (right - left));
+		mat.m31 = -((top + bottom) / (top - bottom));
+		mat.m32 = -((zFar + zNear) / (zFar - zNear));
 		
 		return mat;
 	}

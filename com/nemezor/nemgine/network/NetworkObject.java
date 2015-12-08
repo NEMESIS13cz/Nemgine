@@ -2,7 +2,7 @@ package com.nemezor.nemgine.network;
 
 public final class NetworkObject {
 
-	private int id;
+	protected int id;
 	
 	protected NetworkObject(int id) {
 		this.id = id;

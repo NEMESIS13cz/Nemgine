@@ -3,7 +3,6 @@ package com.nemezor.nemgine.network;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,15 +13,23 @@ import com.nemezor.nemgine.misc.Side;
 
 public class NetworkManager {
 
-	private static HashMap<Integer, ISocket> sockets = new HashMap<Integer, ISocket>();
 	private static int socketCounter = 0;
+	private static HashMap<Integer, ISocket> sockets = new HashMap<Integer, ISocket>();
 	private static ArrayList<NetworkListener> listeners = new ArrayList<NetworkListener>();
 	protected static ArrayList<NetworkObject> objects = new ArrayList<NetworkObject>();
 	
-	public static synchronized int generateSockets(Side type) {
+	public static synchronized int generateClientSockets(int timeout) {
+		return generateSockets(Side.CLIENT, timeout);
+	}
+	
+	public static synchronized int generateServerSockets() {
+		return generateSockets(Side.SERVER, Registry.INVALID);
+	}
+	
+	public static synchronized int generateSockets(Side type, int timeout) {
 		socketCounter++;
 		if (type == Side.CLIENT) {
-			sockets.put(socketCounter, new Socket(Registry.INVALID));
+			sockets.put(socketCounter, new Socket(Registry.INVALID, timeout));
 		}else{
 			sockets.put(socketCounter, new ServerSocket(Registry.INVALID));
 		}
@@ -33,27 +40,13 @@ public class NetworkManager {
 		if (sockets.get(id) != null && sockets.get(id).getState() != Registry.INVALID) {
 			return false;
 		}
-		try {
-			NetworkObject obj = sockets.get(id).conn(id, address);
-			if (sockets.get(id).type() == Side.CLIENT) {
-				if (obj == null) {
-					return false;
-				}
-				objects.add(obj);
+		NetworkObject obj = sockets.get(id).conn(id, address);
+		if (sockets.get(id).type() == Side.CLIENT) {
+			if (obj == null) {
+				return false;
 			}
-		} catch (UnknownHostException e) {
-			NetworkException ex = new NetworkException(Registry.NETWORK_MANAGER_UNKNOWN_HOST_ERROR);
-			ex.setThrower(Registry.NETWORK_MANAGER_NAME);
-			ex.setAddress(address);
-			ex.printStackTrace();
-			e.printStackTrace();
-			return false;
-		} catch (IOException e) {
-			NetworkException ex = new NetworkException(Registry.NETWORK_MANAGER_IO_ERROR);
-			ex.setThrower(Registry.NETWORK_MANAGER_NAME);
-			ex.setAddress(address);
-			ex.printStackTrace();
-			e.printStackTrace();
+			objects.add(obj);
+		}else if (obj != null && obj.id == Registry.INVALID) {
 			return false;
 		}
 		return true;
@@ -111,22 +104,48 @@ public class NetworkManager {
 	public static synchronized void registerListenerClass(Object listener) {
 		Method[] methods = listener.getClass().getMethods();
 		ArrayList<Method> temp = new ArrayList<Method>();
+		ArrayList<Method> temp2 = new ArrayList<Method>();
+		ArrayList<Method> temp3 = new ArrayList<Method>();
 		for (Method m : methods) {
 			Annotation[] ann = m.getDeclaredAnnotationsByType(Network.class);
 			if (ann.length > 0 && m.getParameterCount() == 2 && m.getParameters()[0].getType() == NetworkObject.class && m.getParameters()[1].getType() == IPacket.class) {
 				temp.add(m);
+			}else if (ann.length > 0 && m.getParameterCount() == 2 && m.getParameters()[0].getType() == NetworkObject.class && m.getParameters()[1].getType() == NetworkInfo.class) {
+				temp2.add(m);
+			}else if (ann.length > 0 && m.getParameterCount() == 1 && m.getParameters()[0].getType() == NetworkObject.class) {
+				temp3.add(m);
 			}
 		}
 		Method[] methods_ = new Method[temp.size()];
 		for (int i = 0; i < methods_.length; i++) {
 			methods_[i] = temp.get(i);
 		}
-		listeners.add(new NetworkListener(listener, methods_));
+		Method[] methods2_ = new Method[temp2.size()];
+		for (int i = 0; i < methods2_.length; i++) {
+			methods2_[i] = temp2.get(i);
+		}
+		Method[] methods3_ = new Method[temp3.size()];
+		for (int i = 0; i < methods3_.length; i++) {
+			methods3_[i] = temp3.get(i);
+		}
+		listeners.add(new NetworkListener(listener, methods_, methods2_, methods3_));
 	}
 	
 	protected static synchronized void callPacketReceivedEvent(NetworkObject netObject, IPacket packet) {
 		for (NetworkListener m : listeners) {
-			m.invoke(netObject, packet);
+			m.invokePacket(netObject, packet);
+		}
+	}
+	
+	protected static synchronized void callInfoEvent(NetworkObject netObject, NetworkInfo info) {
+		for (NetworkListener m : listeners) {
+			m.invokeInfo(netObject, info);
+		}
+	}
+	
+	protected static synchronized void callConnectionEstablishedEvent(NetworkObject netObject) {
+		for (NetworkListener m : listeners) {
+			m.invokeConn(netObject);
 		}
 	}
 }

@@ -1,7 +1,9 @@
 package com.nemezor.nemgine.graphics;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.IntBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -20,6 +22,8 @@ import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import com.nemezor.nemgine.exceptions.ModelException;
+import com.nemezor.nemgine.graphics.util.Model;
+import com.nemezor.nemgine.graphics.util.ModelData;
 import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.Registry;
 import com.nemezor.nemgine.misc.Side;
@@ -28,6 +32,7 @@ public class ModelManager {
 
 	private static HashMap<Integer, Model> models = new HashMap<Integer, Model>();
 	private static int modelCounter = 0;
+	private static int squareModel = 0;
 	
 	private ModelManager() {}
 	
@@ -37,6 +42,9 @@ public class ModelManager {
 		}
 		modelCounter++;
 		models.put(modelCounter, new Model(Registry.INVALID, null, null));
+		if (Loader.loading()) {
+			Loader.modelCounter++;
+		}
 		return modelCounter;
 	}
 	
@@ -137,12 +145,18 @@ public class ModelManager {
 		if (model == null || model.id != Registry.INVALID) {
 			return false;
 		}
+		if (Loader.loading()) {
+			Loader.loadingModel(new File(file).getName());
+		}
 		ModelData data = loadModel(file);
 		if (data == null) {
 			ModelException ex = new ModelException(Registry.MODEL_MANAGER_LOADER_GLOBAL_ERROR);
 			ex.setThrower(Registry.MODEL_MANAGER_NAME);
 			ex.setModelInfo(file);
 			ex.printStackTrace();
+			if (Loader.loading()) {
+				Loader.failedToLoadResource(Registry.LOADING_SCREEN_ERROR);
+			}
 			return false;
 		}
 		
@@ -161,12 +175,19 @@ public class ModelManager {
 		int[] buffers = new int[] {indVBOid, verVBOid, texVBOid, norVBOid};
 		
 		models.put(id, new Model(VAOid, buffers, data));
+		if (Loader.loading()) {
+			Loader.modelLoaded();
+		}
 		return true;
 	}
 	
 	private static ModelData loadModel(String file) {
 		try {
-			BufferedReader reader = Files.newBufferedReader(Paths.get(ClassLoader.getSystemResource(file).getPath()));
+			URL url = ClassLoader.getSystemResource(file);
+			if (url == null) {
+				return null;
+			}
+			BufferedReader reader = Files.newBufferedReader(Paths.get(url.getPath()));
 			
 			String buf = "";
 			ArrayList<Vector3f> vertices = new ArrayList<Vector3f>();
@@ -250,5 +271,16 @@ public class ModelManager {
 		normalsArray[current * 3] = currentNorm.getX();
 		normalsArray[current * 3 + 1] = currentNorm.getY();
 		normalsArray[current * 3 + 2] = currentNorm.getZ();
+	}
+	
+	protected static void initializeSquareModel() {
+		squareModel = generateModels();
+		if (!initializeModel(squareModel, Registry.MODEL_SQUARE)) {
+			Loader.failedToLoadResource(Registry.LOADING_SCREEN_ERROR);
+		}
+	}
+	
+	public static int getSquareModelID() {
+		return squareModel;
 	}
 }

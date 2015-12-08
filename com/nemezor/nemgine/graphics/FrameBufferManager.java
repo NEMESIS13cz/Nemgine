@@ -11,6 +11,7 @@ import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL32;
 
+import com.nemezor.nemgine.graphics.util.FrameBuffer;
 import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.Registry;
 import com.nemezor.nemgine.misc.Side;

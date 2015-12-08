@@ -1,25 +1,25 @@
 package com.nemezor.nemgine.tests.network_test;
 
-import org.lwjgl.LWJGLException;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import com.nemezor.nemgine.console.Console;
 import com.nemezor.nemgine.debug.DebugPacket;
-import com.nemezor.nemgine.graphics.Camera;
 import com.nemezor.nemgine.graphics.DisplayManager;
-import com.nemezor.nemgine.graphics.FrameBuffer;
 import com.nemezor.nemgine.graphics.FrameBufferManager;
 import com.nemezor.nemgine.graphics.GLHelper;
 import com.nemezor.nemgine.graphics.ModelManager;
 import com.nemezor.nemgine.graphics.ShaderManager;
+import com.nemezor.nemgine.graphics.util.Camera;
+import com.nemezor.nemgine.graphics.util.FrameBuffer;
 import com.nemezor.nemgine.main.Application;
 import com.nemezor.nemgine.main.IMainRenderLoop;
 import com.nemezor.nemgine.main.Nemgine;
-import com.nemezor.nemgine.main.NemgineLoader;
-import com.nemezor.nemgine.misc.Side;
+import com.nemezor.nemgine.misc.Logger;
 import com.nemezor.nemgine.network.Address;
 import com.nemezor.nemgine.network.IPacket;
 import com.nemezor.nemgine.network.Network;
+import com.nemezor.nemgine.network.NetworkInfo;
 import com.nemezor.nemgine.network.NetworkManager;
 import com.nemezor.nemgine.network.NetworkObject;
 
@@ -39,21 +39,25 @@ public class NetworkTestClient implements IMainRenderLoop {
 	
 	@Application(name="Network Test - Client", width=800, height=450, path="tests/network", contained=true)
 	public void entry() {
-		NemgineLoader.updateState("Initializing");
 		int thread = Nemgine.generateThreads("Render", true);
 		Nemgine.bindRenderLoop(thread, this);
 		Nemgine.startThread(thread);
 		cam = new Camera(new Vector3f(), new Vector3f());
-		
-		// network init
-		NetworkManager.registerListenerClass(this);
-		int sockId = NetworkManager.generateSockets(Side.CLIENT);
-		NetworkManager.connect(sockId, new Address("localhost", 1338));
 	}
 	
 	@Network
+	public void connectionEstablished(NetworkObject obj) {
+		Logger.log("Connection established!");
+	}
+	
+	@Network
+	public void networkInfo(NetworkObject obj, NetworkInfo info) {
+		Console.out.println(info.getType());
+	}
+
+	@Network
 	public void packetReceived(NetworkObject obj, IPacket packet) {
-		if (packet != null) {
+		if (packet.getClass() == DebugPacket.class) {
 			angle = Integer.valueOf(((DebugPacket)packet).getData());
 		}
 	}
@@ -95,11 +99,10 @@ public class NetworkTestClient implements IMainRenderLoop {
 	
 	@Override
 	public void setUpRender() {
-		try {
-			DisplayManager.initialize(70.0f, 0.002f, 500.0f);
-		} catch (LWJGLException e) {
-			e.printStackTrace();
-		}
+		NetworkManager.registerListenerClass(this);
+		int sockId = NetworkManager.generateClientSockets(3000);
+		NetworkManager.connect(sockId, new Address("192.168.0.17", 1338));
+		DisplayManager.setOpenGLConfiguration(70.0f, 0.002f, 500.0f);
 		frame = FrameBufferManager.generateFrameBuffers();
 		FrameBufferManager.initializeFrameBuffer(frame, 800, 450, true, false, true);
 	}
@@ -111,8 +114,6 @@ public class NetworkTestClient implements IMainRenderLoop {
 	
 	@Override
 	public void loadResources() {
-		NemgineLoader.updateState("Loading Shaders");
-		
 		shader = ShaderManager.generateShaders();
 		ShaderManager.initializeShader(shader, "com/nemezor/nemgine/tests/reflection/vertex.shader", 
 											   "com/nemezor/nemgine/tests/reflection/fragment.shader", 
@@ -140,8 +141,6 @@ public class NetworkTestClient implements IMainRenderLoop {
 		ShaderManager.loadMatrix4(water, "transformation", new Matrix4f());
 		ShaderManager.loadVector3(water, "light", new Vector3f(-50, 30, 10));
 		ShaderManager.unbindShader();
-		
-		NemgineLoader.updateState("Loading Models");
 		
 		model = ModelManager.generateModels();
 		ModelManager.initializeModel(model, "com/nemezor/nemgine/tests/reflection/dragon.obj");
