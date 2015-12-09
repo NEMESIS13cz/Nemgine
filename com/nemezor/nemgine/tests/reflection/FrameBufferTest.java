@@ -90,20 +90,23 @@ public class FrameBufferTest implements IMainRenderLoop {
 	
 	@Override
 	public void loadResources() {
-		try {
-			Thread.sleep(20000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		shader = ShaderManager.generateShaders();
 		logoShader = ShaderManager.generateShaders();
 		water = ShaderManager.generateShaders();
 		model = ModelManager.generateModels();
 		logo = ModelManager.generateModels();
 		square = ModelManager.generateModels();
-		int[] IDs = new int[5000];
-		for (int i = 0; i < IDs.length; i++) {
-			IDs[i] = TextureManager.generateTextures();
+		int[] textureIDs = new int[2000];
+		for (int i = 0; i < textureIDs.length; i++) {
+			textureIDs[i] = TextureManager.generateTextures();
+		}
+		int[] modelIDs = new int[1000];
+		for (int i = 0; i < modelIDs.length; i++) {
+			modelIDs[i] = ModelManager.generateModels();
+		}
+		int[] shaderIDs = new int[1000];
+		for (int i = 0; i < shaderIDs.length; i++) {
+			shaderIDs[i] = ShaderManager.generateShaders();
 		}
 		
 		ShaderManager.initializeShader(shader, "com/nemezor/nemgine/tests/reflection/vertex.shader", 
@@ -136,8 +139,15 @@ public class FrameBufferTest implements IMainRenderLoop {
 		ModelManager.initializeModel(logo, "com/nemezor/nemgine/tests/reflection/nemgine.obj");
 		ModelManager.initializeModel(square, "com/nemezor/nemgine/tests/reflection/square.obj");
 		
-		for (int i = 0; i < 5000; i++) {
-			TextureManager.initializeTexture(IDs[i], "com/nemezor/nemgine/tests/test_images/test_" + i + ".png");
+		for (int i = 0; i < 2000; i++) {
+			TextureManager.initializeTexture(textureIDs[i], "com/nemezor/nemgine/tests/test_images/test_" + i + ".png");
+		}
+		for (int i = 0; i < 1000; i++) {
+			ModelManager.initializeModel(modelIDs[i], "com/nemezor/nemgine/tests/test_models/test_" + i + ".obj");
+		}
+		for (int i = 0; i < 1000; i++) {
+			ShaderManager.initializeShader(shaderIDs[i], "com/nemezor/nemgine/tests/test_shaders/test_" + i + ".vertex", 
+					"com/nemezor/nemgine/tests/test_shaders/test_" + i + ".fragment", new String[] {"projection", "transformation"}, new String[] {"position"}, new int[] {0});
 		}
 	}
 
