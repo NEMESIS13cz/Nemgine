@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -139,11 +140,13 @@ public class TextureManager {
 		int h = Registry.INVALID;
 		
 		try {
-			BufferedImage image = ImageIO.read(ClassLoader.getSystemResourceAsStream(file));
+			InputStream stream = ClassLoader.getSystemResourceAsStream(file);
+			BufferedImage image = ImageIO.read(stream);
 			w = image.getWidth();
 			h = image.getHeight();
 			pixels = new int[w * h];
 			image.getRGB(0, 0, w, h, pixels, 0, w);
+			stream.close();
 		} catch (IOException e) {
 			TextureException ex = new TextureException(Registry.TEXTURE_LOADER_NOT_FOUND);
 			ex.setThrower(Registry.TEXTURE_LOADER_NAME);

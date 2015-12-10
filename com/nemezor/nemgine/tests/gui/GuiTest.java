@@ -1,4 +1,4 @@
-package com.nemezor.nemgine.tests.reflection;
+package com.nemezor.nemgine.tests.gui;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -10,27 +10,29 @@ import com.nemezor.nemgine.graphics.FrameBufferManager;
 import com.nemezor.nemgine.graphics.GLHelper;
 import com.nemezor.nemgine.graphics.ModelManager;
 import com.nemezor.nemgine.graphics.ShaderManager;
+import com.nemezor.nemgine.graphics.TextureManager;
 import com.nemezor.nemgine.graphics.util.Camera;
 import com.nemezor.nemgine.graphics.util.FrameBuffer;
 import com.nemezor.nemgine.main.Application;
 import com.nemezor.nemgine.main.IMainRenderLoop;
 import com.nemezor.nemgine.main.Nemgine;
+import com.nemezor.nemgine.misc.Color;
 
-public class FrameBufferTest implements IMainRenderLoop {
+public class GuiTest implements IMainRenderLoop {
 
 	private int shader;
 	private int logoShader;
 	private int model;
 	private int logo;
 	private int angle = 0;
-	private int square;
 	private int water;
 	private int frame;
 	private int waterLevel = -20;
+	private int testTexture;
 	
 	private Camera cam;
 	
-	@Application(name="FrameBuffer Renderer", width=1280, height=720, path="tests/water", contained=true)
+	@Application(name="Gui Test", width=1280, height=720, path="tests/water", contained=true)
 	public void entry() {
 		int thread = Nemgine.generateThreads("Render", true);
 		Nemgine.bindRenderLoop(thread, this);
@@ -54,6 +56,7 @@ public class FrameBufferTest implements IMainRenderLoop {
 		Camera invertCam = new Camera(new Vector3f(camP.x, waterLevel - camP.y, camP.z), new Vector3f(-camR.x, camR.y, camR.z));
 		Matrix4f logoTransform2 = GLHelper.initTransformationMatrix(invertCam, new Vector3f(-15, 10, -30), new Vector3f((float)Math.toRadians(15 + angle), (float)Math.toRadians(25 + angle), (float)Math.toRadians(15)), new Vector3f(1, 1, 1));
 		Matrix4f transform2 = GLHelper.initTransformationMatrix(invertCam, new Vector3f(0, -5, -25), new Vector3f(0, (float)Math.toRadians(angle), 0), new Vector3f(1, 1, 1));
+		Matrix4f testTransform = GLHelper.initTransformationMatrix(new Vector3f(0.25f, 0.25f, 0), new Vector3f((float)Math.toRadians(90), 0, 0), new Vector3f(0.25f, 1, 0.25f));
 		
 		FrameBufferManager.bindFrameBuffer(frame);
 		
@@ -62,11 +65,12 @@ public class FrameBufferTest implements IMainRenderLoop {
 		ModelManager.finishRendering();
 		
 		FrameBufferManager.unbindFrameBuffer();
-
+		
 		ModelManager.renderModel(model, 0, shader, transform, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
 		ModelManager.renderModel(logo, 0, logoShader, logoTransform, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
-		ModelManager.renderModelWithFrameBufferTexture(square, frame, FrameBuffer.TEXTURE_BUFFER, water, waterTransform, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
+		ModelManager.renderModelWithFrameBufferTexture(ModelManager.getSquareModelID(), frame, FrameBuffer.TEXTURE_BUFFER, water, waterTransform, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
 		
+		ModelManager.renderModelWithColor(ModelManager.getSquareModelID(), testTexture, ShaderManager.getTextureShaderID(), testTransform, GLHelper.initBasicOrthographicProjectionMatrix(), new Color(1, 1, 1, 0.5f), "transformation", "projection", "color");
 		
 		ModelManager.finishRendering();
 		DisplayManager.finishRender();
@@ -94,11 +98,13 @@ public class FrameBufferTest implements IMainRenderLoop {
 		water = ShaderManager.generateShaders();
 		model = ModelManager.generateModels();
 		logo = ModelManager.generateModels();
-		square = ModelManager.generateModels();
+		testTexture = TextureManager.generateTextures();
 	}
 	
 	@Override
 	public void loadResources() {
+		TextureManager.initializeTexture(testTexture, "com/nemezor/nemgine/tests/gui/test_texture.png");
+		
 		ShaderManager.initializeShader(shader, "com/nemezor/nemgine/tests/reflection/vertex.shader", 
 											   "com/nemezor/nemgine/tests/reflection/fragment.shader", 
 											   new String[] {"projection", "transformation", "light"}, 
@@ -127,12 +133,11 @@ public class FrameBufferTest implements IMainRenderLoop {
 		
 		ModelManager.initializeModel(model, "com/nemezor/nemgine/tests/reflection/dragon.obj");
 		ModelManager.initializeModel(logo, "com/nemezor/nemgine/tests/reflection/nemgine.obj");
-		ModelManager.initializeModel(square, "com/nemezor/nemgine/tests/reflection/square.obj");
 	}
 
 	@Override
 	public void updateRenderSecond(int frames, long averageInterval) {
-		DisplayManager.changeTitle("FrameBuffer Renderer | FPS: " + frames + " | AVG: " + averageInterval + "ms");
+		DisplayManager.changeTitle("Gui Test | FPS: " + frames + " | AVG: " + averageInterval + "ms");
 	}
 	
 	@Override
@@ -146,7 +151,7 @@ public class FrameBufferTest implements IMainRenderLoop {
 	}
 	
 	public static void main(String[] args) {
-		Nemgine.start(args, FrameBufferTest.class);
+		Nemgine.start(args, GuiTest.class);
 	}
 
 	////////////////////////////////////

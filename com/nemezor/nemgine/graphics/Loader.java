@@ -30,6 +30,7 @@ public class Loader {
 	private static boolean postinitialized = false;
 	private static boolean isDone = false;
 	private static boolean exit = false;
+	private static boolean loaded = false;
 	private static int logoShader = 0;
 	private static int barShader = 0;
 	private static int texture = 0;
@@ -39,6 +40,8 @@ public class Loader {
 	private static Matrix4f textureTransformation;
 	private static Matrix4f shaderTransformation;
 	private static Matrix4f modelTransformation;
+	private static long frameskip = Registry.ONE_SECOND_IN_MILLIS / Registry.LOADING_SCREEN_REFRESHRATE;
+	private static long lastFrame = 0;
 	
 	protected static int shaderCounter = 0;
 	protected static int modelCounter = 0;
@@ -83,18 +86,20 @@ public class Loader {
 		GLHelper.aspect = (float) Display.getWidth() / (float) Display.getHeight();
 		GLHelper.updatePerspectiveProjection();
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
 		ModelManager.initializeSquareModel();
 		texture = TextureManager.loadMissingTextureAndLogo();
 		logoShader = ShaderManager.loadLogoShaders();
 		barShader = ShaderManager.loadProgressBarShaders();
 		transformation = GLHelper.initTransformationMatrix(new Vector3f(0, 0.1f, 0), new Vector3f(90, 0, 0), new Vector3f(1, 0, 1));
-		textureTransformation = GLHelper.initTransformationMatrix(new Vector3f(0, -0.3f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f, 0, 0.1f));
-		shaderTransformation = GLHelper.initTransformationMatrix(new Vector3f(0, -0.5f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f, 0, 0.1f));
-		modelTransformation = GLHelper.initTransformationMatrix(new Vector3f(0, -0.7f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f, 0, 0.1f));
+		textureTransformation = GLHelper.initTransformationMatrix(new Vector3f(0, 0.3f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f, 0, 0.1f));
+		shaderTransformation = GLHelper.initTransformationMatrix(new Vector3f(0, 0.5f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f, 0, 0.1f));
+		modelTransformation = GLHelper.initTransformationMatrix(new Vector3f(0, 0.7f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f, 0, 0.1f));
 		perspective = GLHelper.initOrthographicProjectionMatrix(-1, 1, 1, -1, -1, 1);
 		postinitialized = true;
 		update();
+		ShaderManager.generateGuiShaderIDs();
 	}
 	
 	public static void finish() {
@@ -109,11 +114,24 @@ public class Loader {
 			Display.setDisplayMode(new DisplayMode(appW, appH));
 		} catch (LWJGLException e) {}
 		Display.setResizable(true);
+		DisplayManager.reinitializeOpenGL();
 		frame.dispose();
 		isDone = true;
 	}
 	
+	public static void loadDefaultResources() {
+		if (loaded) {
+			return;
+		}
+		ShaderManager.loadGuiShaders();
+		
+		loaded = true;
+	}
+	
 	private static void update() {
+		if (lastFrame + frameskip > System.currentTimeMillis()) {
+			return;
+		}
 		textureTransformation = GLHelper.initTransformationMatrix(new Vector3f(-0.8f + (0.8f * (float)textureProgress / (float)textureCounter), -0.3f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f * (float)textureProgress / (float)textureCounter, 0, 0.1f));
 		shaderTransformation = GLHelper.initTransformationMatrix(new Vector3f(-0.8f + (0.8f * (float)shaderProgress / (float)shaderCounter), -0.5f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f * (float)shaderProgress / (float)shaderCounter, 0, 0.1f));
 		modelTransformation = GLHelper.initTransformationMatrix(new Vector3f(-0.8f + (0.8f * (float)modelProgress / (float)modelCounter), -0.7f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f * (float)modelProgress / (float)modelCounter, 0, 0.1f));
@@ -129,6 +147,7 @@ public class Loader {
 		
 		ModelManager.finishRendering();
 		DisplayManager.finishRender();
+		lastFrame = System.currentTimeMillis();
 	}
 	
 	protected static void loadingTexture(String name) {

@@ -35,6 +35,9 @@ public class ShaderManager {
 	private static int currentShader = 0;
 	private static Shader currentShaderData = null;
 	
+	private static int guiShaderColored;
+	private static int guiShaderTextured;
+	
 	private ShaderManager() {}
 
 	public static synchronized int generateShaders() {
@@ -275,5 +278,23 @@ public class ShaderManager {
 		int id = generateShaders();
 		initializeShader(id, Registry.SHADER_PROGRESS_BAR_VERTEX, Registry.SHADER_PROGRESS_BAR_FRAGMENT, new String[] {"projection", "transformation", "progress"}, new String[] {"position"}, new int[] {0});
 		return id;
+	}
+	
+	protected static void generateGuiShaderIDs() {
+		guiShaderColored = generateShaders();
+		guiShaderTextured = generateShaders();
+	}
+	
+	protected static void loadGuiShaders() {
+		initializeShader(guiShaderColored, Registry.GUI_COLORED_SHADER_VERTEX, Registry.GUI_COLORED_SHADER_FRAGMENT, new String[] {"projection", "transformation", "color"}, new String[] {"position"}, new int[] {0});
+		initializeShader(guiShaderTextured, Registry.GUI_TEXTURED_SHADER_VERTEX, Registry.GUI_TEXTURED_SHADER_FRAGMENT, new String[] {"projection", "transformation", "color"}, new String[] {"position"}, new int[] {0});
+	}
+	
+	public static int getColorShaderID() {
+		return guiShaderColored;
+	}
+	
+	public static int getTextureShaderID() {
+		return guiShaderTextured;
 	}
 }

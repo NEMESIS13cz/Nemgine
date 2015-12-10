@@ -1,29 +1,19 @@
-package com.nemezor.nemgine.tests.network_test;
+package com.nemezor.nemgine.tests.loading;
 
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-import com.nemezor.nemgine.console.Console;
-import com.nemezor.nemgine.debug.DebugPacket;
 import com.nemezor.nemgine.graphics.DisplayManager;
-import com.nemezor.nemgine.graphics.FrameBufferManager;
 import com.nemezor.nemgine.graphics.GLHelper;
 import com.nemezor.nemgine.graphics.ModelManager;
 import com.nemezor.nemgine.graphics.ShaderManager;
+import com.nemezor.nemgine.graphics.TextureManager;
 import com.nemezor.nemgine.graphics.util.Camera;
-import com.nemezor.nemgine.graphics.util.FrameBuffer;
 import com.nemezor.nemgine.main.Application;
 import com.nemezor.nemgine.main.IMainRenderLoop;
 import com.nemezor.nemgine.main.Nemgine;
-import com.nemezor.nemgine.misc.Logger;
-import com.nemezor.nemgine.network.Address;
-import com.nemezor.nemgine.network.IPacket;
-import com.nemezor.nemgine.network.Network;
-import com.nemezor.nemgine.network.NetworkInfo;
-import com.nemezor.nemgine.network.NetworkManager;
-import com.nemezor.nemgine.network.NetworkObject;
 
-public class NetworkTestClient implements IMainRenderLoop {
+public class LoaderTest implements IMainRenderLoop {
 
 	private int shader;
 	private int logoShader;
@@ -31,35 +21,19 @@ public class NetworkTestClient implements IMainRenderLoop {
 	private int logo;
 	private int angle = 0;
 	private int square;
-	private int water;
-	private int frame;
-	private int waterLevel = -20;
 	
 	private Camera cam;
+
+	int[] textureIDs = new int[2000];
+	int[] modelIDs = new int[1000];
+	int[] shaderIDs = new int[1000];
 	
-	@Application(name="Network Test - Client", width=800, height=450, path="tests/network", contained=true)
+	@Application(name="Loader Test", width=1280, height=720, path="tests/water", contained=true)
 	public void entry() {
 		int thread = Nemgine.generateThreads("Render", true);
 		Nemgine.bindRenderLoop(thread, this);
 		Nemgine.startThread(thread);
 		cam = new Camera(new Vector3f(), new Vector3f());
-	}
-	
-	@Network
-	public void connectionEstablished(NetworkObject obj) {
-		Logger.log("Connection established!");
-	}
-	
-	@Network
-	public void networkInfo(NetworkObject obj, NetworkInfo info) {
-		Console.out.println(info.getType());
-	}
-
-	@Network
-	public void packetReceived(NetworkObject obj, IPacket packet) {
-		if (packet.getClass() == DebugPacket.class) {
-			angle = Integer.valueOf(((DebugPacket)packet).getData());
-		}
 	}
 	
 	@Override
@@ -72,39 +46,19 @@ public class NetworkTestClient implements IMainRenderLoop {
 		
 		Matrix4f transform = GLHelper.initTransformationMatrix(cam, new Vector3f(0, -5, -25), new Vector3f(0, (float)Math.toRadians(angle), 0), new Vector3f(1, 1, 1));
 		Matrix4f logoTransform = GLHelper.initTransformationMatrix(cam, new Vector3f(-15, 10, -30), new Vector3f((float)Math.toRadians(15 + angle), (float)Math.toRadians(25 + angle), (float)Math.toRadians(15)), new Vector3f(1, 1, 1));
-		Matrix4f waterTransform = GLHelper.initTransformationMatrix(cam, new Vector3f(0, waterLevel, -25), new Vector3f(), new Vector3f(100, 1, 100));
-		Vector3f camP = cam.getPosition();
-		Vector3f camR = cam.getRotation();
-		Camera invertCam = new Camera(new Vector3f(camP.x, waterLevel - camP.y, camP.z), new Vector3f(-camR.x, camR.y, camR.z));
-		Matrix4f logoTransform2 = GLHelper.initTransformationMatrix(invertCam, new Vector3f(-15, 10, -30), new Vector3f((float)Math.toRadians(15 + angle), (float)Math.toRadians(25 + angle), (float)Math.toRadians(15)), new Vector3f(1, 1, 1));
-		Matrix4f transform2 = GLHelper.initTransformationMatrix(invertCam, new Vector3f(0, -5, -25), new Vector3f(0, (float)Math.toRadians(angle), 0), new Vector3f(1, 1, 1));
-		
-		FrameBufferManager.bindFrameBuffer(frame);
-		
-		ModelManager.renderModel(model, 0, shader, transform2, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
-		ModelManager.renderModel(logo, 0, logoShader, logoTransform2, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
-		ModelManager.finishRendering();
-		
-		FrameBufferManager.unbindFrameBuffer();
 
 		ModelManager.renderModel(model, 0, shader, transform, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
 		ModelManager.renderModel(logo, 0, logoShader, logoTransform, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
-		ModelManager.renderModelWithFrameBufferTexture(square, frame, FrameBuffer.TEXTURE_BUFFER, water, waterTransform, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
-		
-		
+
 		ModelManager.finishRendering();
-		
 		DisplayManager.finishRender();
+		angle++;
 	}
 	
 	@Override
 	public void setUpRender() {
-		NetworkManager.registerListenerClass(this);
-		int sockId = NetworkManager.generateClientSockets(3000);
-		NetworkManager.connect(sockId, new Address("localhost", 1338));
+		System.gc();
 		DisplayManager.setOpenGLConfiguration(70.0f, 0.002f, 500.0f);
-		frame = FrameBufferManager.generateFrameBuffers();
-		FrameBufferManager.initializeFrameBuffer(frame, 800, 450, true, false, true);
 	}
 
 	@Override
@@ -116,10 +70,18 @@ public class NetworkTestClient implements IMainRenderLoop {
 	public void generateResources() {
 		shader = ShaderManager.generateShaders();
 		logoShader = ShaderManager.generateShaders();
-		water = ShaderManager.generateShaders();
 		model = ModelManager.generateModels();
 		logo = ModelManager.generateModels();
 		square = ModelManager.generateModels();
+		for (int i = 0; i < textureIDs.length; i++) {
+			textureIDs[i] = TextureManager.generateTextures();
+		}
+		for (int i = 0; i < modelIDs.length; i++) {
+			modelIDs[i] = ModelManager.generateModels();
+		}
+		for (int i = 0; i < shaderIDs.length; i++) {
+			shaderIDs[i] = ShaderManager.generateShaders();
+		}
 	}
 	
 	@Override
@@ -132,10 +94,7 @@ public class NetworkTestClient implements IMainRenderLoop {
 												   "com/nemezor/nemgine/tests/reflection/logo.fragment", 
 												   new String[] {"projection", "transformation"}, 
 												   new String[] {"position"}, new int[] {0});
-		ShaderManager.initializeShader(water, "com/nemezor/nemgine/tests/reflection/reflection.vertex", 
-											   "com/nemezor/nemgine/tests/reflection/reflection.fragment", 
-											   new String[] {"projection", "transformation", "light"}, 
-											   new String[] {"position", "normal"}, new int[] {0, 2});
+		
 		ShaderManager.bindShader(shader);
 		ShaderManager.loadMatrix4(shader, "projection", GLHelper.getCurrentPerspectiveProjectionMatrix());
 		ShaderManager.loadMatrix4(shader, "transformation", new Matrix4f());
@@ -143,20 +102,27 @@ public class NetworkTestClient implements IMainRenderLoop {
 		ShaderManager.bindShader(logoShader);
 		ShaderManager.loadMatrix4(logoShader, "projection", GLHelper.getCurrentPerspectiveProjectionMatrix());
 		ShaderManager.loadMatrix4(logoShader, "transformation", new Matrix4f());
-		ShaderManager.bindShader(water);
-		ShaderManager.loadMatrix4(water, "projection", GLHelper.getCurrentPerspectiveProjectionMatrix());
-		ShaderManager.loadMatrix4(water, "transformation", new Matrix4f());
-		ShaderManager.loadVector3(water, "light", new Vector3f(-50, 30, 10));
 		ShaderManager.unbindShader();
-
+		
 		ModelManager.initializeModel(model, "com/nemezor/nemgine/tests/reflection/dragon.obj");
 		ModelManager.initializeModel(logo, "com/nemezor/nemgine/tests/reflection/nemgine.obj");
 		ModelManager.initializeModel(square, "com/nemezor/nemgine/tests/reflection/square.obj");
+		
+		for (int i = 0; i < 1000; i++) {
+			ModelManager.initializeModel(modelIDs[i], "com/nemezor/nemgine/tests/test_models/test_" + i + ".obj");
+		}
+		for (int i = 0; i < 1000; i++) {
+			ShaderManager.initializeShader(shaderIDs[i], "com/nemezor/nemgine/tests/test_shaders/test_" + i + ".vertex", 
+					"com/nemezor/nemgine/tests/test_shaders/test_" + i + ".fragment", new String[] {"projection", "transformation"}, new String[] {"position"}, new int[] {0});
+		}
+		for (int i = 0; i < 2000; i++) {
+			TextureManager.initializeTexture(textureIDs[i], "com/nemezor/nemgine/tests/test_images/test_" + i + ".png");
+		}
 	}
 
 	@Override
 	public void updateRenderSecond(int frames, long averageInterval) {
-		DisplayManager.changeTitle("Network Test - Client | FPS: " + frames + " | AVG: " + averageInterval + "ms");
+		DisplayManager.changeTitle("FrameBuffer Renderer | FPS: " + frames + " | AVG: " + averageInterval + "ms");
 	}
 	
 	@Override
@@ -170,6 +136,6 @@ public class NetworkTestClient implements IMainRenderLoop {
 	}
 	
 	public static void main(String[] args) {
-		Nemgine.start(args, NetworkTestClient.class);
+		Nemgine.start(args, LoaderTest.class);
 	}
 }

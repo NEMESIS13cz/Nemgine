@@ -23,7 +23,6 @@ public class Nemgine {
 	private static HashMap<Integer, BindableThread> threadPool = new HashMap<Integer, BindableThread>();
 	private static int threadCounter = 0;
 	private static boolean isRunning = true;
-	private static Runtime runtime = Runtime.getRuntime();
 	private static boolean headless = false;
 
 	protected static boolean hasRenderThread = false;
@@ -229,30 +228,6 @@ public class Nemgine {
 
 	private static synchronized void setStopping() {
 		isRunning = false;
-	}
-
-	public static int cpuCores() {
-		return runtime.availableProcessors();
-	}
-
-	public static long allocatedMemory() {
-		return runtime.totalMemory();
-	}
-
-	public static long maximumMemory() {
-		return runtime.maxMemory();
-	}
-
-	public static long freeMemory() {
-		return runtime.freeMemory();
-	}
-
-	public static long usedMemory() {
-		return runtime.totalMemory() - runtime.freeMemory();
-	}
-
-	public static void freeUpMemory() {
-		runtime.gc();
 	}
 	
 	public static Side getSide() {

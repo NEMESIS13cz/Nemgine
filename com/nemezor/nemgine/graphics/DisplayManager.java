@@ -16,7 +16,7 @@ public class DisplayManager {
 		GLHelper.zNear = zNear;
 	}
 
-	private static void reinitializeOpenGL() {
+	protected static void reinitializeOpenGL() {
 		if (Nemgine.getSide() == Side.CLIENT) {
 			GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
 			GLHelper.aspect = (float) Display.getWidth() / (float) Display.getHeight();
@@ -58,5 +58,13 @@ public class DisplayManager {
 		if (Nemgine.getSide() == Side.CLIENT) {
 			Display.setTitle(newTitle);
 		}
+	}
+	
+	public static void enableBlending() {
+		GL11.glEnable(GL11.GL_BLEND);
+	}
+	
+	public static void disableBlending() {
+		GL11.glDisable(GL11.GL_BLEND);
 	}
 }

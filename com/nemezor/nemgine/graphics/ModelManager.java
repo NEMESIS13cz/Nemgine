@@ -25,6 +25,7 @@ import com.nemezor.nemgine.exceptions.ModelException;
 import com.nemezor.nemgine.graphics.util.Model;
 import com.nemezor.nemgine.graphics.util.ModelData;
 import com.nemezor.nemgine.main.Nemgine;
+import com.nemezor.nemgine.misc.Color;
 import com.nemezor.nemgine.misc.Registry;
 import com.nemezor.nemgine.misc.Side;
 
@@ -77,6 +78,18 @@ public class ModelManager {
 		models.clear();
 	}
 	
+	public static void renderModelWithColor(int id, int textureID, int shaderID, Matrix4f transformation, Matrix4f projection, Color color, String transformationAttribName, String projectionAttribName, String colorAttribName) {
+		if (color.getAlpha() != 1.0f) {
+			DisplayManager.enableBlending();
+		}
+		ShaderManager.bindShader(shaderID);
+		ShaderManager.loadVector4(shaderID, colorAttribName, color.getColorAsVector());
+		renderModel(id, textureID, shaderID, transformation, projection, transformationAttribName, projectionAttribName);
+		if (color.getAlpha() != 1.0f) {
+			DisplayManager.disableBlending();
+		}
+	}
+	
 	public static void renderModelWithFrameBufferTexture(int id, int frameBuffer, int texture, int shaderID, Matrix4f transformation, Matrix4f projection, String transformationAttribName, String projectionAttribName) {
 		Model model = models.get(id);
 		if (model == null || model.id == Registry.INVALID) {
@@ -99,6 +112,7 @@ public class ModelManager {
 		GL20.glDisableVertexAttribArray(0);
 		if (model.isTextured()) {
 			GL20.glDisableVertexAttribArray(1);
+			FrameBufferManager.unbindFrameBufferTexture();
 		}
 		GL20.glDisableVertexAttribArray(2);
 		GL30.glBindVertexArray(0);

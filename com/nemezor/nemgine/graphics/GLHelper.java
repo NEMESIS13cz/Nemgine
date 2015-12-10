@@ -97,6 +97,10 @@ public class GLHelper {
 		return mat;
 	}
 	
+	public static Matrix4f initBasicOrthographicProjectionMatrix() {
+		return initOrthographicProjectionMatrix(0, 1, 0, 1, -1, 1);
+	}
+	
 	public static int createBufferAndStore(int attrNum, int size, float[] data) {
 		if (Nemgine.getSide() == Side.SERVER) {
 			return Registry.INVALID;

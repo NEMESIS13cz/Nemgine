@@ -33,6 +33,8 @@ public class BindableThread extends Thread {
 			Loader.initialize(Nemgine.w, Nemgine.h, Nemgine.name, attribs);
 			render.setUpRender();
 			Loader.postInitialize();
+			render.generateResources();
+			Loader.loadDefaultResources();
 			render.loadResources();
 		}
 		

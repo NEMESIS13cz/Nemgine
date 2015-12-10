@@ -8,6 +8,8 @@ public interface IMainRenderLoop {
 	
 	public abstract void cleanUpRender();
 	
+	public abstract void generateResources();
+	
 	public abstract void loadResources();
 	
 	public abstract void updateRenderSecond(int frames, long averageInterval);

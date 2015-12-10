@@ -11,6 +11,7 @@ public final class Registry {
 	// Misc
 	public static final int ONE_SECOND_IN_MILLIS = 1000;
 	public static final int INVALID = -1;
+	public static final int COLOR_NORMALIZER_VALUE = 255;
 	
 	// Threads
 	public static final int DEFAULT_FRAMESKIP_TRESHOLD = 5;
@@ -28,6 +29,7 @@ public final class Registry {
 	public static final int LOADING_SCREEN_FONT_Y = 340;
 	public static final int LOADING_SCREEN_FONT_PROPERTIES = Font.BOLD;
 	public static final int LOADING_SCREEN_FONT_COLOR = 0x6a9df9;
+	public static final int LOADING_SCREEN_REFRESHRATE = 60;
 	
 	// Network
 	public static final int IP_ADDRESS_MAXIMUM_PORT_VALUE = 65535;
@@ -45,10 +47,15 @@ public final class Registry {
 	public static final String NEMGINE_EXECUTION_FAIL = "Application execution failed!";
 	public static final String NEMGINE_EXCEPTION_SHUTDOWN = "The application has encountered an unexpected exception.";
 	public static final String NEMGINE_EXCEPTION_SHUTDOWN_MORE = "More information can be found in the logs.";
+	public static final String NEMGINE_OPENGL_VERSION_OUT_OF_DATE = "Your OpenGL version is not sufficient to run Nemgine.";
 	
 	// Misc
 	public static final String LOGO_IMAGE_PATH = "com/nemezor/nemgine/resources/logo.png";
 	public static final String LOGO_IMAGE_LOAD_ERROR = "Failed to load logo image!";
+	public static final String GUI_COLORED_SHADER_FRAGMENT = "com/nemezor/nemgine/resources/gui_colored.fragment";
+	public static final String GUI_COLORED_SHADER_VERTEX = "com/nemezor/nemgine/resources/gui_colored.vertex";
+	public static final String GUI_TEXTURED_SHADER_FRAGMENT = "com/nemezor/nemgine/resources/gui_textured.fragment";
+	public static final String GUI_TEXTURED_SHADER_VERTEX = "com/nemezor/nemgine/resources/gui_textured.vertex";
 	
 	// Logging
 	public static final String LOG_FILE_PATH = "/logs";
