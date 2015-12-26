@@ -98,21 +98,13 @@ public class Nemgine {
 	}
 
 	public static boolean threadsRunning() {
-		BindableThread[] threads = new BindableThread[threadPool.size()];
-		int index = 0;
 		Iterator<Integer> keys = threadPool.keySet().iterator();
 		while (keys.hasNext()) {
-			threads[index] = threadPool.get(keys.next());
-			index++;
-		}
-		boolean repeat = false;
-		for (BindableThread thread : threads) {
-			if (thread.isAlive()) {
-				repeat = true;
-				break;
+			if (threadPool.get(keys.next()).isAlive()) {
+				return true;
 			}
 		}
-		return repeat;
+		return false;
 	}
 
 	public static synchronized void stopThread(int id) {

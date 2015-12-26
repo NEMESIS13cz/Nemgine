@@ -18,7 +18,7 @@ public class Logger {
 	private static boolean initialized = false;
 	private static FileWriter writer;
 	private static String lastDate;
-	private static int fileNum = 2;
+	private static int fileNum = 1;
 	private static String appFile;
 	
 	public static void initialize(String appFilePath) {
@@ -27,7 +27,7 @@ public class Logger {
 		File dir = new File(path);
 		String curr = getCurrentLogName();
 		lastDate = getCurrentLogName();
-		File file = new File(path + "/" + curr + ".1" + Registry.LOG_FILE_FORMAT);
+		File file = new File(path + "/" + curr + "." + fileNum + Registry.LOG_FILE_FORMAT);
 		if (!dir.exists()) {
 			dir.mkdirs();
 		}
@@ -39,8 +39,8 @@ public class Logger {
 			}
 		}else{
 			while (file.exists()) {
-				file = new File(path + "/" + curr + "." + fileNum + Registry.LOG_FILE_FORMAT);
 				fileNum++;
+				file = new File(path + "/" + curr + "." + fileNum + Registry.LOG_FILE_FORMAT);
 			}
 			try {
 				file.createNewFile();

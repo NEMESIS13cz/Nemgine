@@ -3,10 +3,9 @@ package com.nemezor.nemgine.graphics;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.FloatBuffer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -236,11 +235,11 @@ public class ShaderManager {
 	private static int loadShader(String file, EnumShaderType type) {
 		StringBuilder shaderSrc = new StringBuilder();
 		try {
-			URL url = ClassLoader.getSystemResource(file);
-			if (url == null) {
+			InputStream stream = Nemgine.class.getResourceAsStream("/" + file);
+			if (stream == null) {
 				return Registry.INVALID;
 			}
-			BufferedReader reader = Files.newBufferedReader(Paths.get(url.getPath()));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 			String line;
 			while ((line = reader.readLine()) != null) {
 				shaderSrc.append(line).append("\n");

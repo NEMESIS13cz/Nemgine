@@ -140,7 +140,7 @@ public class TextureManager {
 		int h = Registry.INVALID;
 		
 		try {
-			InputStream stream = ClassLoader.getSystemResourceAsStream(file);
+			InputStream stream = Nemgine.class.getResourceAsStream("/" + file);
 			BufferedImage image = ImageIO.read(stream);
 			w = image.getWidth();
 			h = image.getHeight();
@@ -185,11 +185,13 @@ public class TextureManager {
 		int h = Registry.INVALID;
 		
 		try {
-			BufferedImage image = ImageIO.read(ClassLoader.getSystemResourceAsStream(Registry.TEXTURE_MISSING_PATH));
+			InputStream stream = Nemgine.class.getResourceAsStream("/" + Registry.TEXTURE_MISSING_PATH);
+			BufferedImage image = ImageIO.read(stream);
 			w = image.getWidth();
 			h = image.getHeight();
 			pixels = new int[w * h];
 			image.getRGB(0, 0, w, h, pixels, 0, w);
+			stream.close();
 		} catch (IOException e) {
 			Logger.log(Registry.NEMGINE_NAME, Registry.TEXTURE_LOADER_MISSING_ERROR);
 			System.exit(Registry.INVALID);

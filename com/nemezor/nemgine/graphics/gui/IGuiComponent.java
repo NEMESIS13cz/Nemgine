@@ -10,6 +10,8 @@ public interface IGuiComponent {
 	
 	public void initialize();
 	
+	public void resize();
+	
 	public RenderAttributes getRenderAttributes();
 	
 	public void dispose();

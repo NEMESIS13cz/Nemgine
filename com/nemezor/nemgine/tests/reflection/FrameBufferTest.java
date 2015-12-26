@@ -62,7 +62,7 @@ public class FrameBufferTest implements IMainRenderLoop {
 		ModelManager.finishRendering();
 		
 		FrameBufferManager.unbindFrameBuffer();
-
+		
 		ModelManager.renderModel(model, 0, shader, transform, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
 		ModelManager.renderModel(logo, 0, logoShader, logoTransform, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
 		ModelManager.renderModelWithFrameBufferTexture(square, frame, FrameBuffer.TEXTURE_BUFFER, water, waterTransform, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
@@ -126,6 +126,7 @@ public class FrameBufferTest implements IMainRenderLoop {
 		ShaderManager.unbindShader();
 		
 		ModelManager.initializeModel(model, "com/nemezor/nemgine/tests/reflection/dragon.obj");
+		ModelManager.initializeModel(model, "com/nemezor/nemgine/tests/imperator.obj");
 		ModelManager.initializeModel(logo, "com/nemezor/nemgine/tests/reflection/nemgine.obj");
 		ModelManager.initializeModel(square, "com/nemezor/nemgine/tests/reflection/square.obj");
 	}

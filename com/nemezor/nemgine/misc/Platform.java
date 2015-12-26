@@ -17,6 +17,7 @@ public class Platform {
 	private static String openGLRenderer;
 	private static String[] openGLExtensions;
 	private static int openGLVersion = Registry.INVALID;
+	private static int openGLTextureSize = Registry.INVALID;
 	
 	private static Runtime runtime = Runtime.getRuntime();
 	
@@ -43,6 +44,7 @@ public class Platform {
 			openGLVendor = GL11.glGetString(GL11.GL_VENDOR);
 			openGLRenderer = GL11.glGetString(GL11.GL_RENDERER);
 			openGLExtensions = GL11.glGetString(GL11.GL_EXTENSIONS).split(" ");
+			openGLTextureSize = GL11.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE);
 			
 			gl.destroy();
 		} catch (LWJGLException e) {
@@ -64,6 +66,10 @@ public class Platform {
 
 	public static String[] getOpenGLExtensions() {
 		return openGLExtensions.clone();
+	}
+	
+	public static int getOpenGLTextureSize() {
+		return openGLTextureSize;
 	}
 	
 	public static String getOperatingSystem() {

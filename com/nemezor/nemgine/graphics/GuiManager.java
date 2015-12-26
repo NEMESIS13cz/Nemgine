@@ -81,7 +81,7 @@ public class GuiManager {
 			currentGui = null;
 		}
 		Iterator<Integer> iter = guis.keySet().iterator();
-		
+	
 		while (iter.hasNext()) {
 			Gui gui = guis.get(iter.next());
 			if (gui == null) {

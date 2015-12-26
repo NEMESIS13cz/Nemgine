@@ -1,6 +1,7 @@
 package com.nemezor.nemgine.tests.network_test;
 
 import com.nemezor.nemgine.console.Console;
+import com.nemezor.nemgine.console.Input;
 import com.nemezor.nemgine.debug.DebugPacket;
 import com.nemezor.nemgine.main.Application;
 import com.nemezor.nemgine.main.IMainTickLoop;
@@ -27,6 +28,13 @@ public class NetworkTestServer implements IMainTickLoop {
 	
 	public static void main(String[] args) {
 		Nemgine.start(args, NetworkTestServer.class);
+	}
+	
+	@Input
+	public void consoleInput(String input) {
+		if (input.equals("exit")) {
+			Nemgine.shutDown();
+		}
 	}
 	
 	@Network
@@ -62,6 +70,7 @@ public class NetworkTestServer implements IMainTickLoop {
 	@Override
 	public void setUpTick() {
 		NetworkManager.registerListenerClass(this);
+		Console.registerInputListener(this);
 		int sock = NetworkManager.generateServerSockets();
 		if (NetworkManager.connect(sock, new Address(null, 1338))) {
 			Logger.log("Bleh");

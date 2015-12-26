@@ -3,10 +3,9 @@ package com.nemezor.nemgine.graphics;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.IntBuffer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -155,6 +154,14 @@ public class ModelManager {
 	}
 	
 	public static boolean initializeModel(int id, String file) {
+		return initializeModelInternal(id, file, true);
+	}
+	
+	public static boolean initializeModelForceNoTexture(int id, String file) {
+		return initializeModelInternal(id, file, false);
+	}
+	
+	private static boolean initializeModelInternal(int id, String file, boolean textured) {
 		Model model = models.get(id);
 		if (model == null || model.id != Registry.INVALID) {
 			return false;
@@ -162,7 +169,7 @@ public class ModelManager {
 		if (Loader.loading()) {
 			Loader.loadingModel(new File(file).getName());
 		}
-		ModelData data = loadModel(file);
+		ModelData data = loadModel(file, textured);
 		if (data == null) {
 			ModelException ex = new ModelException(Registry.MODEL_MANAGER_LOADER_GLOBAL_ERROR);
 			ex.setThrower(Registry.MODEL_MANAGER_NAME);
@@ -195,15 +202,16 @@ public class ModelManager {
 		return true;
 	}
 	
-	private static ModelData loadModel(String file) {
+	private static ModelData loadModel(String file, boolean textured) {
 		try {
-			URL url = ClassLoader.getSystemResource(file);
-			if (url == null) {
+			InputStream stream = Nemgine.class.getResourceAsStream("/" + file);
+			if (stream == null) {
 				return null;
 			}
-			BufferedReader reader = Files.newBufferedReader(Paths.get(url.getPath()));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 			
-			String buf = "";
+			String buffer = "";
+			ArrayList<String> lines = new ArrayList<String>();
 			ArrayList<Vector3f> vertices = new ArrayList<Vector3f>();
 			ArrayList<Vector2f> textures = new ArrayList<Vector2f>();
 			ArrayList<Vector3f> normals = new ArrayList<Vector3f>();
@@ -213,8 +221,16 @@ public class ModelManager {
 			float[] normalsArray = null;
 			int[] indicesArray = null;
 			
-			while (true) {
-				buf = reader.readLine();
+			while (buffer != null) {
+				buffer = reader.readLine();
+				lines.add(buffer);
+			}
+			reader.close();
+			
+			for (String buf : lines) {
+				if (buf == null) {
+					continue;
+				}
 				String[] current = buf.split(" ");
 				
 				if (buf.startsWith("v ")) {
@@ -226,16 +242,14 @@ public class ModelManager {
 				}else if (buf.startsWith("vn ")) {
 					Vector3f normal = new Vector3f(Float.parseFloat(current[1]), Float.parseFloat(current[2]), Float.parseFloat(current[3]));
 					normals.add(normal);
-				}else if (buf.startsWith("f ")) {
-					texturesArray = new float[vertices.size() * 2];
-					normalsArray = new float[vertices.size() * 3];
-					break;
 				}
 			}
 			
-			while (buf != null) {
-				if (!buf.startsWith("f ")) {
-					buf = reader.readLine();
+			texturesArray = new float[vertices.size() * 2];
+			normalsArray = new float[vertices.size() * 3];
+
+			for (String buf : lines) {
+				if (buf == null || !buf.startsWith("f ")) {
 					continue;
 				}
 				String[] current = buf.split(" ");
@@ -243,13 +257,10 @@ public class ModelManager {
 				String[] vertex2 = current[2].split("/");
 				String[] vertex3 = current[3].split("/");
 				
-				processVertex(vertex1, indices, textures, normals, texturesArray, normalsArray);
-				processVertex(vertex2, indices, textures, normals, texturesArray, normalsArray);
-				processVertex(vertex3, indices, textures, normals, texturesArray, normalsArray);
-				buf = reader.readLine();
+				processVertex(vertex1, indices, textures, normals, texturesArray, normalsArray, textured);
+				processVertex(vertex2, indices, textures, normals, texturesArray, normalsArray, textured);
+				processVertex(vertex3, indices, textures, normals, texturesArray, normalsArray, textured);
 			}
-			
-			reader.close();
 			
 			verticesArray = new float[vertices.size() * 3];
 			indicesArray = new int[indices.size()];
@@ -273,15 +284,18 @@ public class ModelManager {
 		}
 	}
 	
-	private static void processVertex(String[] vertexData, ArrayList<Integer> indices, ArrayList<Vector2f> textures, ArrayList<Vector3f> normals, float[] textureArray, float[] normalsArray) {
+	private static void processVertex(String[] vertexData, ArrayList<Integer> indices, ArrayList<Vector2f> textures, ArrayList<Vector3f> normals, float[] textureArray, float[] normalsArray, boolean textured) {
 		int current = vertexData[0].equals("") ? 0 : (Integer.parseInt(vertexData[0]) - 1);
 		indices.add(current);
-		if (textures.size() > 0) {
+		if (textures.size() > 0 && textured) {
 			Vector2f currentTex = textures.get(vertexData[1].equals("") ? 0 : (Integer.parseInt(vertexData[1]) - 1));
 			textureArray[current * 2] = currentTex.getX();
 			textureArray[current * 2 + 1] = 1 - currentTex.getY();
 		}
-		Vector3f currentNorm = normals.get(vertexData[2].equals("") ? 0 : (Integer.parseInt(vertexData[2]) - 1));
+		if (normals.size() == 0) {
+			return;
+		}
+		Vector3f currentNorm = normals.get((vertexData.length < 3 || vertexData[2].equals("")) ? 0 : (Integer.parseInt(vertexData[2]) - 1));
 		normalsArray[current * 3] = currentNorm.getX();
 		normalsArray[current * 3 + 1] = currentNorm.getY();
 		normalsArray[current * 3 + 2] = currentNorm.getZ();

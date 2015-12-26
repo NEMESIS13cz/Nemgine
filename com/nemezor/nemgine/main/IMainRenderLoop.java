@@ -2,21 +2,21 @@ package com.nemezor.nemgine.main;
 
 public interface IMainRenderLoop {
 	
-	public abstract void render();
+	public void render();
 	
-	public abstract void setUpRender();
+	public void setUpRender();
 	
-	public abstract void cleanUpRender();
+	public void cleanUpRender();
 	
-	public abstract void generateResources();
+	public void generateResources();
 	
-	public abstract void loadResources();
+	public void loadResources();
 	
-	public abstract void updateRenderSecond(int frames, long averageInterval);
+	public void updateRenderSecond(int frames, long averageInterval);
 	
-	public abstract long getRenderSleepInterval();
+	public long getRenderSleepInterval();
 	
-	public abstract int getRenderFrameskipTreshold();
+	public int getRenderFrameskipTreshold();
 	
 	public default String getStacktraceRenderName() {
 		return "Main render loop";

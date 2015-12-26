@@ -2,11 +2,8 @@ package com.nemezor.nemgine.graphics;
 
 import java.awt.Canvas;
 import java.awt.Dimension;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 
 import javax.swing.JFrame;
-import javax.swing.JTextArea;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.ContextAttribs;
@@ -17,7 +14,7 @@ import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-import com.nemezor.nemgine.main.Nemgine;
+import com.nemezor.nemgine.misc.ErrorScreen;
 import com.nemezor.nemgine.misc.Logger;
 import com.nemezor.nemgine.misc.Registry;
 
@@ -29,7 +26,6 @@ public class Loader {
 	private static boolean initialized = false;
 	private static boolean postinitialized = false;
 	private static boolean isDone = false;
-	private static boolean exit = false;
 	private static boolean loaded = false;
 	private static int logoShader = 0;
 	private static int barShader = 0;
@@ -181,43 +177,7 @@ public class Loader {
 	}
 	
 	protected static void failedToLoadResource(String message) {
-		JFrame frame = new JFrame();
-		
-		WindowListener action = new WindowListener() {
-			
-			public void windowOpened(WindowEvent e) {}
-			public void windowClosing(WindowEvent e) {
-				frame.dispose();
-				exit = true;
-			}
-			public void windowClosed(WindowEvent e) {}
-			public void windowIconified(WindowEvent e) {}
-			public void windowDeiconified(WindowEvent e) {}
-			public void windowActivated(WindowEvent e) {}
-			public void windowDeactivated(WindowEvent e) {}
-		};
-		
-		JTextArea text = new JTextArea(Registry.NEMGINE_EXCEPTION_SHUTDOWN + "\n\n>>> " + message + "\n\n\n\n" + Registry.NEMGINE_SHUTDOWN_EXIT + Registry.INVALID + "\n\n\n" + (Logger.isContained() ? "" : Registry.NEMGINE_EXCEPTION_SHUTDOWN_MORE));
-		text.setEditable(false);
-		
-		frame.setResizable(false);
-		frame.getContentPane().add(text);
-		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.addWindowListener(action);
-		frame.pack();
-		frame.setSize(new Dimension(Registry.ERROR_SCREEN_WIDTH, Registry.ERROR_SCREEN_HEIGHT));
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
-		
-		while (!exit) {
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-			}
-		}
-		Nemgine.shutDown();
-		Nemgine.exit(Registry.INVALID);
+		ErrorScreen.show(message, true);
 	}
 	
 	public static Dimension getSize() {
