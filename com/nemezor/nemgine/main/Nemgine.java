@@ -40,7 +40,7 @@ public class Nemgine {
 				for (Method method : application.getDeclaredMethods()) {
 					if (method.getAnnotation(Application.class) != null) {
 						if (entry != null) {
-							Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_RESOLVE_MULTIPLE);
+							Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_RESOLVE_MULTIPLE, false);
 							System.exit(Registry.INVALID);
 						}
 						ann = method.getAnnotation(Application.class);
@@ -48,7 +48,7 @@ public class Nemgine {
 					}
 				}
 				if (entry == null) {
-					Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_RESOLVE_NONE);
+					Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_RESOLVE_NONE, false);
 					System.exit(Registry.INVALID);
 				}
 				
@@ -67,7 +67,7 @@ public class Nemgine {
 				try {
 					entry.invoke(application.newInstance());
 				} catch (Exception e) {
-					Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_EXECUTION_FAIL);
+					Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_EXECUTION_FAIL, false);
 					e.printStackTrace();
 					System.exit(Registry.INVALID);
 				}
@@ -81,7 +81,7 @@ public class Nemgine {
 
 	public static void exit(int exitCode) {
 		if (!isRunning()) {
-			Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_SHUTDOWN_DISPOSE);
+			Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_SHUTDOWN_DISPOSE, false);
 			NetworkManager.disposeAll();
 			if (Nemgine.getSide() == Side.CLIENT) {
 				TextureManager.disposeAll();
@@ -90,7 +90,7 @@ public class Nemgine {
 				FrameBufferManager.disposeAll();
 				DisplayManager.dispose();
 			}
-			Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_SHUTDOWN_EXIT + exitCode);
+			Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_SHUTDOWN_EXIT + exitCode, false);
 			Logger.close();
 			System.gc();
 			System.exit(exitCode);

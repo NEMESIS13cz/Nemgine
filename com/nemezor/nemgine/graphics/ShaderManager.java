@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.ARBShaderObjects;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.util.vector.Matrix2f;
@@ -173,6 +174,64 @@ public class ShaderManager {
 		}
 		GL20.glUniform1f(currentShaderData.data.get(name), data ? 1.0f : 0.0f);
 	}
+	
+	public static void loadVector4Array(int id, String name, Vector4f[] array) {
+		if (id != currentShader || Nemgine.getSide() == Side.SERVER) {
+			return;
+		}
+		FloatBuffer buffer = BufferUtils.createFloatBuffer(array.length * 4);
+		float[] data = new float[array.length * 4];
+		for (int i = 0; i < array.length; i++) {
+			data[i * 4] = array[i].getX();
+			data[i * 4 + 1] = array[i].getY();
+			data[i * 4 + 2] = array[i].getZ();
+			data[i * 4 + 3] = array[i].getW();
+		}
+		buffer.put(data);
+		buffer.flip();
+		ARBShaderObjects.glUniform1ARB(currentShaderData.data.get(name), buffer);
+	}
+	
+	public static void loadVector3Array(int id, String name, Vector3f[] array) {
+		if (id != currentShader || Nemgine.getSide() == Side.SERVER) {
+			return;
+		}
+		FloatBuffer buffer = BufferUtils.createFloatBuffer(array.length * 3);
+		float[] data = new float[array.length * 3];
+		for (int i = 0; i < array.length; i++) {
+			data[i * 3] = array[i].getX();
+			data[i * 3 + 1] = array[i].getY();
+			data[i * 3 + 2] = array[i].getZ();
+		}
+		buffer.put(data);
+		buffer.flip();
+		ARBShaderObjects.glUniform1ARB(currentShaderData.data.get(name), buffer);
+	}
+	
+	public static void loadVector2Array(int id, String name, Vector2f[] array) {
+		if (id != currentShader || Nemgine.getSide() == Side.SERVER) {
+			return;
+		}
+		FloatBuffer buffer = BufferUtils.createFloatBuffer(array.length * 2);
+		float[] data = new float[array.length * 2];
+		for (int i = 0; i < array.length; i++) {
+			data[i * 2] = array[i].getX();
+			data[i * 2 + 1] = array[i].getY();
+		}
+		buffer.put(data);
+		buffer.flip();
+		ARBShaderObjects.glUniform1ARB(currentShaderData.data.get(name), buffer);
+	}
+	
+	public static void loadFloatArray(int id, String name, float[] array) {
+		if (id != currentShader || Nemgine.getSide() == Side.SERVER) {
+			return;
+		}
+		FloatBuffer buffer = BufferUtils.createFloatBuffer(array.length * 2);
+		buffer.put(array);
+		buffer.flip();
+		ARBShaderObjects.glUniform1ARB(currentShaderData.data.get(name), buffer);
+	}
 
 	public static boolean initializeShader(int id, String vertexFile, String fragmentFile, String[] uniforms, String[] attribNames, int[] attribBinds) {
 		if (attribBinds.length != attribNames.length) {
@@ -261,7 +320,7 @@ public class ShaderManager {
 			ex.setShaderInfo(file, type);
 			ex.setThrower(Registry.SHADER_LOADER_NAME);
 			ex.printStackTrace();
-			Logger.log(null, GL20.glGetShaderInfoLog(shaderID, Registry.SHADER_ERROR_LOG_SIZE));
+			Logger.log(null, GL20.glGetShaderInfoLog(shaderID, Registry.SHADER_ERROR_LOG_SIZE), false);
 			return Registry.INVALID;
 		}
 		return shaderID;

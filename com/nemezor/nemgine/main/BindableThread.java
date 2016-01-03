@@ -2,10 +2,9 @@ package com.nemezor.nemgine.main;
 
 import java.util.ArrayList;
 
-import org.lwjgl.opengl.ContextAttribs;
-
 import com.nemezor.nemgine.exceptions.ThreadException;
 import com.nemezor.nemgine.graphics.Loader;
+import com.nemezor.nemgine.misc.ErrorScreen;
 import com.nemezor.nemgine.misc.Registry;
 
 public class BindableThread extends Thread {
@@ -28,23 +27,50 @@ public class BindableThread extends Thread {
 	}
 	
 	private void runMain() {
+		Loader.initialize(Nemgine.w, Nemgine.h, Nemgine.name);
 		if (render != null) {
-			ContextAttribs attribs = new ContextAttribs(3, 2).withForwardCompatible(true).withProfileCore(true);
-			Loader.initialize(Nemgine.w, Nemgine.h, Nemgine.name, attribs);
-			render.setUpRender();
-			Loader.postInitialize();
-			render.generateResources();
-			Loader.loadDefaultResources();
-			render.loadResources();
+			try{
+				render.setUpRender();
+			}catch (Exception e) {
+				String stack = "";
+				for (StackTraceElement el : e.getStackTrace()) {
+					stack += el.toString() + "\n";
+				}
+				ErrorScreen.show(Registry.LOADING_SCREEN_ERROR + "\n\n" + e.getLocalizedMessage() + "\n" + stack, true);
+			}
 		}
-		
+		Loader.postInitialize();
+		if (render != null) {
+			try{
+				render.generateResources();
+			}catch (Exception e) {
+				String stack = "";
+				for (StackTraceElement el : e.getStackTrace()) {
+					stack += el.toString() + "\n";
+				}
+				ErrorScreen.show(Registry.LOADING_SCREEN_ERROR + "\n\n" + e.getLocalizedMessage() + "\n" + stack, true);
+			}
+		}
 		if (tick != null) {
+			tick.generateResources();
+		}
+		Loader.loadDefaultResources();
+		if (render != null) {
+			try{
+				render.loadResources();
+			}catch (Exception e) {
+				String stack = "";
+				for (StackTraceElement el : e.getStackTrace()) {
+					stack += el.toString() + "\n";
+				}
+				ErrorScreen.show(Registry.LOADING_SCREEN_ERROR + "\n\n" + e.getLocalizedMessage() + "\n" + stack, true);
+			}
+		}
+		if (tick != null) {
+			tick.loadResources();
 			tick.setUpTick();
 		}
-
-		if (render != null) {
-			Loader.finish();
-		}
+		Loader.finish();
 		
 		long SLEEP = 0;
 		long RENDER_SLEEP = 0;
@@ -58,47 +84,49 @@ public class BindableThread extends Thread {
 		int frames = 0;
 		long average_time_frame = 0;
 		long frame_begin = 0;
+		long average_time_per_frame = render != null ? render.getRenderSleepInterval() : Long.MAX_VALUE;
 		
 		int TICK_SKIP = Registry.DEFAULT_TICKSKIP_TRESHOLD;
 		int ticks = 0;
 		long average_time_tick = 0;
 		long tick_begin = 0;
+		long average_time_per_tick = tick != null ? tick.getTickSleepInterval() : Long.MAX_VALUE;
 		
 		while (Nemgine.isRunning() && isRunning()) {
 			long begin = System.currentTimeMillis();
 			if (render != null && NEXT_RENDER < System.currentTimeMillis()) {
-				NEXT_RENDER += RENDER_SLEEP;
+				NEXT_RENDER += RENDER_SLEEP - average_time_per_frame;
+				frame_begin = System.currentTimeMillis();
 				
 				render.render();
 				
-				if (NEXT_RENDER + (RENDER_SLEEP * FRAME_SKIP) < System.currentTimeMillis()) {
+				if (FRAME_SKIP != Registry.INVALID && NEXT_RENDER + (RENDER_SLEEP * FRAME_SKIP) < System.currentTimeMillis()) {
 					ThreadException e = new ThreadException(Registry.THREAD_RENDER_KEEPUP_1 + ((System.currentTimeMillis() - NEXT_RENDER) / (RENDER_SLEEP != 0 ? RENDER_SLEEP : 1)) + Registry.THREAD_RENDER_KEEPUP_2);
 					e.setBindCause(render);
 					e.setThrower(this);
 					e.printStackTrace();
-					NEXT_RENDER = System.currentTimeMillis() + RENDER_SLEEP;
+					NEXT_RENDER = System.currentTimeMillis() + (RENDER_SLEEP - average_time_per_frame);
 				}
 				
 				average_time_frame += System.currentTimeMillis() - frame_begin;
 				frames++;
-				frame_begin = System.currentTimeMillis();
 			}
 			if (tick != null && NEXT_TICK < System.currentTimeMillis()) {
-				NEXT_TICK += TICK_SLEEP;
+				NEXT_TICK += TICK_SLEEP - average_time_per_tick;
+				tick_begin = System.currentTimeMillis();
 				
 				tick.tick();
 				
-				if (NEXT_TICK + (TICK_SLEEP * TICK_SKIP) < System.currentTimeMillis()) {
+				if (TICK_SKIP != Registry.INVALID && NEXT_TICK + (TICK_SLEEP * TICK_SKIP) < System.currentTimeMillis()) {
 					ThreadException e = new ThreadException(Registry.THREAD_TICK_KEEPUP_1 + ((System.currentTimeMillis() - NEXT_TICK) / (TICK_SLEEP != 0 ? TICK_SLEEP : 1)) + Registry.THREAD_TICK_KEEPUP_2);
 					e.setBindCause(tick);
 					e.setThrower(this);
 					e.printStackTrace();
-					NEXT_TICK = System.currentTimeMillis() + TICK_SLEEP;
+					NEXT_TICK = System.currentTimeMillis() + (TICK_SLEEP - average_time_per_tick);
 				}
 				
 				average_time_tick += System.currentTimeMillis() - tick_begin;
 				ticks++;
-				tick_begin = System.currentTimeMillis();
 			}
 			try {
 				long sleep_amount = SLEEP - (System.currentTimeMillis() - begin);
@@ -125,14 +153,16 @@ public class BindableThread extends Thread {
 				long t = Long.MIN_VALUE;
 				if (render != null) {
 					r = render.getRenderSleepInterval();
-					render.updateRenderSecond(frames, (average_time_frame / (frames != 0 ? frames : 1)));
+					average_time_per_frame = (average_time_frame / (frames != 0 ? frames : 1));
+					render.updateRenderSecond(frames, average_time_per_frame);
 					average_time_frame = 0;
 					frames = 0;
 					FRAME_SKIP = render.getRenderFrameskipTreshold();
 				}
 				if (tick != null) {
 					t = tick.getTickSleepInterval();
-					tick.updateTickSecond(ticks, (average_time_tick / (ticks != 0 ? ticks : 1)));
+					average_time_per_tick = (average_time_tick / (ticks != 0 ? ticks : 1));
+					tick.updateTickSecond(ticks, average_time_per_tick);
 					average_time_tick = 0;
 					ticks = 0;
 					TICK_SKIP = tick.getTickTickskipTreshold();

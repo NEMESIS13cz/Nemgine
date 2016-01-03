@@ -115,4 +115,12 @@ public class GLHelper {
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		return vbo;
 	}
+	
+	public static void enableBlending() {
+		GL11.glEnable(GL11.GL_BLEND);
+	}
+	
+	public static void disableBlending() {
+		GL11.glDisable(GL11.GL_BLEND);
+	}
 }

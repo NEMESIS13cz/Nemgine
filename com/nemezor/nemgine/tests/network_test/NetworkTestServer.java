@@ -96,4 +96,14 @@ public class NetworkTestServer implements IMainTickLoop {
 	public int getTickTickskipTreshold() {
 		return 10;
 	}
+
+	@Override
+	public void generateResources() {
+		
+	}
+
+	@Override
+	public void loadResources() {
+		
+	}
 }

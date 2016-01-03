@@ -5,6 +5,7 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import com.nemezor.nemgine.debug.DebugColorizer;
 import com.nemezor.nemgine.graphics.DisplayManager;
 import com.nemezor.nemgine.graphics.FrameBufferManager;
 import com.nemezor.nemgine.graphics.GLHelper;
@@ -12,9 +13,11 @@ import com.nemezor.nemgine.graphics.ModelManager;
 import com.nemezor.nemgine.graphics.ShaderManager;
 import com.nemezor.nemgine.graphics.util.Camera;
 import com.nemezor.nemgine.graphics.util.FrameBuffer;
+import com.nemezor.nemgine.graphics.util.LightSource;
 import com.nemezor.nemgine.main.Application;
 import com.nemezor.nemgine.main.IMainRenderLoop;
 import com.nemezor.nemgine.main.Nemgine;
+import com.nemezor.nemgine.misc.Color;
 
 public class FrameBufferTest implements IMainRenderLoop {
 
@@ -29,6 +32,8 @@ public class FrameBufferTest implements IMainRenderLoop {
 	private int waterLevel = -20;
 	
 	private Camera cam;
+	private LightSource[] lights = new LightSource[4];
+	private DebugColorizer[] colorz = new DebugColorizer[4];
 	
 	@Application(name="FrameBuffer Renderer", width=1280, height=720, path="tests/water", contained=true)
 	public void entry() {
@@ -55,6 +60,14 @@ public class FrameBufferTest implements IMainRenderLoop {
 		Matrix4f logoTransform2 = GLHelper.initTransformationMatrix(invertCam, new Vector3f(-15, 10, -30), new Vector3f((float)Math.toRadians(15 + angle), (float)Math.toRadians(25 + angle), (float)Math.toRadians(15)), new Vector3f(1, 1, 1));
 		Matrix4f transform2 = GLHelper.initTransformationMatrix(invertCam, new Vector3f(0, -5, -25), new Vector3f(0, (float)Math.toRadians(angle), 0), new Vector3f(1, 1, 1));
 		
+		ShaderManager.bindShader(shader);
+		Vector3f[] vecs = new Vector3f[lights.length];
+		for (int i = 0; i < vecs.length; i++) {
+			vecs[i] = lights[i].getColor().getColorRGBAsVector();
+		}
+		//ShaderManager.loadVector3Array(shader, "light_color_vertex", vecs);
+		ShaderManager.unbindShader();
+		
 		FrameBufferManager.bindFrameBuffer(frame);
 		
 		ModelManager.renderModel(model, 0, shader, transform2, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
@@ -73,6 +86,9 @@ public class FrameBufferTest implements IMainRenderLoop {
 		angle++;
 		
 		handleInput();
+		for (int i = 0; i < 4; i++) {
+			lights[i].setColor(colorz[i].getNext(lights[i].getColor()));
+		}
 	}
 	
 	@Override
@@ -80,6 +96,13 @@ public class FrameBufferTest implements IMainRenderLoop {
 		DisplayManager.setOpenGLConfiguration(70.0f, 0.002f, 500.0f);
 		frame = FrameBufferManager.generateFrameBuffers();
 		FrameBufferManager.initializeFrameBuffer(frame, 800, 450, true, false, true);
+		lights[0] = new LightSource(new Vector3f(-50, 10, 0), new Color(127.0f, 0.0f, 0.0f));
+		lights[1] = new LightSource(new Vector3f(50, 10, 0), new Color(0.0f, 127.0f, 0.0f));
+		lights[2] = new LightSource(new Vector3f(0, 10, -50), new Color(0.0f, 0.0f, 127.0f));
+		lights[3] = new LightSource(new Vector3f(0, 10, 50), new Color(0.0f, 0.0f, 0.0f));
+		for (int i = 0; i < 4; i++) {
+			colorz[i] = new DebugColorizer(i);
+		}
 	}
 
 	@Override
@@ -101,7 +124,7 @@ public class FrameBufferTest implements IMainRenderLoop {
 	public void loadResources() {
 		ShaderManager.initializeShader(shader, "com/nemezor/nemgine/tests/reflection/vertex.shader", 
 											   "com/nemezor/nemgine/tests/reflection/fragment.shader", 
-											   new String[] {"projection", "transformation", "light"}, 
+											   new String[] {"projection", "transformation", "light", "light_color_vertex"}, 
 											   new String[] {"position", "normal"}, new int[] {0, 2});
 		ShaderManager.initializeShader(logoShader, "com/nemezor/nemgine/tests/reflection/logo.vertex", 
 												   "com/nemezor/nemgine/tests/reflection/logo.fragment", 
@@ -115,14 +138,22 @@ public class FrameBufferTest implements IMainRenderLoop {
 		ShaderManager.bindShader(shader);
 		ShaderManager.loadMatrix4(shader, "projection", GLHelper.getCurrentPerspectiveProjectionMatrix());
 		ShaderManager.loadMatrix4(shader, "transformation", new Matrix4f());
-		ShaderManager.loadVector3(shader, "light", new Vector3f(-50, 30, 10));
+		Vector3f[] vecs = new Vector3f[lights.length];
+		for (int i = 0; i < vecs.length; i++) {
+			vecs[i] = lights[i].getPosition();
+		}
+		ShaderManager.loadVector3Array(shader, "light", vecs.clone());
+		for (int i = 0; i < vecs.length; i++) {
+			vecs[i] = lights[i].getColor().getColorRGBAsVector();
+		}
+		ShaderManager.loadVector3Array(shader, "light_color_vertex", vecs.clone());
 		ShaderManager.bindShader(logoShader);
 		ShaderManager.loadMatrix4(logoShader, "projection", GLHelper.getCurrentPerspectiveProjectionMatrix());
 		ShaderManager.loadMatrix4(logoShader, "transformation", new Matrix4f());
 		ShaderManager.bindShader(water);
 		ShaderManager.loadMatrix4(water, "projection", GLHelper.getCurrentPerspectiveProjectionMatrix());
 		ShaderManager.loadMatrix4(water, "transformation", new Matrix4f());
-		ShaderManager.loadVector3(water, "light", new Vector3f(-50, 30, 10));
+		ShaderManager.loadVector3(water, "light", new Vector3f(0, 0, 0));
 		ShaderManager.unbindShader();
 		
 		ModelManager.initializeModel(model, "com/nemezor/nemgine/tests/reflection/dragon.obj");

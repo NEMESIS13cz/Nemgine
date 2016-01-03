@@ -67,14 +67,27 @@ public class Logger {
 		}
 	}
 	
-	public static synchronized void log(String msg) {
-		log(Thread.currentThread().getName(), msg);
-	}
-	
-	public static synchronized void log(String sender, String msg) {
+	public static synchronized void logConsoleOnly(String msg) {
 		String time = getCurrentMessageTime();
+		String sender = Thread.currentThread().getName();
 		String message = "|" + time + "|" + (sender == null ? " >>> " : " [" + sender + "]: ") + msg;
 		Console.out.println(message);
+	}
+	
+	public static synchronized void logSilently(String msg) {
+		log(Thread.currentThread().getName(), msg, true);
+	}
+	
+	public static synchronized void log(String msg) {
+		log(Thread.currentThread().getName(), msg, false);
+	}
+	
+	public static synchronized void log(String sender, String msg, boolean silent) {
+		String time = getCurrentMessageTime();
+		String message = "|" + time + "|" + (sender == null ? " >>> " : " [" + sender + "]: ") + msg;
+		if (!silent) {
+			Console.out.println(message);
+		}
 		if (initialized) {
 			String curr = getCurrentLogName();
 			if (!lastDate.equals(curr)) {

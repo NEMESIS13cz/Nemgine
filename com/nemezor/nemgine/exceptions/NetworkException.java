@@ -37,9 +37,9 @@ public class NetworkException extends Exception {
 	}
 	
 	public void printStackTrace() {
-		Logger.log(thrower == null ? Registry.NETWORK_EXCEPTION_NO_ACCESSOR : thrower, getLocalizedMessage());
+		Logger.log(thrower == null ? Registry.NETWORK_EXCEPTION_NO_ACCESSOR : thrower, getLocalizedMessage(), false);
 		if (IP != null) {
-			Logger.log(null, IP.toString());
+			Logger.log(null, IP.toString(), false);
 		}
 	}
 }

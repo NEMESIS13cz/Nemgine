@@ -8,6 +8,10 @@ public interface IMainTickLoop {
 	
 	public void cleanUpTick();
 	
+	public void generateResources();
+	
+	public void loadResources();
+	
 	public void updateTickSecond(int ticks, long averageInterval);
 	
 	public long getTickSleepInterval();

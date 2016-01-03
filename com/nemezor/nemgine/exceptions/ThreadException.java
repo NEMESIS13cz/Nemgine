@@ -57,7 +57,7 @@ public class ThreadException extends Exception {
 	}
 	
 	public void printStackTrace() {
-		Logger.log(thrower != null ? thrower.getName() : Registry.THREAD_BIND_EXCEPTION_NO_THROWER, getLocalizedMessage());
+		Logger.log(thrower != null ? thrower.getName() : Registry.THREAD_BIND_EXCEPTION_NO_THROWER, getLocalizedMessage(), false);
 		String msg = null;
 		if (getBindCauseRender() != null) {
 			msg = getBindCauseRender().getStacktraceRenderName();
@@ -67,7 +67,7 @@ public class ThreadException extends Exception {
 			msg = getBindCauseAux().getStacktraceAuxName();
 		}
 		if (msg != null) {
-			Logger.log(null, msg);
+			Logger.log(null, msg, false);
 		}
 	}
 }

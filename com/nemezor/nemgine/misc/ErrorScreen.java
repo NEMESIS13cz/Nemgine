@@ -14,6 +14,13 @@ public class ErrorScreen {
 	private static boolean exit = false;
 	
 	public static void show(String message, boolean shouldExit) {
+		if (Nemgine.getSide() == Side.SERVER) {
+			if (!shouldExit) {
+				return;
+			}
+			Nemgine.shutDown();
+			Nemgine.exit(Registry.INVALID);
+		}
 		JFrame frame = new JFrame();
 		
 		WindowListener action = new WindowListener() {

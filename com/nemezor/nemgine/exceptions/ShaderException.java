@@ -43,9 +43,9 @@ public class ShaderException extends Exception {
 	}
 	
 	public void printStackTrace() {
-		Logger.log(thrower == null ? Registry.SHADER_EXCEPTION_NO_ACCESSOR : thrower, getLocalizedMessage());
+		Logger.log(thrower == null ? Registry.SHADER_EXCEPTION_NO_ACCESSOR : thrower, getLocalizedMessage(), false);
 		if (type != null) {
-			Logger.log(null, name + " (" + type.toString() + ")");
+			Logger.log(null, name + " (" + type.toString() + ")", false);
 		}
 	}
 }

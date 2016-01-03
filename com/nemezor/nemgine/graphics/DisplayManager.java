@@ -31,6 +31,7 @@ public class DisplayManager {
 	public static boolean resize() {
 		if (Nemgine.getSide() == Side.CLIENT && Display.wasResized()) {
 			reinitializeOpenGL();
+			GuiManager.resizeActiveGuis();
 			return true;
 		}
 		return false;
@@ -58,13 +59,5 @@ public class DisplayManager {
 		if (Nemgine.getSide() == Side.CLIENT) {
 			Display.setTitle(newTitle);
 		}
-	}
-	
-	public static void enableBlending() {
-		GL11.glEnable(GL11.GL_BLEND);
-	}
-	
-	public static void disableBlending() {
-		GL11.glDisable(GL11.GL_BLEND);
 	}
 }

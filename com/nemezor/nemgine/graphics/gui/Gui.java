@@ -2,16 +2,22 @@ package com.nemezor.nemgine.graphics.gui;
 
 import java.util.ArrayList;
 
-import com.nemezor.nemgine.graphics.DisplayManager;
+import org.lwjgl.opengl.Display;
+
+import com.nemezor.nemgine.graphics.GLHelper;
+import com.nemezor.nemgine.input.Mouse;
 import com.nemezor.nemgine.misc.RenderAttributes;
 
 public class Gui {
 
 	private int state;
 	private ArrayList<IGuiComponent> components = new ArrayList<IGuiComponent>();
+	protected int width, height, canvasWidth, canvasHeight;
 	
-	public Gui(int state) {
+	public Gui(int state, int cW, int cH) {
 		this.state = state;
+		this.canvasWidth = cW;
+		this.canvasHeight = cH;
 	}
 	
 	public int getState() {
@@ -28,7 +34,24 @@ public class Gui {
 		}
 	}
 	
+	protected void addComponent(IGuiComponent c) {
+		c.initialize(canvasWidth, canvasHeight);
+		c.resize(width, height);
+		components.add(c);
+	}
+	
+	public void resize() {
+		width = Display.getWidth();
+		height = Display.getHeight();
+		
+		for (IGuiComponent c : components) {
+			c.resize(width, height);
+		}
+	}
+	
 	public void render() {
+		float mouseX = Mouse.getAbsoluteX();
+		float mouseY = Mouse.getAbsoluteY();
 		ArrayList<IGuiComponent> transparent = new ArrayList<IGuiComponent>();
 		ArrayList<IGuiComponent> texturedTransparent = new ArrayList<IGuiComponent>();
 		ArrayList<IGuiComponent> regular = new ArrayList<IGuiComponent>();
@@ -52,24 +75,27 @@ public class Gui {
 		}
 		
 		for (IGuiComponent c : regular) {
-			c.render();
+			c.render(mouseX, mouseY);
 		}
 		for (IGuiComponent c : textured) {
-			c.render();
+			c.render(mouseX, mouseY);
 		}
-		DisplayManager.enableBlending();
+		GLHelper.enableBlending();
 		for (IGuiComponent c : transparent) {
-			c.render();
+			c.render(mouseX, mouseY);
 		}
 		for (IGuiComponent c : texturedTransparent) {
-			c.render();
+			c.render(mouseX, mouseY);
 		}
-		DisplayManager.disableBlending();
+		GLHelper.disableBlending();
 	}
 	
 	public void update() {
+		float mouseX = Mouse.getAbsoluteX();
+		float mouseY = Mouse.getAbsoluteY();
+		
 		for (IGuiComponent c : components) {
-			c.update();
+			c.update(mouseX, mouseY);
 		}
 	}
 }

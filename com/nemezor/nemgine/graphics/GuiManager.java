@@ -15,12 +15,12 @@ public class GuiManager {
 	private static Gui currentGui = null;
 	private static HashMap<Integer, Gui> guis = new HashMap<Integer, Gui>();
 	
-	public static synchronized int generateGuis() {
+	public static synchronized int generateGuis(int canvasWidth, int canvasHeight) {
 		if (Nemgine.getSide() == Side.SERVER) {
 			return Registry.INVALID;
 		}
 		guiCount++;
-		guis.put(guiCount, new Gui(Registry.INVALID));
+		guis.put(guiCount, new Gui(Registry.INVALID, canvasWidth, canvasHeight));
 		return guiCount;
 	}
 	
@@ -44,6 +44,7 @@ public class GuiManager {
 		if (gui == null || gui.getState() == Registry.INVALID) {
 			return;
 		}
+		gui.resize();
 		currentGuiId = id;
 		currentGui = gui;
 	}
@@ -104,5 +105,11 @@ public class GuiManager {
 			return;
 		}
 		currentGui.update();
+	}
+	
+	protected static void resizeActiveGuis() {
+		if (currentGui != null) {
+			currentGui.resize();
+		}
 	}
 }

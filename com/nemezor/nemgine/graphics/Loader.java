@@ -14,9 +14,11 @@ import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.ErrorScreen;
 import com.nemezor.nemgine.misc.Logger;
 import com.nemezor.nemgine.misc.Registry;
+import com.nemezor.nemgine.misc.Side;
 
 public class Loader {
 
@@ -46,13 +48,20 @@ public class Loader {
 	protected static int modelProgress = 0;
 	protected static int textureProgress = 0;
 	
-	public static void initialize(int appWidth, int appHeight, String title, ContextAttribs attributes) {
+	public static void initialize(int appWidth, int appHeight, String title) {
 		if (initialized) {
 			return;
 		}
 		appW = appWidth;
 		appH = appHeight;
 		appTitle = title;
+		
+		if (Nemgine.getSide() == Side.SERVER) {
+			initialized = true;
+			return;
+		}
+		
+		ContextAttribs attributes = new ContextAttribs(3, 2).withForwardCompatible(true).withProfileCore(true);
 		
 		try {
 			Display.setTitle(appTitle);
@@ -78,6 +87,12 @@ public class Loader {
 		if (postinitialized) {
 			return;
 		}
+		if (Nemgine.getSide() == Side.SERVER) {
+			postinitialized = true;
+			update();
+			return;
+		}
+		
 		GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
 		GLHelper.aspect = (float) Display.getWidth() / (float) Display.getHeight();
 		GLHelper.updatePerspectiveProjection();
@@ -102,6 +117,10 @@ public class Loader {
 		if (isDone) {
 			return;
 		}
+		if (Nemgine.getSide() == Side.SERVER) {
+			isDone = true;
+			return;
+		}
 		ShaderManager.dispose(logoShader);
 		ShaderManager.dispose(barShader);
 		TextureManager.dispose(texture);
@@ -119,6 +138,11 @@ public class Loader {
 		if (loaded) {
 			return;
 		}
+		if (Nemgine.getSide() == Side.SERVER) {
+			loaded = true;
+			return;
+		}
+		
 		ShaderManager.loadGuiShaders();
 		
 		loaded = true;
@@ -128,6 +152,12 @@ public class Loader {
 		if (lastFrame + frameskip > System.currentTimeMillis()) {
 			return;
 		}
+		
+		if (Nemgine.getSide() == Side.SERVER) {
+			lastFrame = System.currentTimeMillis();
+			return;
+		}
+		
 		textureTransformation = GLHelper.initTransformationMatrix(new Vector3f(-0.8f + (0.8f * (float)textureProgress / (float)textureCounter), -0.3f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f * (float)textureProgress / (float)textureCounter, 0, 0.1f));
 		shaderTransformation = GLHelper.initTransformationMatrix(new Vector3f(-0.8f + (0.8f * (float)shaderProgress / (float)shaderCounter), -0.5f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f * (float)shaderProgress / (float)shaderCounter, 0, 0.1f));
 		modelTransformation = GLHelper.initTransformationMatrix(new Vector3f(-0.8f + (0.8f * (float)modelProgress / (float)modelCounter), -0.7f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f * (float)modelProgress / (float)modelCounter, 0, 0.1f));
@@ -147,7 +177,7 @@ public class Loader {
 	}
 	
 	protected static void loadingTexture(String name) {
-		Logger.log("Loading Texture: " + name);
+		Logger.logSilently("Loading Texture: " + name);
 		update();
 	}
 	
@@ -157,7 +187,7 @@ public class Loader {
 	}
 	
 	protected static void loadingShader(String name) {
-		Logger.log("Loading Shader: " + name);
+		Logger.logSilently("Loading Shader: " + name);
 		update();
 	}
 	
@@ -167,7 +197,7 @@ public class Loader {
 	}
 	
 	protected static void loadingModel(String name) {
-		Logger.log("Loading Model: " + name);
+		Logger.logSilently("Loading Model: " + name);
 		update();
 	}
 	

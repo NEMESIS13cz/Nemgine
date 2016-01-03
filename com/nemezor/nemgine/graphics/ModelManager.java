@@ -79,13 +79,13 @@ public class ModelManager {
 	
 	public static void renderModelWithColor(int id, int textureID, int shaderID, Matrix4f transformation, Matrix4f projection, Color color, String transformationAttribName, String projectionAttribName, String colorAttribName) {
 		if (color.getAlpha() != 1.0f) {
-			DisplayManager.enableBlending();
+			GLHelper.enableBlending();
 		}
 		ShaderManager.bindShader(shaderID);
 		ShaderManager.loadVector4(shaderID, colorAttribName, color.getColorAsVector());
 		renderModel(id, textureID, shaderID, transformation, projection, transformationAttribName, projectionAttribName);
 		if (color.getAlpha() != 1.0f) {
-			DisplayManager.disableBlending();
+			GLHelper.disableBlending();
 		}
 	}
 	

@@ -1,5 +1,6 @@
 package com.nemezor.nemgine.misc;
 
+import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
 public class Color {
@@ -28,6 +29,10 @@ public class Color {
 	
 	public Vector4f getColorAsVector() {
 		return color;
+	}
+	
+	public Vector3f getColorRGBAsVector() {
+		return new Vector3f(color.getX(), color.getY(), color.getZ());
 	}
 	
 	public float getRed() {

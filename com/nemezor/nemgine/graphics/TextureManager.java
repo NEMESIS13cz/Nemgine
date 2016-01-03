@@ -193,7 +193,7 @@ public class TextureManager {
 			image.getRGB(0, 0, w, h, pixels, 0, w);
 			stream.close();
 		} catch (IOException e) {
-			Logger.log(Registry.NEMGINE_NAME, Registry.TEXTURE_LOADER_MISSING_ERROR);
+			Logger.log(Registry.NEMGINE_NAME, Registry.TEXTURE_LOADER_MISSING_ERROR, false);
 			System.exit(Registry.INVALID);
 		}
 
