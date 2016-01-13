@@ -24,6 +24,7 @@ public class Nemgine {
 	private static int threadCounter = 0;
 	private static boolean isRunning = true;
 	private static boolean headless = false;
+	private static boolean compat = false;
 
 	protected static boolean hasRenderThread = false;
 	protected static int w, h;
@@ -58,6 +59,7 @@ public class Nemgine {
 				boolean contained = InputParams.containsEntry("contained") ? InputParams.getBoolean("contained") : ann.contained();
 				headless = InputParams.containsEntry("server") ? InputParams.getBoolean("server") : ann.side() == Side.SERVER;
 				name = ann.name();
+				compat = InputParams.containsEntry("compat") ? InputParams.getBoolean("compat") : ann.compatibilityMode();
 				
 				if (!contained) {
 					Logger.initialize(ann.path().endsWith("/") ? ann.path().substring(0, ann.path().length() - 1) : ann.path());
@@ -224,5 +226,9 @@ public class Nemgine {
 	
 	public static Side getSide() {
 		return headless ? Side.SERVER : Side.CLIENT;
+	}
+	
+	public static boolean isInCompatibilityMode() {
+		return compat;
 	}
 }

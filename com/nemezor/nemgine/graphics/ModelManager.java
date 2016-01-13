@@ -78,6 +78,9 @@ public class ModelManager {
 	}
 	
 	public static void renderModelWithColor(int id, int textureID, int shaderID, Matrix4f transformation, Matrix4f projection, Color color, String transformationAttribName, String projectionAttribName, String colorAttribName) {
+		if (Nemgine.isInCompatibilityMode() && FrameBufferManager.inFrameBuffer) {
+			return;
+		}
 		if (color.getAlpha() != 1.0f) {
 			GLHelper.enableBlending();
 		}
@@ -91,7 +94,7 @@ public class ModelManager {
 	
 	public static void renderModelWithFrameBufferTexture(int id, int frameBuffer, int texture, int shaderID, Matrix4f transformation, Matrix4f projection, String transformationAttribName, String projectionAttribName) {
 		Model model = models.get(id);
-		if (model == null || model.id == Registry.INVALID) {
+		if (model == null || model.id == Registry.INVALID || Nemgine.isInCompatibilityMode()) {
 			return;
 		}
 		ShaderManager.bindShader(shaderID);
@@ -118,6 +121,9 @@ public class ModelManager {
 	}
 	
 	public static void renderModel(int id, int textureID, int shaderID, Matrix4f transformation, Matrix4f projection, String transformationAttribName, String projectionAttribName) {
+		if (Nemgine.isInCompatibilityMode() && FrameBufferManager.inFrameBuffer) {
+			return;
+		}
 		Model model = models.get(id);
 		if (model == null || model.id == Registry.INVALID) {
 			return;
@@ -145,7 +151,7 @@ public class ModelManager {
 	}
 	
 	public static void finishRendering() {
-		if (Nemgine.getSide() == Side.SERVER) {
+		if (Nemgine.getSide() == Side.SERVER || (Nemgine.isInCompatibilityMode() && FrameBufferManager.inFrameBuffer)) {
 			return;
 		}
 		ShaderManager.unbindShader();

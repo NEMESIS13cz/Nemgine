@@ -12,6 +12,7 @@ import com.nemezor.nemgine.misc.Side;
 public @interface Application {
 	
 	boolean contained() default false;
+	boolean compatibilityMode() default false;
 	Side side() default Side.CLIENT;
 	int width() default 600;
 	int height() default 400;

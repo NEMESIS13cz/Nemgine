@@ -17,6 +17,7 @@ import org.lwjgl.util.vector.Vector3f;
 import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.ErrorScreen;
 import com.nemezor.nemgine.misc.Logger;
+import com.nemezor.nemgine.misc.Platform;
 import com.nemezor.nemgine.misc.Registry;
 import com.nemezor.nemgine.misc.Side;
 
@@ -61,8 +62,6 @@ public class Loader {
 			return;
 		}
 		
-		ContextAttribs attributes = new ContextAttribs(3, 2).withForwardCompatible(true).withProfileCore(true);
-		
 		try {
 			Display.setTitle(appTitle);
 			Display.setResizable(false);
@@ -76,7 +75,12 @@ public class Loader {
 			frame.setLocationRelativeTo(null);
 			frame.setVisible(true);
 			Display.setParent(canvas);
-			Display.create(new PixelFormat(), attributes);
+			if (Nemgine.isInCompatibilityMode() && Platform.getOpenGLVersion() < Registry.OPENGL_OFFICIAL_SUPPORTED_VERSION) {
+				Display.create(new PixelFormat());
+			}else{
+				ContextAttribs attributes = new ContextAttribs(3, 2).withForwardCompatible(true).withProfileCore(true);
+				Display.create(new PixelFormat(), attributes);
+			}
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 		}
