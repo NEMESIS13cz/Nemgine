@@ -5,14 +5,13 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import com.nemezor.nemgine.debug.DebugColorizer;
 import com.nemezor.nemgine.graphics.DisplayManager;
-import com.nemezor.nemgine.graphics.FrameBufferManager;
 import com.nemezor.nemgine.graphics.GLHelper;
 import com.nemezor.nemgine.graphics.ModelManager;
 import com.nemezor.nemgine.graphics.ShaderManager;
 import com.nemezor.nemgine.graphics.TextureManager;
 import com.nemezor.nemgine.graphics.util.Camera;
-import com.nemezor.nemgine.graphics.util.FrameBuffer;
 import com.nemezor.nemgine.main.Application;
 import com.nemezor.nemgine.main.IMainRenderLoop;
 import com.nemezor.nemgine.main.Nemgine;
@@ -26,13 +25,13 @@ public class GuiTest implements IMainRenderLoop {
 	private int logo;
 	private int angle = 0;
 	private int water;
-	private int frame;
-	private int waterLevel = -20;
 	private int testTexture;
 	
+	private DebugColorizer colorizer = new DebugColorizer(0);
+	private Color currColor = new Color(0xFFFFFFFF);
 	private Camera cam;
 	
-	@Application(name="Gui Test", width=1280, height=720, path="tests/water", contained=true)
+	@Application(name="Gui Test", width=1280, height=720, path="tests/gui", contained=true)
 	public void entry() {
 		int thread = Nemgine.generateThreads("Render", true);
 		Nemgine.bindRenderLoop(thread, this);
@@ -50,25 +49,14 @@ public class GuiTest implements IMainRenderLoop {
 		
 		Matrix4f transform = GLHelper.initTransformationMatrix(cam, new Vector3f(0, -5, -25), new Vector3f(0, (float)Math.toRadians(angle), 0), new Vector3f(1, 1, 1));
 		Matrix4f logoTransform = GLHelper.initTransformationMatrix(cam, new Vector3f(-15, 10, -30), new Vector3f((float)Math.toRadians(15 + angle), (float)Math.toRadians(25 + angle), (float)Math.toRadians(15)), new Vector3f(1, 1, 1));
-		Matrix4f waterTransform = GLHelper.initTransformationMatrix(cam, new Vector3f(0, waterLevel, -25), new Vector3f(), new Vector3f(100, 1, 100));
-		Vector3f camP = cam.getPosition();
-		Vector3f camR = cam.getRotation();
-		Camera invertCam = new Camera(new Vector3f(camP.x, waterLevel - camP.y, camP.z), new Vector3f(-camR.x, camR.y, camR.z));
-		Matrix4f logoTransform2 = GLHelper.initTransformationMatrix(invertCam, new Vector3f(-15, 10, -30), new Vector3f((float)Math.toRadians(15 + angle), (float)Math.toRadians(25 + angle), (float)Math.toRadians(15)), new Vector3f(1, 1, 1));
-		Matrix4f transform2 = GLHelper.initTransformationMatrix(invertCam, new Vector3f(0, -5, -25), new Vector3f(0, (float)Math.toRadians(angle), 0), new Vector3f(1, 1, 1));
 		Matrix4f testTransform = GLHelper.initTransformationMatrix(new Vector3f(0.25f, 0.25f, 0), new Vector3f((float)Math.toRadians(90), 0, 0), new Vector3f(0.25f, 1, 0.25f));
 		
-		FrameBufferManager.bindFrameBuffer(frame);
-		
-		ModelManager.renderModel(model, 0, shader, transform2, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
-		ModelManager.renderModel(logo, 0, logoShader, logoTransform2, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
-		ModelManager.finishRendering();
-		
-		FrameBufferManager.unbindFrameBuffer();
+		ShaderManager.bindShader(shader);
+		ShaderManager.loadVector4(shader, "lightColorIn", (currColor = colorizer.getNext(currColor)).getColorAsVector());
+		ShaderManager.unbindShader();
 		
 		ModelManager.renderModel(model, 0, shader, transform, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
 		ModelManager.renderModel(logo, 0, logoShader, logoTransform, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
-		ModelManager.renderModelWithFrameBufferTexture(ModelManager.getSquareModelID(), frame, FrameBuffer.TEXTURE_BUFFER, water, waterTransform, GLHelper.getCurrentPerspectiveProjectionMatrix(), "transformation", "projection");
 		
 		ModelManager.renderModelWithColor(ModelManager.getSquareModelID(), testTexture, ShaderManager.getTextureShaderID(), testTransform, GLHelper.initBasicOrthographicProjectionMatrix(), new Color(1, 1, 1, 0.5f), "transformation", "projection", "color");
 		
@@ -82,8 +70,6 @@ public class GuiTest implements IMainRenderLoop {
 	@Override
 	public void setUpRender() {
 		DisplayManager.setOpenGLConfiguration(70.0f, 0.002f, 500.0f);
-		frame = FrameBufferManager.generateFrameBuffers();
-		FrameBufferManager.initializeFrameBuffer(frame, 800, 450, true, false, true);
 	}
 
 	@Override
@@ -105,9 +91,9 @@ public class GuiTest implements IMainRenderLoop {
 	public void loadResources() {
 		TextureManager.initializeTexture(testTexture, "com/nemezor/nemgine/tests/gui/test_texture.png");
 		
-		ShaderManager.initializeShader(shader, "com/nemezor/nemgine/tests/reflection/vertex.shader", 
-											   "com/nemezor/nemgine/tests/reflection/fragment.shader", 
-											   new String[] {"projection", "transformation", "light"}, 
+		ShaderManager.initializeShader(shader, "com/nemezor/nemgine/tests/gui/shader.vert", 
+											   "com/nemezor/nemgine/tests/gui/shader.frag", 
+											   new String[] {"projection", "transformation", "lightVectorIn", "lightColorIn"}, 
 											   new String[] {"position", "normal"}, new int[] {0, 2});
 		ShaderManager.initializeShader(logoShader, "com/nemezor/nemgine/tests/reflection/logo.vertex", 
 												   "com/nemezor/nemgine/tests/reflection/logo.fragment", 
@@ -121,7 +107,7 @@ public class GuiTest implements IMainRenderLoop {
 		ShaderManager.bindShader(shader);
 		ShaderManager.loadMatrix4(shader, "projection", GLHelper.getCurrentPerspectiveProjectionMatrix());
 		ShaderManager.loadMatrix4(shader, "transformation", new Matrix4f());
-		ShaderManager.loadVector3(shader, "light", new Vector3f(-50, 30, 10));
+		ShaderManager.loadVector3(shader, "lightVectorIn", new Vector3f(-50, 30, 10));
 		ShaderManager.bindShader(logoShader);
 		ShaderManager.loadMatrix4(logoShader, "projection", GLHelper.getCurrentPerspectiveProjectionMatrix());
 		ShaderManager.loadMatrix4(logoShader, "transformation", new Matrix4f());

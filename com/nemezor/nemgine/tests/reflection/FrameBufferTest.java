@@ -157,7 +157,6 @@ public class FrameBufferTest implements IMainRenderLoop {
 		ShaderManager.unbindShader();
 		
 		ModelManager.initializeModel(model, "com/nemezor/nemgine/tests/reflection/dragon.obj");
-		ModelManager.initializeModel(model, "com/nemezor/nemgine/tests/imperator.obj");
 		ModelManager.initializeModel(logo, "com/nemezor/nemgine/tests/reflection/nemgine.obj");
 		ModelManager.initializeModel(square, "com/nemezor/nemgine/tests/reflection/square.obj");
 	}
