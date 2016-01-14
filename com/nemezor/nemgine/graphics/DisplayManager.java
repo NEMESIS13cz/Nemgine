@@ -4,6 +4,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
 import com.nemezor.nemgine.main.Nemgine;
+import com.nemezor.nemgine.misc.Color;
 import com.nemezor.nemgine.misc.Side;
 
 public class DisplayManager {
@@ -58,6 +59,12 @@ public class DisplayManager {
 	public static void changeTitle(String newTitle) {
 		if (Nemgine.getSide() == Side.CLIENT) {
 			Display.setTitle(newTitle);
+		}
+	}
+	
+	public static void fillDisplay(Color c) {
+		if (Nemgine.getSide().isClient()) {
+			GL11.glClearColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
 		}
 	}
 }

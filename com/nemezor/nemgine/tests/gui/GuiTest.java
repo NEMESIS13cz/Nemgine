@@ -46,6 +46,7 @@ public class GuiTest implements IMainRenderLoop {
 		}
 		DisplayManager.resize();
 		DisplayManager.prepareRender();
+		DisplayManager.fillDisplay(new Color(0x0000FFFF));
 		
 		Matrix4f transform = GLHelper.initTransformationMatrix(cam, new Vector3f(0, -5, -25), new Vector3f(0, (float)Math.toRadians(angle), 0), new Vector3f(1, 1, 1));
 		Matrix4f logoTransform = GLHelper.initTransformationMatrix(cam, new Vector3f(-15, 10, -30), new Vector3f((float)Math.toRadians(15 + angle), (float)Math.toRadians(25 + angle), (float)Math.toRadians(15)), new Vector3f(1, 1, 1));
