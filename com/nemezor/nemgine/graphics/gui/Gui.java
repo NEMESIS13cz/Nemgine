@@ -2,13 +2,11 @@ package com.nemezor.nemgine.graphics.gui;
 
 import java.util.ArrayList;
 
-import org.lwjgl.opengl.Display;
-
 import com.nemezor.nemgine.graphics.GLHelper;
 import com.nemezor.nemgine.input.Mouse;
 import com.nemezor.nemgine.misc.RenderAttributes;
 
-public class Gui {
+public class Gui { //TODO FIX ALL THE THINGS
 
 	private int state;
 	private ArrayList<IGuiComponent> components = new ArrayList<IGuiComponent>();
@@ -41,8 +39,8 @@ public class Gui {
 	}
 	
 	public void resize() {
-		width = Display.getWidth();
-		height = Display.getHeight();
+		//width = Display.getWidth();
+		//height = Display.getHeight();
 		
 		for (IGuiComponent c : components) {
 			c.resize(width, height);

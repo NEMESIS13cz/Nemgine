@@ -5,12 +5,12 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL32;
 
+import com.nemezor.nemgine.graphics.util.Display;
 import com.nemezor.nemgine.graphics.util.FrameBuffer;
 import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.Registry;
@@ -57,7 +57,7 @@ public class FrameBufferManager {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 	}
 	
-	public static void unbindFrameBuffer() {
+	public static void unbindFrameBuffer(Display window) {
 		if (currentBuffer == 0 || Nemgine.getSide() == Side.SERVER) {
 			return;
 		}
@@ -68,7 +68,7 @@ public class FrameBufferManager {
 			return;
 		}
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
-		GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
+		GL11.glViewport(0, 0, window.getWidth(), window.getHeight());
 	}
 	
 	public static void bindFrameBufferTexture(int id, int texture) {
@@ -132,8 +132,6 @@ public class FrameBufferManager {
 		if (Nemgine.getSide() == Side.SERVER || Nemgine.isInCompatibilityMode()) {
 			return;
 		}
-		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
-		GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
 		Iterator<Integer> keys = buffers.keySet().iterator();
 		
 		while (keys.hasNext()) {
@@ -145,7 +143,7 @@ public class FrameBufferManager {
 		buffers.clear();
 	}
 	
-	public static boolean initializeFrameBuffer(int id, int width, int height, boolean textureBuffer, boolean depthTextureBuffer, boolean depthBuffer) {
+	public static boolean initializeFrameBuffer(Display window, int id, int width, int height, boolean textureBuffer, boolean depthTextureBuffer, boolean depthBuffer) {
 		if (currentBuffer == id || Nemgine.isInCompatibilityMode()) {
 			return false;
 		}
@@ -182,7 +180,7 @@ public class FrameBufferManager {
 			GL30.glFramebufferRenderbuffer(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, GL30.GL_RENDERBUFFER, depth);
 		}
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
-		GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
+		GL11.glViewport(0, 0, window.getWidth(), window.getHeight());
 		buffer.id = glId;
 		buffer.texture = texture;
 		buffer.depth = depth;

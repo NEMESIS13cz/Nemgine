@@ -2,8 +2,9 @@ package com.nemezor.nemgine.main;
 
 import java.util.ArrayList;
 
+import org.lwjgl.opengl.GL;
+
 import com.nemezor.nemgine.exceptions.ThreadException;
-import com.nemezor.nemgine.graphics.Loader;
 import com.nemezor.nemgine.misc.ErrorScreen;
 import com.nemezor.nemgine.misc.Registry;
 
@@ -27,8 +28,8 @@ public class BindableThread extends Thread {
 	}
 	
 	private void runMain() {
-		Loader.initialize(Nemgine.w, Nemgine.h, Nemgine.name);
 		if (render != null) {
+			GL.setCapabilities(Nemgine.glCaps);
 			try{
 				render.setUpRender();
 			}catch (Exception e) {
@@ -39,10 +40,9 @@ public class BindableThread extends Thread {
 				ErrorScreen.show(Registry.LOADING_SCREEN_ERROR + "\n\n" + e.getLocalizedMessage() + "\n" + stack, true);
 			}
 		}
-		Loader.postInitialize();
-		if (render != null) {
+		if (tick != null) {
 			try{
-				render.generateResources();
+				tick.setUpTick();
 			}catch (Exception e) {
 				String stack = "";
 				for (StackTraceElement el : e.getStackTrace()) {
@@ -51,26 +51,6 @@ public class BindableThread extends Thread {
 				ErrorScreen.show(Registry.LOADING_SCREEN_ERROR + "\n\n" + e.getLocalizedMessage() + "\n" + stack, true);
 			}
 		}
-		if (tick != null) {
-			tick.generateResources();
-		}
-		Loader.loadDefaultResources();
-		if (render != null) {
-			try{
-				render.loadResources();
-			}catch (Exception e) {
-				String stack = "";
-				for (StackTraceElement el : e.getStackTrace()) {
-					stack += el.toString() + "\n";
-				}
-				ErrorScreen.show(Registry.LOADING_SCREEN_ERROR + "\n\n" + e.getLocalizedMessage() + "\n" + stack, true);
-			}
-		}
-		if (tick != null) {
-			tick.loadResources();
-			tick.setUpTick();
-		}
-		Loader.finish();
 		
 		long SLEEP = 0;
 		long RENDER_SLEEP = 0;

@@ -1,10 +1,13 @@
 package com.nemezor.nemgine.misc;
 
-import org.lwjgl.LWJGLException;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.Pbuffer;
-import org.lwjgl.opengl.PixelFormat;
+import org.lwjgl.opengl.GL20;
+import org.lwjgl.system.MemoryUtil;
+
+import com.nemezor.nemgine.exceptions.WindowException;
+import com.nemezor.nemgine.main.Nemgine;
 
 public class Platform {
 	
@@ -16,8 +19,9 @@ public class Platform {
 	private static String openGLVendor;
 	private static String openGLRenderer;
 	private static String[] openGLExtensions;
-	private static int openGLVersion = Registry.INVALID;
 	private static int openGLTextureSize = Registry.INVALID;
+	private static GLVersion openGLVersion = new GLVersion(Registry.INVALID, Registry.INVALID);
+	private static GLVersion GLSLVersion = new GLVersion(Registry.INVALID, Registry.INVALID);
 	
 	private static Runtime runtime = Runtime.getRuntime();
 	
@@ -36,24 +40,48 @@ public class Platform {
 		if (headless) {
 			return;
 		}
-		try {
-			Pbuffer gl = new Pbuffer(1, 1, new PixelFormat(), null);
-			gl.makeCurrent();
-			
-			openGLVersion = GL30.glGetInteger(GL30.GL_MAJOR_VERSION, 0);
-			openGLVendor = GL11.glGetString(GL11.GL_VENDOR);
-			openGLRenderer = GL11.glGetString(GL11.GL_RENDERER);
-			openGLExtensions = GL11.glGetString(GL11.GL_EXTENSIONS).split(" ");
-			openGLTextureSize = GL11.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE);
-			
-			gl.destroy();
-		} catch (LWJGLException e) {
+		setDefaultGLFWWindowConfigurations();
+		long window = GLFW.glfwCreateWindow(1, 1, Registry.NEMGINE_NAME, MemoryUtil.NULL, MemoryUtil.NULL);
+		if (window == MemoryUtil.NULL) {
+			WindowException e = new WindowException(Registry.WINDOW_EXCEPTION_PLATFORM_DATA_EXTRACTION);
 			e.printStackTrace();
+			String stack = "";
+			for (StackTraceElement el : e.getStackTrace()) {
+				stack += el.toString() + "\n";
+			}
+			ErrorScreen.show(Registry.WINDOW_EXCEPTION_PLATFORM_DATA_EXTRACTION + "\n\n" + e.getLocalizedMessage() + "\n" + stack, true);
 		}
+		GLFW.glfwMakeContextCurrent(window);
+		GL.createCapabilities(Registry.OPENGL_FORWARD_COMPATIBLE);
+		
+		openGLVendor = GL11.glGetString(GL11.GL_VENDOR);
+		openGLRenderer = GL11.glGetString(GL11.GL_RENDERER);
+		String[] SLVerTemp = GL11.glGetString(GL20.GL_SHADING_LANGUAGE_VERSION).split("\\.");
+		String[] GLVerTemp = GL11.glGetString(GL11.GL_VERSION).split("\\.");
+		String extTemp = GL11.glGetString(GL11.GL_EXTENSIONS);
+		openGLTextureSize = GL11.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE);
+		
+		if (extTemp != null) {
+			openGLExtensions = extTemp.split(" ");
+		}else{
+			openGLExtensions = new String[0];
+		}
+		try{
+			openGLVersion = new GLVersion(Integer.parseInt(GLVerTemp[0]), Integer.parseInt(GLVerTemp[1]));
+		} catch (NumberFormatException e) {}
+		try{
+			GLSLVersion = new GLVersion(Integer.parseInt(SLVerTemp[0]), Integer.parseInt(SLVerTemp[1]));
+		} catch (NumberFormatException e) {}
+		
+		GLFW.glfwDestroyWindow(window);
 	}
 	
-	public static int getOpenGLVersion() {
-		return openGLVersion;
+	public static GLVersion getOpenGLVersion() {
+		return openGLVersion.clone();
+	}
+	
+	public static GLVersion getGLSLVersion() {
+		return GLSLVersion.clone();
 	}
 
 	public static String getOpenGLVendor() {
@@ -114,5 +142,23 @@ public class Platform {
 
 	public static void freeUpMemory() {
 		runtime.gc();
+	}
+	
+	public static void setDefaultGLFWWindowConfigurations() {
+		if (Nemgine.getSide().isServer()) {
+			return;
+		}
+		GLFW.glfwDefaultWindowHints();
+		GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
+		GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_TRUE);
+		if (Nemgine.isInCompatibilityMode()) {
+			GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_ANY_PROFILE);
+			GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
+			GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 0);
+		}else{
+			GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
+			GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
+			GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 2);
+		}
 	}
 }

@@ -11,27 +11,13 @@ import org.lwjgl.util.vector.Vector3f;
 
 import com.nemezor.nemgine.graphics.util.Camera;
 import com.nemezor.nemgine.main.Nemgine;
+import com.nemezor.nemgine.misc.Color;
 import com.nemezor.nemgine.misc.Registry;
 import com.nemezor.nemgine.misc.Side;
 
 public class GLHelper {
-
-	protected static float zNear;
-	protected static float zFar;
-	protected static float aspect;
-	protected static float FOV;
-	
-	private static Matrix4f projection = new Matrix4f();
 	
 	private GLHelper() {}
-	
-	protected static void updatePerspectiveProjection() {
-		projection = initPerspectiveProjectionMatrix(FOV, aspect, zNear, zFar);
-	}
-	
-	public static Matrix4f getCurrentPerspectiveProjectionMatrix() {
-		return projection;
-	}
 	
 	public static Matrix4f initTransformationMatrix(Camera camera, Vector3f translation, Vector3f rotation, Vector3f scale) {
 		Matrix4f mat = initTransformationMatrix(translation, rotation, scale);
@@ -117,10 +103,23 @@ public class GLHelper {
 	}
 	
 	public static void enableBlending() {
+		if (Nemgine.getSide().isServer()) {
+			return;
+		}
 		GL11.glEnable(GL11.GL_BLEND);
 	}
 	
 	public static void disableBlending() {
+		if (Nemgine.getSide().isServer()) {
+			return;
+		}
 		GL11.glDisable(GL11.GL_BLEND);
+	}
+	
+	public static void fillDisplay(Color c) {
+		if (Nemgine.getSide().isServer()) {
+			return;
+		}
+		GL11.glClearColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
 	}
 }

@@ -24,8 +24,14 @@ public class FontManager {
 		if (Nemgine.getSide().isServer()) {
 			return false;
 		}
+		int width = 0;
+		int chars = 0;
 		
-		
+		for (int i = 0; i < 0xFFFF; i++) {
+			if (font.canDisplay(i)) {
+				System.out.println((char)i);
+			}
+		}
 		
 		return false;
 	}

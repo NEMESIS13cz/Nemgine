@@ -1,19 +1,13 @@
 package com.nemezor.nemgine.graphics;
 
-import java.awt.Canvas;
-import java.awt.Dimension;
-
-import javax.swing.JFrame;
-
-import org.lwjgl.LWJGLException;
-import org.lwjgl.opengl.ContextAttribs;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.PixelFormat;
+import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import com.nemezor.nemgine.exceptions.WindowException;
 import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.ErrorScreen;
 import com.nemezor.nemgine.misc.Logger;
@@ -23,11 +17,8 @@ import com.nemezor.nemgine.misc.Side;
 
 public class Loader {
 
-	private static int appW;
-	private static int appH;
 	private static String appTitle;
 	private static boolean initialized = false;
-	private static boolean postinitialized = false;
 	private static boolean isDone = false;
 	private static boolean loaded = false;
 	private static int logoShader = 0;
@@ -35,12 +26,12 @@ public class Loader {
 	private static int texture = 0;
 	private static Matrix4f transformation;
 	private static Matrix4f perspective;
-	private static JFrame frame;
 	private static Matrix4f textureTransformation;
 	private static Matrix4f shaderTransformation;
 	private static Matrix4f modelTransformation;
 	private static long frameskip = Registry.ONE_SECOND_IN_MILLIS / Registry.LOADING_SCREEN_REFRESHRATE;
 	private static long lastFrame = 0;
+	private static long window;
 	
 	protected static int shaderCounter = 0;
 	protected static int modelCounter = 0;
@@ -49,12 +40,10 @@ public class Loader {
 	protected static int modelProgress = 0;
 	protected static int textureProgress = 0;
 	
-	public static void initialize(int appWidth, int appHeight, String title) {
+	public static void initialize(String title) {
 		if (initialized) {
 			return;
 		}
-		appW = appWidth;
-		appH = appHeight;
 		appTitle = title;
 		
 		if (Nemgine.getSide() == Side.SERVER) {
@@ -62,44 +51,25 @@ public class Loader {
 			return;
 		}
 		
-		try {
-			Display.setTitle(appTitle);
-			Display.setResizable(false);
-			frame = new JFrame();
-			Canvas canvas = new Canvas();
-			frame.getContentPane().add(canvas);
-			frame.setUndecorated(true);
-			frame.setTitle(appTitle);
-			frame.pack();
-			frame.setSize(Registry.LOADING_SCREEN_WIDTH, Registry.LOADING_SCREEN_HEIGHT);
-			frame.setLocationRelativeTo(null);
-			frame.setVisible(true);
-			Display.setParent(canvas);
-			if (Nemgine.isInCompatibilityMode() && Platform.getOpenGLVersion() < Registry.OPENGL_OFFICIAL_SUPPORTED_VERSION) {
-				Display.create(new PixelFormat());
-			}else{
-				ContextAttribs attributes = new ContextAttribs(3, 2).withForwardCompatible(true).withProfileCore(true);
-				Display.create(new PixelFormat(), attributes);
-			}
-		} catch (LWJGLException e) {
+		Platform.setDefaultGLFWWindowConfigurations();
+		GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_FALSE);
+		GLFW.glfwWindowHint(GLFW.GLFW_DECORATED, GLFW.GLFW_FALSE);
+		window = GLFW.glfwCreateWindow(Registry.LOADING_SCREEN_WIDTH, Registry.LOADING_SCREEN_HEIGHT, appTitle, MemoryUtil.NULL, MemoryUtil.NULL);
+		if (window == MemoryUtil.NULL) {
+			WindowException e = new WindowException(Registry.WINDOW_EXCEPTION_LOADING_SCREEN_INITIALIZATION_FAILED);
 			e.printStackTrace();
+			String stack = "";
+			for (StackTraceElement el : e.getStackTrace()) {
+				stack += el.toString() + "\n";
+			}
+			ErrorScreen.show(Registry.WINDOW_EXCEPTION_LOADING_SCREEN_INITIALIZATION_FAILED + "\n\n" + e.getLocalizedMessage() + "\n" + stack, true);
 		}
-		initialized = true;
-	}
-	
-	public static void postInitialize() {
-		if (postinitialized) {
-			return;
-		}
-		if (Nemgine.getSide() == Side.SERVER) {
-			postinitialized = true;
-			update();
-			return;
-		}
+		GLFWVidMode mode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
+		GLFW.glfwSetWindowPos(window, (mode.width() - Registry.LOADING_SCREEN_WIDTH) / 2, (mode.height() - Registry.LOADING_SCREEN_HEIGHT) / 2);
+		GLFW.glfwMakeContextCurrent(window);
+		GLFW.glfwShowWindow(window);
 		
-		GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
-		GLHelper.aspect = (float) Display.getWidth() / (float) Display.getHeight();
-		GLHelper.updatePerspectiveProjection();
+		GL11.glViewport(0, 0, Registry.LOADING_SCREEN_WIDTH, Registry.LOADING_SCREEN_HEIGHT);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
@@ -112,8 +82,10 @@ public class Loader {
 		shaderTransformation = GLHelper.initTransformationMatrix(new Vector3f(0, 0.5f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f, 0, 0.1f));
 		modelTransformation = GLHelper.initTransformationMatrix(new Vector3f(0, 0.7f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f, 0, 0.1f));
 		perspective = GLHelper.initOrthographicProjectionMatrix(-1, 1, 1, -1, -1, 1);
-		postinitialized = true;
+
+		initialized = true;
 		update();
+		
 		ShaderManager.generateGuiShaderIDs();
 	}
 	
@@ -128,13 +100,8 @@ public class Loader {
 		ShaderManager.dispose(logoShader);
 		ShaderManager.dispose(barShader);
 		TextureManager.dispose(texture);
-		try {
-			Display.setParent(null);
-			Display.setDisplayMode(new DisplayMode(appW, appH));
-		} catch (LWJGLException e) {}
-		Display.setResizable(true);
-		DisplayManager.reinitializeOpenGL();
-		frame.dispose();
+		GLFW.glfwDestroyWindow(window);
+		GLFW.glfwMakeContextCurrent(MemoryUtil.NULL);
 		isDone = true;
 	}
 	
@@ -165,7 +132,9 @@ public class Loader {
 		textureTransformation = GLHelper.initTransformationMatrix(new Vector3f(-0.8f + (0.8f * (float)textureProgress / (float)textureCounter), -0.3f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f * (float)textureProgress / (float)textureCounter, 0, 0.1f));
 		shaderTransformation = GLHelper.initTransformationMatrix(new Vector3f(-0.8f + (0.8f * (float)shaderProgress / (float)shaderCounter), -0.5f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f * (float)shaderProgress / (float)shaderCounter, 0, 0.1f));
 		modelTransformation = GLHelper.initTransformationMatrix(new Vector3f(-0.8f + (0.8f * (float)modelProgress / (float)modelCounter), -0.7f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f * (float)modelProgress / (float)modelCounter, 0, 0.1f));
-		DisplayManager.prepareRender();
+		
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+		
 		ModelManager.renderModel(ModelManager.getSquareModelID(), texture, logoShader, transformation, perspective, "transformation", "projection");
 		ShaderManager.bindShader(barShader);
 		ShaderManager.loadFloat(barShader, "progress", (float)textureProgress / (float)textureCounter);
@@ -176,7 +145,8 @@ public class Loader {
 		ModelManager.renderModel(ModelManager.getSquareModelID(), 0, barShader, modelTransformation, perspective, "transformation", "projection");
 		
 		ModelManager.finishRendering();
-		DisplayManager.finishRender();
+		GLFW.glfwSwapBuffers(window);
+		GLFW.glfwPollEvents();
 		lastFrame = System.currentTimeMillis();
 	}
 	
@@ -214,15 +184,7 @@ public class Loader {
 		ErrorScreen.show(message, true);
 	}
 	
-	public static Dimension getSize() {
-		return new Dimension(Display.getWidth(), Display.getHeight());
-	}
-	
-	public static String getTitle() {
-		return Display.getTitle();
-	}
-	
 	public static boolean loading() {
-		return postinitialized ? !isDone : false;
+		return initialized ? !isDone : false;
 	}
 }

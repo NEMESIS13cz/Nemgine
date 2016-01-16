@@ -1,70 +1,62 @@
 package com.nemezor.nemgine.graphics;
 
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
+import java.util.HashMap;
+import java.util.Iterator;
 
+import com.nemezor.nemgine.graphics.util.Display;
 import com.nemezor.nemgine.main.Nemgine;
-import com.nemezor.nemgine.misc.Color;
-import com.nemezor.nemgine.misc.Side;
+import com.nemezor.nemgine.misc.Registry;
 
 public class DisplayManager {
-	
+
 	private DisplayManager() {}
 
-	public static void setOpenGLConfiguration(float fieldOfView, float zNear, float zFar) {
-		GLHelper.FOV = fieldOfView;
-		GLHelper.zFar = zFar;
-		GLHelper.zNear = zNear;
-	}
-
-	protected static void reinitializeOpenGL() {
-		if (Nemgine.getSide() == Side.CLIENT) {
-			GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
-			GLHelper.aspect = (float) Display.getWidth() / (float) Display.getHeight();
-			GLHelper.updatePerspectiveProjection();
+	private static HashMap<Integer, Display> displays = new HashMap<Integer, Display>();
+	private static int displayCounter = 0;
+	
+	public static synchronized int generateDisplays() {
+		if (Nemgine.getSide().isServer()) {
+			return Registry.INVALID;
 		}
-	}
-
-	public static boolean closeRequested() {
-		return Display.isCloseRequested();
-	}
-
-	public static boolean resize() {
-		if (Nemgine.getSide() == Side.CLIENT && Display.wasResized()) {
-			reinitializeOpenGL();
-			GuiManager.resizeActiveGuis();
-			return true;
-		}
-		return false;
-	}
-
-	public static void dispose() {
-		if (Nemgine.getSide() == Side.CLIENT) {
-			Display.destroy();
-		}
-	}
-
-	public static void prepareRender() {
-		if (Nemgine.getSide() == Side.CLIENT) {
-			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		}
-	}
-
-	public static void finishRender() {
-		if (Nemgine.getSide() == Side.CLIENT) {
-			Display.update();
-		}
+		displayCounter++;
+		displays.put(displayCounter, new Display(Registry.INVALID));
+		return displayCounter;
 	}
 	
-	public static void changeTitle(String newTitle) {
-		if (Nemgine.getSide() == Side.CLIENT) {
-			Display.setTitle(newTitle);
+	public static Display initializeDisplay(int id, float fieldOfView, int width, int height, float zNear, float zFar, boolean resizable) {
+		Display display = displays.get(id);
+		if (display == null || display.getStatus() != Registry.INVALID) {
+			return null;
 		}
+		display.initialize(fieldOfView, width, height, zNear, zFar, resizable);
+		display.setStatus(0);
+		return display;
+	}
+
+	public static void dispose(int id) {
+		if (Nemgine.getSide().isServer()) {
+			return;
+		}
+		Display display = displays.get(id);
+		if (display == null || display.getStatus() == Registry.INVALID) {
+			return;
+		}
+		display.dispose();
+		displays.remove(id);
 	}
 	
-	public static void fillDisplay(Color c) {
-		if (Nemgine.getSide().isClient()) {
-			GL11.glClearColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+	public static void disposeAll() {
+		if (Nemgine.getSide().isServer()) {
+			return;
 		}
+		Iterator<Integer> keys = displays.keySet().iterator();
+		
+		while (keys.hasNext()) {
+			Display display = displays.get(keys.next());
+			if (display.getStatus() != Registry.INVALID) {
+				display.dispose();
+			}
+		}
+		displays.clear();
 	}
 }

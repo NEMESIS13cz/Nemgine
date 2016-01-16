@@ -8,7 +8,7 @@ import com.nemezor.nemgine.input.Mouse;
 import com.nemezor.nemgine.misc.Color;
 import com.nemezor.nemgine.misc.RenderAttributes;
 
-public class BaseComponent implements IGuiComponent {
+public class BaseComponent implements IGuiComponent { //TODO FIX ALL THE THINGS
 
 	private int x, y, fx, fy, w, h;  // initial x, y, farX, farY, width, height
 	private int al, ar, at, ab; // absolute left, right, top, bottom

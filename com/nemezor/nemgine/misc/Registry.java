@@ -38,6 +38,11 @@ public final class Registry {
 	public static final int SOCKET_DEFAULT_TIMEOUT = 5000;
 	
 	////////////////////////////////////////////////////////////////////////////////////////
+
+	// Main
+	public static final boolean OPENGL_FORWARD_COMPATIBLE = true;
+	
+	////////////////////////////////////////////////////////////////////////////////////////
 	
 	// Main
 	public static final String NEMGINE_NAME = "Nemgine";
@@ -49,6 +54,14 @@ public final class Registry {
 	public static final String NEMGINE_EXCEPTION_SHUTDOWN = "The application has encountered an unexpected exception.";
 	public static final String NEMGINE_EXCEPTION_SHUTDOWN_MORE = "More information can be found in the logs.";
 	public static final String NEMGINE_OPENGL_VERSION_OUT_OF_DATE = "Your OpenGL version is not sufficient to run Nemgine.";
+	public static final String NEMGINE_FAILED_TO_INITIALIZE_GLFW = "Failed to initialize GLFW.";
+	public static final String NEMGINE_FAILED_TO_INSTANTIATE_APPLICATION = "Failed to create an instance of application class.";
+	
+	// Window
+	public static final String WINDOW_EXCEPTION_NO_ACCESSOR = "Anonymous Window Accessor";
+	public static final String WINDOW_EXCEPTION_FAILED_TO_CREATE = "Failed to create GLFW Window.";
+	public static final String WINDOW_EXCEPTION_PLATFORM_DATA_EXTRACTION = "Failed to create Platform window.";
+	public static final String WINDOW_EXCEPTION_LOADING_SCREEN_INITIALIZATION_FAILED = "Failed to create Loading Screen window.";
 	
 	// Misc
 	public static final String LOGO_IMAGE_PATH = "com/nemezor/nemgine/resources/logo.png";
@@ -73,6 +86,9 @@ public final class Registry {
 	public static final String THREAD_TIME_KEEPUP_1 = "Can't keep up at timing! skipping ";
 	public static final String THREAD_TIME_KEEPUP_2 = " seconds.";
 	public static final String THREAD_INTERRUPT = "Thread interrupted! This should NEVER happen!";
+	public static final String THREAD_ALREADY_RUNNING = "Thread is already running!";
+	public static final String THREAD_ALREADY_AUXILIARY = "Thread is already auxiliary thread!";
+	public static final String THREAD_ALREADY_MAIN = "Thread is already a main render or main tick thread!";
 	
 	// Textures
 	public static final String TEXTURE_EXCEPTION_NO_ACCESSOR = "Anonymous Texture Accessor";
@@ -100,6 +116,7 @@ public final class Registry {
 	public static final String SHADER_PROGRESS_BAR_FRAGMENT = "com/nemezor/nemgine/resources/loader_bar.fragment";
 	
 	// Models
+	public static final String MODEL_EXCEPTION_NO_ACCESSOR = "Anonymous Model Accessor";
 	public static final String MODEL_LOADER_NOT_FOUND = "Failed to load model!";
 	public static final String MODEL_LOADER_NAME = "Nemgine Model Loader";
 	public static final String MODEL_MANAGER_NAME = "Nemgine Model Manager";
@@ -112,6 +129,8 @@ public final class Registry {
 	public static final String PARAMS_ARG_PREFIX_2 = "--";
 	public static final String PARAMS_SEPARATOR = "=";
 	public static final String LOADING_SCREEN_ERROR = "Failed to load resources.";
+	public static final String LOADING_RESOURCES_GENERATE_IDS_FAILED = "Failed to generate OpenGL resource IDs.";
+	public static final String LOADING_RESOURCES_LOAD_FAILED = "Failed to load OpenGL resources.";
 	
 	// Network
 	public static final String NETWORK_MANAGER_NAME = "Nemgine Network Manager";
@@ -120,4 +139,9 @@ public final class Registry {
 	public static final String IP_ADDRESS_INVALID_PORT = "Port out of range!";
 	public static final String IP_ADDRESS_NAME = "IP Address Checker";
 	public static final String NETWORK_EXCEPTION_NO_ACCESSOR = "Anonymous Network Accessor";
+	
+	// Parameters
+	public static final String PARAM_CONTAINED = "NGcontained";
+	public static final String PARAM_SERVER = "NGserver";
+	public static final String PARAM_COMPAT = "NGcompat";
 }

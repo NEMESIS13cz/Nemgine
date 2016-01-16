@@ -117,7 +117,7 @@ public class ShaderManager {
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
 		data.store(buffer);
 		buffer.flip();
-		GL20.glUniformMatrix4(currentShaderData.data.get(name), false, buffer);
+		GL20.glUniformMatrix4fv(currentShaderData.data.get(name), false, buffer);
 	}
 
 	public static void loadMatrix3(int id, String name, Matrix3f data) {
@@ -127,7 +127,7 @@ public class ShaderManager {
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(9);
 		data.store(buffer);
 		buffer.flip();
-		GL20.glUniformMatrix3(currentShaderData.data.get(name), false, buffer);
+		GL20.glUniformMatrix3fv(currentShaderData.data.get(name), false, buffer);
 	}
 
 	public static void loadMatrix2(int id, String name, Matrix2f data) {
@@ -137,7 +137,7 @@ public class ShaderManager {
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(4);
 		data.store(buffer);
 		buffer.flip();
-		GL20.glUniformMatrix2(currentShaderData.data.get(name), false, buffer);
+		GL20.glUniformMatrix2fv(currentShaderData.data.get(name), false, buffer);
 	}
 
 	public static void loadVector4(int id, String name, Vector4f data) {
@@ -189,7 +189,7 @@ public class ShaderManager {
 		}
 		buffer.put(data);
 		buffer.flip();
-		ARBShaderObjects.glUniform1ARB(currentShaderData.data.get(name), buffer);
+		ARBShaderObjects.glUniform1fvARB(currentShaderData.data.get(name), buffer);
 	}
 	
 	public static void loadVector3Array(int id, String name, Vector3f[] array) {
@@ -205,7 +205,7 @@ public class ShaderManager {
 		}
 		buffer.put(data);
 		buffer.flip();
-		ARBShaderObjects.glUniform1ARB(currentShaderData.data.get(name), buffer);
+		ARBShaderObjects.glUniform1fvARB(currentShaderData.data.get(name), buffer);
 	}
 	
 	public static void loadVector2Array(int id, String name, Vector2f[] array) {
@@ -220,7 +220,7 @@ public class ShaderManager {
 		}
 		buffer.put(data);
 		buffer.flip();
-		ARBShaderObjects.glUniform1ARB(currentShaderData.data.get(name), buffer);
+		ARBShaderObjects.glUniform1fvARB(currentShaderData.data.get(name), buffer);
 	}
 	
 	public static void loadFloatArray(int id, String name, float[] array) {
@@ -230,7 +230,7 @@ public class ShaderManager {
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(array.length * 2);
 		buffer.put(array);
 		buffer.flip();
-		ARBShaderObjects.glUniform1ARB(currentShaderData.data.get(name), buffer);
+		ARBShaderObjects.glUniform1fvARB(currentShaderData.data.get(name), buffer);
 	}
 
 	public static boolean initializeShader(int id, String vertexFile, String fragmentFile, String[] uniforms, String[] attribNames, int[] attribBinds) {

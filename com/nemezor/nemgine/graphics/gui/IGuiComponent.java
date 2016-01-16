@@ -2,7 +2,7 @@ package com.nemezor.nemgine.graphics.gui;
 
 import com.nemezor.nemgine.misc.RenderAttributes;
 
-public interface IGuiComponent {
+public interface IGuiComponent { //TODO FIX ALL THE THINGS
 
 	public void update(float mouseX, float mouseY);
 	

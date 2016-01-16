@@ -36,7 +36,7 @@ public class ModelException extends Exception {
 	}
 	
 	public void printStackTrace() {
-		Logger.log(thrower == null ? Registry.TEXTURE_EXCEPTION_NO_ACCESSOR : thrower, getLocalizedMessage(), false);
+		Logger.log(thrower == null ? Registry.MODEL_EXCEPTION_NO_ACCESSOR : thrower, getLocalizedMessage(), false);
 		if (name != null) {
 			Logger.log(null, name, false);
 		}
