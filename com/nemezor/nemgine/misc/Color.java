@@ -66,4 +66,8 @@ public class Color {
 	public int getAlphaAsInt() {
 		return (int) (color.w * Registry.COLOR_NORMALIZER_VALUE);
 	}
+	
+	public Color invert() {
+		return new Color(1 - color.x, 1 - color.y, 1 - color.z, color.w);
+	}
 }

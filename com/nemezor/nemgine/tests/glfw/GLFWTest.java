@@ -118,7 +118,7 @@ public class GLFWTest implements IMainRenderLoop {
 			window2.fill(new Color(0x0000FFFF));
 			
 			ShaderManager.bindShader(shader);
-			ShaderManager.loadVector4(shader, "lightColorIn", (currColor = colorizer.getNext(currColor)).getColorAsVector());
+			ShaderManager.loadVector4(shader, "lightColorIn", currColor.invert().getColorAsVector());
 			ShaderManager.unbindShader();
 			
 			ModelManager.renderModel(model, 0, shader, transform, window.getPerspectiveProjectionMatrix(), "transformation", "projection");
