@@ -122,7 +122,7 @@ public class Loader {
 		loaded = true;
 	}
 	
-	public static void update() {
+	private static void update() {
 		if (lastFrame + frameskip > System.currentTimeMillis()) {
 			return;
 		}
