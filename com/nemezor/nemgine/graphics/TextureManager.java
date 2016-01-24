@@ -13,6 +13,7 @@ import java.util.Iterator;
 
 import javax.imageio.ImageIO;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
 import com.nemezor.nemgine.exceptions.TextureException;
@@ -166,13 +167,14 @@ public class TextureManager {
 			data[i] = alpha << 24 | blue << 16 | green << 8 | red;
 		}
 
-		IntBuffer res = ByteBuffer.allocateDirect(data.length * 4).order(ByteOrder.nativeOrder()).asIntBuffer();
+		IntBuffer res = BufferUtils.createIntBuffer(pixels.length);
 		res.put(data).flip();
 
 		int id = GL11.glGenTextures();
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
 		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, w, h, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, res);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 

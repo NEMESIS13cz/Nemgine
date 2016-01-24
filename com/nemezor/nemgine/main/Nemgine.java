@@ -7,8 +7,7 @@ import java.util.Iterator;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GLCapabilities;
+import org.lwjgl.opengl.GL11;
 
 import com.nemezor.nemgine.console.Console;
 import com.nemezor.nemgine.exceptions.ThreadException;
@@ -37,7 +36,6 @@ public class Nemgine {
 	private static long context = 0;
 	private static GLFWErrorCallback errCb = null;
 	
-	protected static GLCapabilities glCaps;
 	protected static boolean hasRenderThread = false;
 	protected static String name;
 	
@@ -100,13 +98,9 @@ public class Nemgine {
 				}
 				
 				Platform.initialize(headless);
-				if (!headless) {
-					context = GLFW.glfwGetCurrentContext();
-					glCaps = GL.getCapabilities();
-				}
 				
 				if (!headless) {
-					Loader.initialize(name);
+					context = Loader.initialize(name);
 					try {
 						resources.invoke(instance, GLResourceEvent.GENERATE_IDS);
 					} catch (Exception e) {
@@ -125,6 +119,7 @@ public class Nemgine {
 						System.exit(Registry.INVALID);
 					}
 					Loader.finish();
+					GL11.glFinish();
 				}
 				
 				try {
@@ -304,7 +299,7 @@ public class Nemgine {
 		return name;
 	}
 	
-	public static long getCurrentOpenGLContext() {
+	public static long getOpenGLContext() {
 		return context;
 	}
 }

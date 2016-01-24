@@ -72,7 +72,7 @@ public class Platform {
 		try{
 			GLSLVersion = new GLVersion(Integer.parseInt(SLVerTemp[0]), Integer.parseInt(SLVerTemp[1]));
 		} catch (NumberFormatException e) {}
-		
+
 		GLFW.glfwDestroyWindow(window);
 	}
 	
@@ -151,6 +151,7 @@ public class Platform {
 		GLFW.glfwDefaultWindowHints();
 		GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
 		GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_TRUE);
+		GLFW.glfwWindowHint(GLFW.GLFW_DOUBLE_BUFFER, GLFW.GLFW_TRUE);
 		if (Nemgine.isInCompatibilityMode()) {
 			GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_ANY_PROFILE);
 			GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);

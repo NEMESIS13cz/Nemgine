@@ -31,4 +31,8 @@ public class Camera {
 	public void move(Vector3f offset) {
 		Vector3f.add(position, offset, position);
 	}
+	
+	public String toString() {
+		return "R-" + rotation.toString() + "\nP-" + position.toString();
+	}
 }

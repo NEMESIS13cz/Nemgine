@@ -22,4 +22,9 @@ public class Mouse {
 	public static boolean isButtonDown(Display window, int id) {
 		return GLFW.glfwGetMouseButton(window.getGLFWId(), id) == GLFW.GLFW_TRUE;
 	}
+	
+	public static boolean isInsideWindow(Display window) {
+		double[] pos = getMousePosition(window);
+		return !(pos[0] < 0 || pos[0] > window.getWidth() || pos[1] < 0 || pos[1] > window.getHeight());
+	}
 }

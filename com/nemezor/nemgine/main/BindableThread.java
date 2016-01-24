@@ -2,8 +2,6 @@ package com.nemezor.nemgine.main;
 
 import java.util.ArrayList;
 
-import org.lwjgl.opengl.GL;
-
 import com.nemezor.nemgine.exceptions.ThreadException;
 import com.nemezor.nemgine.misc.ErrorScreen;
 import com.nemezor.nemgine.misc.Registry;
@@ -29,7 +27,6 @@ public class BindableThread extends Thread {
 	
 	private void runMain() {
 		if (render != null) {
-			GL.setCapabilities(Nemgine.glCaps);
 			try{
 				render.setUpRender();
 			}catch (Exception e) {

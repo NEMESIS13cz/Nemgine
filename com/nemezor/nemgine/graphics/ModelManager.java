@@ -41,7 +41,7 @@ public class ModelManager {
 			return Registry.INVALID;
 		}
 		modelCounter++;
-		models.put(modelCounter, new Model(Registry.INVALID, null, null));
+		models.put(modelCounter, new Model(false));
 		if (Loader.loading()) {
 			Loader.modelCounter++;
 		}
@@ -53,7 +53,7 @@ public class ModelManager {
 		if (model == null) {
 			return;
 		}
-		if (model.id != Registry.INVALID) {
+		if (model.init) {
 			model.dispose();
 		}
 		models.remove(id);
@@ -65,13 +65,16 @@ public class ModelManager {
 		}
 		Iterator<Integer> keys = models.keySet().iterator();
 		
-		while (keys.hasNext()) {
-			Model model = models.get(keys.next());
-			if (model == null) {
-				continue;
-			}
-			if (model.id != Registry.INVALID) {
-				model.dispose();
+		for (int id : DisplayManager.getAllIds()) {
+			DisplayManager.switchDisplay(id);
+			while (keys.hasNext()) {
+				Model model = models.get(keys.next());
+				if (model == null) {
+					continue;
+				}
+				if (model.init) {
+					model.dispose();
+				}
 			}
 		}
 		models.clear();
@@ -94,13 +97,13 @@ public class ModelManager {
 	
 	public static void renderModelWithFrameBufferTexture(int id, int frameBuffer, int texture, int shaderID, Matrix4f transformation, Matrix4f projection, String transformationAttribName, String projectionAttribName) {
 		Model model = models.get(id);
-		if (model == null || model.id == Registry.INVALID || Nemgine.isInCompatibilityMode()) {
+		if (model == null || !model.init || Nemgine.isInCompatibilityMode()) {
 			return;
 		}
 		ShaderManager.bindShader(shaderID);
 		ShaderManager.loadMatrix4(shaderID, projectionAttribName, projection);
 		ShaderManager.loadMatrix4(shaderID, transformationAttribName, transformation);
-		GL30.glBindVertexArray(model.id);
+		GL30.glBindVertexArray(model.id.get(DisplayManager.getCurrentDisplayID()));
 		GL20.glEnableVertexAttribArray(0);
 		if (model.isTextured()) {
 			GL20.glEnableVertexAttribArray(1);
@@ -125,13 +128,13 @@ public class ModelManager {
 			return;
 		}
 		Model model = models.get(id);
-		if (model == null || model.id == Registry.INVALID) {
+		if (model == null || !model.init) {
 			return;
 		}
 		ShaderManager.bindShader(shaderID);
 		ShaderManager.loadMatrix4(shaderID, projectionAttribName, projection);
 		ShaderManager.loadMatrix4(shaderID, transformationAttribName, transformation);
-		GL30.glBindVertexArray(model.id);
+		GL30.glBindVertexArray(model.id.get(DisplayManager.getCurrentDisplayID()));
 		GL20.glEnableVertexAttribArray(0);
 		if (model.isTextured()) {
 			GL20.glEnableVertexAttribArray(1);
@@ -159,6 +162,39 @@ public class ModelManager {
 		FrameBufferManager.unbindFrameBufferTexture();
 	}
 	
+	protected static void reloadModels() {
+		Iterator<Integer> keys = models.keySet().iterator();
+		
+		while (keys.hasNext()) {
+			Model model = models.get(keys.next());
+			if (model == null) {
+				continue;
+			}
+			if (model.init) {
+				reloadModel(model);
+			}
+		}
+	}
+	
+	protected static void reloadModel(Model model) {
+		ModelData data = model.getData();
+		int VAOid = GL30.glGenVertexArrays();
+		GL30.glBindVertexArray(VAOid);
+		IntBuffer ind = BufferUtils.createIntBuffer(data.indices.length);
+		ind.put(data.indices);
+		ind.flip();
+		int indVBOid = GL15.glGenBuffers();
+		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, indVBOid);
+		GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, ind, GL15.GL_STATIC_DRAW);
+		int verVBOid = GLHelper.createBufferAndStore(0, 3, data.vertices);
+		int texVBOid = GLHelper.createBufferAndStore(1, 2, data.textures);
+		int norVBOid = GLHelper.createBufferAndStore(2, 3, data.normals);
+		GL30.glBindVertexArray(0);
+		int[] buffers = new int[] {indVBOid, verVBOid, texVBOid, norVBOid};
+		
+		model.addDisplayResources(VAOid, buffers);
+	}
+	
 	public static boolean initializeModel(int id, String file) {
 		return initializeModelInternal(id, file, true);
 	}
@@ -169,7 +205,7 @@ public class ModelManager {
 	
 	private static boolean initializeModelInternal(int id, String file, boolean textured) {
 		Model model = models.get(id);
-		if (model == null || model.id != Registry.INVALID) {
+		if (model == null || model.init) {
 			return false;
 		}
 		if (Loader.loading()) {
@@ -186,7 +222,6 @@ public class ModelManager {
 			}
 			return false;
 		}
-		
 		int VAOid = GL30.glGenVertexArrays();
 		GL30.glBindVertexArray(VAOid);
 		IntBuffer ind = BufferUtils.createIntBuffer(data.indices.length);
@@ -202,6 +237,7 @@ public class ModelManager {
 		int[] buffers = new int[] {indVBOid, verVBOid, texVBOid, norVBOid};
 		
 		models.put(id, new Model(VAOid, buffers, data));
+		
 		if (Loader.loading()) {
 			Loader.modelLoaded();
 		}

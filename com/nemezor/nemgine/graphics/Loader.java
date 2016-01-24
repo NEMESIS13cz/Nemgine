@@ -2,6 +2,7 @@ package com.nemezor.nemgine.graphics;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.vector.Matrix4f;
@@ -40,15 +41,15 @@ public class Loader {
 	protected static int modelProgress = 0;
 	protected static int textureProgress = 0;
 	
-	public static void initialize(String title) {
+	public static long initialize(String title) {
 		if (initialized) {
-			return;
+			return Registry.INVALID;
 		}
 		appTitle = title;
 		
 		if (Nemgine.getSide() == Side.SERVER) {
 			initialized = true;
-			return;
+			return Registry.INVALID;
 		}
 		
 		Platform.setDefaultGLFWWindowConfigurations();
@@ -67,6 +68,7 @@ public class Loader {
 		GLFWVidMode mode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
 		GLFW.glfwSetWindowPos(window, (mode.width() - Registry.LOADING_SCREEN_WIDTH) / 2, (mode.height() - Registry.LOADING_SCREEN_HEIGHT) / 2);
 		GLFW.glfwMakeContextCurrent(window);
+		GL.createCapabilities(Registry.OPENGL_FORWARD_COMPATIBLE);
 		GLFW.glfwShowWindow(window);
 		
 		GL11.glViewport(0, 0, Registry.LOADING_SCREEN_WIDTH, Registry.LOADING_SCREEN_HEIGHT);
@@ -87,6 +89,7 @@ public class Loader {
 		update();
 		
 		ShaderManager.generateGuiShaderIDs();
+		return GLFW.glfwGetCurrentContext();
 	}
 	
 	public static void finish() {
@@ -97,11 +100,11 @@ public class Loader {
 			isDone = true;
 			return;
 		}
+		
+		GLFW.glfwHideWindow(window);
 		ShaderManager.dispose(logoShader);
 		ShaderManager.dispose(barShader);
 		TextureManager.dispose(texture);
-		GLFW.glfwDestroyWindow(window);
-		GLFW.glfwMakeContextCurrent(MemoryUtil.NULL);
 		isDone = true;
 	}
 	
@@ -119,7 +122,7 @@ public class Loader {
 		loaded = true;
 	}
 	
-	private static void update() {
+	public static void update() {
 		if (lastFrame + frameskip > System.currentTimeMillis()) {
 			return;
 		}
@@ -128,7 +131,6 @@ public class Loader {
 			lastFrame = System.currentTimeMillis();
 			return;
 		}
-		
 		textureTransformation = GLHelper.initTransformationMatrix(new Vector3f(-0.8f + (0.8f * (float)textureProgress / (float)textureCounter), -0.3f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f * (float)textureProgress / (float)textureCounter, 0, 0.1f));
 		shaderTransformation = GLHelper.initTransformationMatrix(new Vector3f(-0.8f + (0.8f * (float)shaderProgress / (float)shaderCounter), -0.5f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f * (float)shaderProgress / (float)shaderCounter, 0, 0.1f));
 		modelTransformation = GLHelper.initTransformationMatrix(new Vector3f(-0.8f + (0.8f * (float)modelProgress / (float)modelCounter), -0.7f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f * (float)modelProgress / (float)modelCounter, 0, 0.1f));
@@ -143,7 +145,7 @@ public class Loader {
 		ModelManager.renderModel(ModelManager.getSquareModelID(), 0, barShader, shaderTransformation, perspective, "transformation", "projection");
 		ShaderManager.loadFloat(barShader, "progress", (float)modelProgress / (float)modelCounter);
 		ModelManager.renderModel(ModelManager.getSquareModelID(), 0, barShader, modelTransformation, perspective, "transformation", "projection");
-		
+
 		ModelManager.finishRendering();
 		GLFW.glfwSwapBuffers(window);
 		GLFW.glfwPollEvents();
