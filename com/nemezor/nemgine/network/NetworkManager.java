@@ -63,7 +63,10 @@ public class NetworkManager {
 	
 	public static void dispose(int id) {
 		ISocket sock = sockets.get(id);
-		if (sock != null && !sock.isClosed()) {
+		if (sock == null) {
+			return;
+		}
+		if (!sock.isClosed()) {
 			try {
 				sock.close();
 			} catch (IOException e) {

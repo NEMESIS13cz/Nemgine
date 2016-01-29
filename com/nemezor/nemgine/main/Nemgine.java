@@ -72,7 +72,7 @@ public class Nemgine {
 				headless = InputParams.containsEntry(Registry.PARAM_SERVER) ? InputParams.getBoolean(Registry.PARAM_SERVER) : ann.side().isServer();
 				name = ann.name();
 				compat = InputParams.containsEntry(Registry.PARAM_COMPAT) ? InputParams.getBoolean(Registry.PARAM_COMPAT) : ann.compatibilityMode();
-
+				
 				if (entry == null || (resources == null && !headless)) {
 					Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_RESOLVE_NONE, false);
 					System.exit(Registry.INVALID);

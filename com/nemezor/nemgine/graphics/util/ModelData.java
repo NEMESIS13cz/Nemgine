@@ -13,5 +13,4 @@ public class ModelData {
 		textures = tex;
 		indices = ind;
 	}
-	
 }

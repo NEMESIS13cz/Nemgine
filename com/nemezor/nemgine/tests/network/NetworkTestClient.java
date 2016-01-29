@@ -1,14 +1,12 @@
-package com.nemezor.nemgine.tests.glfw;
-
-import java.awt.Font;
+package com.nemezor.nemgine.tests.network;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 import com.nemezor.nemgine.debug.DebugColorizer;
+import com.nemezor.nemgine.debug.DebugPacket;
 import com.nemezor.nemgine.graphics.DisplayManager;
-import com.nemezor.nemgine.graphics.FontManager;
 import com.nemezor.nemgine.graphics.GLHelper;
 import com.nemezor.nemgine.graphics.ModelManager;
 import com.nemezor.nemgine.graphics.ShaderManager;
@@ -23,36 +21,45 @@ import com.nemezor.nemgine.main.Application;
 import com.nemezor.nemgine.main.IMainRenderLoop;
 import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.Color;
+import com.nemezor.nemgine.misc.Logger;
+import com.nemezor.nemgine.network.Address;
+import com.nemezor.nemgine.network.IPacket;
+import com.nemezor.nemgine.network.Network;
+import com.nemezor.nemgine.network.NetworkInfo;
+import com.nemezor.nemgine.network.NetworkManager;
+import com.nemezor.nemgine.network.NetworkObject;
 
-public class GLFWTest implements IMainRenderLoop {
+public class NetworkTestClient implements IMainRenderLoop {
 
-	int windowID;
-	Display window;
-	int windowID2;
-	Display window2;
-	private int shader;
-	private int logoShader;
-	private int model;
-	private int logo;
-	private int angle = 0;
-	private int water;
-	private int testTexture;
-	private int font;
+	public static void main(String[] args) {
+		Nemgine.start(args, NetworkTestClient.class);
+	}
 	
 	private DebugColorizer colorizer = new DebugColorizer(0);
 	private Color currColor = new Color(0xFFFFFFFF);
 	private Camera cam;
+	private int shader;
+	private int logoShader;
+	private int model;
+	private int logo;
+	private int water;
+	private int testTexture;
+	int windowID;
+	Display window;
+
+	private volatile int angle = 0;
+	private volatile int socketId = 0;
 	
-	@Application(name="GLFW Test", path="tests/glfw", contained=true)
+	@Application(contained=true, path="tests/network", name="Network Test | Client")
 	public void entry() {
-		int thread = Nemgine.generateThreads("Render", true);
+		int thread = Nemgine.generateThreads("Render", false);
 		Nemgine.bindRenderLoop(thread, this);
 		Nemgine.startThread(thread);
 		cam = new Camera(new Vector3f(), new Vector3f());
 	}
 	
 	@OpenGLResources
-	public void load(GLResourceEvent e) {
+	public void loadResources(GLResourceEvent e) {
 		if (e == GLResourceEvent.GENERATE_IDS) {
 			shader = ShaderManager.generateShaders();
 			logoShader = ShaderManager.generateShaders();
@@ -60,7 +67,6 @@ public class GLFWTest implements IMainRenderLoop {
 			model = ModelManager.generateModels();
 			logo = ModelManager.generateModels();
 			testTexture = TextureManager.generateTextures();
-			font = FontManager.generateFonts();
 		}else if (e == GLResourceEvent.LOAD_RESOURCES) {
 			TextureManager.initializeTexture(testTexture, "com/nemezor/nemgine/tests/old/gui/test_texture.png");
 			
@@ -80,18 +86,37 @@ public class GLFWTest implements IMainRenderLoop {
 			
 			ModelManager.initializeModel(model, "com/nemezor/nemgine/tests/old/reflection/dragon.obj");
 			ModelManager.initializeModel(logo, "com/nemezor/nemgine/tests/old/reflection/nemgine.obj");
-			
-			//FontManager.initializeFont(font, new Font("Monospace", Font.BOLD, 24));
+		}
+	}
+
+	@Network
+	public void connectionEstablished(NetworkObject obj) {
+		Logger.log("Connection established");
+	}
+	
+	@Network
+	public void networkInfo(NetworkObject obj, NetworkInfo info) {
+		
+	}
+
+	@Network
+	public void packetReceived(NetworkObject obj, IPacket packet) {
+		if (packet.getClass() == DebugPacket.class) {
+			angle++;
 		}
 	}
 	
-	public static void main(String[] args) {
-		Nemgine.start(args, GLFWTest.class);
+	private void disconnect() {
+		NetworkManager.dispose(socketId);
 	}
-
+	
+	private void connect() {
+		socketId = NetworkManager.generateClientSockets(1000);
+		NetworkManager.connect(socketId, new Address("localhost", 65535));
+	}
+	
 	@Override
 	public void render() {
-		DisplayManager.switchDisplay(windowID);
 		if (window.closeRequested()) {
 			Nemgine.shutDown();
 		}
@@ -113,42 +138,17 @@ public class GLFWTest implements IMainRenderLoop {
 		ModelManager.renderModelWithColor(ModelManager.getSquareModelID(), testTexture, ShaderManager.getTextureShaderID(), testTransform, GLHelper.initBasicOrthographicProjectionMatrix(), new Color(1, 1, 1, 0.5f), "transformation", "projection", "color");
 		
 		ModelManager.finishRendering();
-		angle++;
 		
 		handleInput();
 		
 		window.finishRender();
-		if (!window2.isInvalid()) {
-			DisplayManager.switchDisplay(windowID2);
-			window2.prepareRender();
-			
-			window2.fill(new Color(0x0000FFFF));
-			
-			ShaderManager.bindShader(shader);
-			ShaderManager.loadVector4(shader, "lightColorIn", currColor.invert().getColorAsVector());
-			ShaderManager.unbindShader();
-			
-			ModelManager.renderModel(model, 0, shader, transform, window2.getPerspectiveProjectionMatrix(), "transformation", "projection");
-			ModelManager.renderModel(logo, 0, logoShader, logoTransform, window2.getPerspectiveProjectionMatrix(), "transformation", "projection");
-			
-			ModelManager.renderModelWithColor(ModelManager.getSquareModelID(), testTexture, ShaderManager.getTextureShaderID(), testTransform, GLHelper.initBasicOrthographicProjectionMatrix(), new Color(1, 1, 1, 0.5f), "transformation", "projection", "color");
-			
-			ModelManager.finishRendering();
-			
-			window2.finishRender();
-			if (window2.closeRequested()) {
-				DisplayManager.dispose(windowID2);
-			}
-		}
 	}
 
 	@Override
 	public void setUpRender() {
+		NetworkManager.registerListenerClass(this);
 		windowID = DisplayManager.generateDisplays();
 		window = DisplayManager.initializeDisplay(windowID, 70.0f, 1280, 720, 0.002f, 500.0f, true);
-		windowID2 = DisplayManager.generateDisplays();
-		window2 = DisplayManager.initializeDisplay(windowID2, 70.0f, 600, 400, 0.002f, 500.0f, true);
-		window2.changeTitle(Nemgine.getApplicationName() + " | Window: 2");
 		
 		ShaderManager.bindShader(shader);
 		ShaderManager.loadMatrix4(shader, "projection", window.getPerspectiveProjectionMatrix());
@@ -171,7 +171,7 @@ public class GLFWTest implements IMainRenderLoop {
 
 	@Override
 	public void updateRenderSecond(int frames, long averageInterval) {
-		window.changeTitle(Nemgine.getApplicationName() + " | FPS: " + frames);
+		
 	}
 
 	@Override
@@ -181,8 +181,9 @@ public class GLFWTest implements IMainRenderLoop {
 
 	@Override
 	public int getRenderFrameskipTreshold() {
-		return 20;
+		return 50;
 	}
+
 
 	////////////////////////////////////
 	/**
@@ -194,6 +195,7 @@ public class GLFWTest implements IMainRenderLoop {
 	public float mouseSensitivity = 2;
 	public int walkingSpeed = 200;
 	private double[] lastPos = new double[2];
+	private boolean Qw, Ew;
 	
 	public void handleInput() {
 		if (Mouse.isButtonDown(window, 0) && Mouse.isInsideWindow(window)) {
@@ -229,7 +231,26 @@ public class GLFWTest implements IMainRenderLoop {
 		boolean D = Keyboard.isKeyDown(window, GLFW.GLFW_KEY_A);
 		boolean SHIFT = Keyboard.isKeyDown(window, GLFW.GLFW_KEY_LEFT_SHIFT);
 		boolean SPACE = Keyboard.isKeyDown(window, GLFW.GLFW_KEY_SPACE);
-
+		boolean Q = Keyboard.isKeyDown(window, GLFW.GLFW_KEY_Q);
+		boolean E = Keyboard.isKeyDown(window, GLFW.GLFW_KEY_E);
+		
+		if (Q && !E) {
+			if (!Qw) {
+				Qw = true;
+				connect();
+			}
+		}else{
+			Qw = false;
+		}
+		if (E && !Q) {
+			if (!Ew) {
+				Ew = true;
+				disconnect();
+			}
+		}else{
+			Ew = false;
+		}
+		
 		if (!SHIFT && SPACE) {
 			cam.getPosition().setY(cam.getPosition().getY() + 0.3f);
 		}
