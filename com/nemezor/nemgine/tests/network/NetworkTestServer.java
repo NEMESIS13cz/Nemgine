@@ -41,14 +41,14 @@ public class NetworkTestServer implements IMainTickLoop {
 
 	@Network
 	public void connectionEstablished(NetworkObject obj) {
-		Logger.log("Connection established");
+		Logger.log("Connection with " + obj.getAddress().toString() + " established");
 		client = obj;
 	}
 	
 	@Network
 	public void networkInfo(NetworkObject obj, NetworkInfo info) {
 		if (info.getType() == NetworkInfoType.CONNECTION_LOST) {
-			Logger.log("Connection closed");
+			Logger.log("Connection with " + obj.getAddress().toString() + " closed");
 		}
 	}
 

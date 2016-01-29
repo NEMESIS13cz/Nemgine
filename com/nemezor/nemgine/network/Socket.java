@@ -48,6 +48,7 @@ public class Socket implements ISocket {
 			NetworkManager.callInfoEvent(obj, new NetworkInfo(NetworkInfoType.IO_ERROR, e));
 			return;
 		}
+		obj.addr = addr.clone();
 		NetworkManager.objects.add(obj);
 		NetworkManager.callConnectionEstablishedEvent(obj);
 	}
@@ -87,6 +88,7 @@ public class Socket implements ISocket {
 				NetworkManager.callInfoEvent(obj, new NetworkInfo(NetworkInfoType.IO_ERROR, e));
 				return null;
 			}
+			obj.addr = addr.clone();
 			NetworkManager.callConnectionEstablishedEvent(obj);
 			return obj;
 		}

@@ -35,4 +35,8 @@ public class Address {
 	public String toString() {
 		return IP + ":" + port;
 	}
+	
+	public Address clone() {
+		return new Address(IP, port);
+	}
 }

@@ -91,7 +91,7 @@ public class NetworkTestClient implements IMainRenderLoop {
 
 	@Network
 	public void connectionEstablished(NetworkObject obj) {
-		Logger.log("Connection established");
+		Logger.log("Connection to " + obj.getAddress().toString() + " established");
 	}
 	
 	@Network

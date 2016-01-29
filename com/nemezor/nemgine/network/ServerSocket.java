@@ -101,6 +101,7 @@ public class ServerSocket implements ISocket {
 					try {
 						java.net.Socket client = sock.accept();
 						obj = new NetworkObject(id);
+						obj.addr = new Address(client.getInetAddress().getHostAddress(), client.getPort());
 						queue.put(obj, new ArrayList<IPacket>());
 						NetworkManager.objects.add(obj);
 						startThread(obj, client.getInputStream(), client.getOutputStream());
