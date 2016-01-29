@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.nemezor.nemgine.misc.Side;
 
 public interface ISocket {
-
+	
 	public boolean isConnected();
 	public boolean isClosed();
 	public String getAddress();

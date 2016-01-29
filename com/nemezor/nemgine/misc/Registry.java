@@ -36,6 +36,8 @@ public final class Registry {
 	public static final int IP_ADDRESS_MAXIMUM_PORT_VALUE = 65535;
 	public static final int IP_ADDRESS_MINIMUM_PORT_VALUE = 0;
 	public static final int SOCKET_DEFAULT_TIMEOUT = 5000;
+	public static final int RSA_ENCRYPTION_KEY_LENGTH = 4096;
+	public static final int AES_ENCRYPTION_KEY_LENGTH = 256;
 	
 	////////////////////////////////////////////////////////////////////////////////////////
 
@@ -139,6 +141,8 @@ public final class Registry {
 	public static final String IP_ADDRESS_INVALID_PORT = "Port out of range!";
 	public static final String IP_ADDRESS_NAME = "IP Address Checker";
 	public static final String NETWORK_EXCEPTION_NO_ACCESSOR = "Anonymous Network Accessor";
+	public static final String KEY_EXCHANGE_ENCRYPTION_ALGORITHM = "RSA";
+	public static final String CONNECTION_ENCRYPTION_ALGORITHM = "AES";
 	
 	// Parameters
 	public static final String PARAM_CONTAINED = "NGcontained";

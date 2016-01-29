@@ -6,7 +6,13 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
 
 import com.nemezor.nemgine.misc.Registry;
 import com.nemezor.nemgine.misc.Side;
@@ -134,10 +140,26 @@ public class Socket implements ISocket {
 	}
 	
 	protected void startThread(InputStream input, OutputStream output) {
-		Thread threadIn = new ReceiverThread(obj, this, input);
-		Thread threadOut = new TransmitterThread(obj, this, output);
-		threadIn.start();
-		threadOut.start();
+		Socket sock = this;
+		Thread t = new Thread() {
+			
+			public void run() {
+				try {
+					KeyGenerator gen = KeyGenerator.getInstance(Registry.CONNECTION_ENCRYPTION_ALGORITHM);
+					gen.init(Registry.AES_ENCRYPTION_KEY_LENGTH);
+
+					Cipher ecipher = Cipher.getInstance(Registry.CONNECTION_ENCRYPTION_ALGORITHM);
+					Cipher dcipher = Cipher.getInstance(Registry.CONNECTION_ENCRYPTION_ALGORITHM);
+					
+					RTLock lock = new RTLock(new SecretKeySpec(gen.generateKey().getEncoded(), Registry.CONNECTION_ENCRYPTION_ALGORITHM));
+					Thread threadIn = new ReceiverThread(obj, sock, input, dcipher, lock);
+					Thread threadOut = new TransmitterThread(obj, sock, output, ecipher, lock);
+					threadIn.start();
+					threadOut.start();
+				} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {}
+			}
+		};
+		t.start();
 	}
 	
 	public Side type() {

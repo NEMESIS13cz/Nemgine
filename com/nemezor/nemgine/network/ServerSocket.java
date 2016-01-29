@@ -3,8 +3,14 @@ package com.nemezor.nemgine.network;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 
 import com.nemezor.nemgine.misc.Registry;
 import com.nemezor.nemgine.misc.Side;
@@ -92,6 +98,7 @@ public class ServerSocket implements ISocket {
 	}
 	
 	private void startAcceptorThread(int id) {
+		ServerSocket ssock = this;
 		Thread t = new Thread() {
 			
 			public void run() {
@@ -104,7 +111,7 @@ public class ServerSocket implements ISocket {
 						obj.addr = new Address(client.getInetAddress().getHostAddress(), client.getPort());
 						queue.put(obj, new ArrayList<IPacket>());
 						NetworkManager.objects.add(obj);
-						startThread(obj, client.getInputStream(), client.getOutputStream());
+						startThread(obj, client.getInputStream(), client.getOutputStream(), ssock);
 						NetworkManager.callConnectionEstablishedEvent(obj);
 					} catch (IOException e) {
 						NetworkManager.callInfoEvent(obj, new NetworkInfo(NetworkInfoType.IO_ERROR, e));
@@ -118,11 +125,27 @@ public class ServerSocket implements ISocket {
 		t.start();
 	}
 	
-	private void startThread(NetworkObject client, InputStream input, OutputStream output) {
-		Thread threadIn = new ReceiverThread(client, this, input);
-		Thread threadOut = new TransmitterThread(client, this, output);
-		threadIn.start();
-		threadOut.start();
+	private void startThread(NetworkObject client, InputStream input, OutputStream output, ServerSocket sock) {
+		Thread t = new Thread() {
+			
+			public void run() {
+				try {
+					KeyPairGenerator gen = KeyPairGenerator.getInstance(Registry.KEY_EXCHANGE_ENCRYPTION_ALGORITHM);
+					SecureRandom rand = new SecureRandom();
+					gen.initialize(Registry.RSA_ENCRYPTION_KEY_LENGTH, rand);
+					
+					Cipher ecipher = Cipher.getInstance(Registry.CONNECTION_ENCRYPTION_ALGORITHM);
+					Cipher dcipher = Cipher.getInstance(Registry.CONNECTION_ENCRYPTION_ALGORITHM);
+					
+					RTLock lock = new RTLock(gen.generateKeyPair());
+					Thread threadIn = new ReceiverThread(client, sock, input, dcipher, lock);
+					Thread threadOut = new TransmitterThread(client, sock, output, ecipher, lock);
+					threadIn.start();
+					threadOut.start();
+				} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {}
+			}
+		};
+		t.start();
 	}
 	
 	public Side type() {
