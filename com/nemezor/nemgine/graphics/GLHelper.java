@@ -92,14 +92,19 @@ public class GLHelper {
 			return Registry.INVALID;
 		}
 		int vbo = GL15.glGenBuffers();
+		storeIntoBuffer(vbo, attrNum, size, data);
+		return vbo;
+	}
+	
+	public static void storeIntoBuffer(int buffer, int attrNum, int size, float[] data) {
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buffer);
 		FloatBuffer buf = BufferUtils.createFloatBuffer(data.length);
 		buf.put(data);
 		buf.flip();
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buffer);
 		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buf, GL15.GL_STATIC_DRAW);
 		GL20.glVertexAttribPointer(attrNum, size, GL11.GL_FLOAT, false, 0, 0);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-		return vbo;
 	}
 	
 	public static void enableBlending() {

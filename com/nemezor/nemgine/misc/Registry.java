@@ -42,7 +42,7 @@ public final class Registry {
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	// Main
-	public static final boolean OPENGL_FORWARD_COMPATIBLE = true;
+	public static final boolean OPENGL_FORWARD_COMPATIBLE = false;
 	
 	////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -124,6 +124,11 @@ public final class Registry {
 	public static final String MODEL_MANAGER_NAME = "Nemgine Model Manager";
 	public static final String MODEL_MANAGER_LOADER_GLOBAL_ERROR = "An error occured while loading models, aborting";
 	public static final String MODEL_SQUARE = "com/nemezor/nemgine/resources/square.obj";
+	
+	// Tessellator
+	public static final String TESSELLATOR_ALREADY_RUNNING = "Already tessellating!";
+	public static final String TESSELLATOR_NOT_RUNNING = "Not tessellating!";
+	public static final String TESSELLATOR_SWITCHED_CONTEXTS = "Windows switched during tessellation!";
 	
 	// Loading
 	public static final String LOADING_SCREEN_FONT = "Courier New";

@@ -30,10 +30,9 @@ import com.nemezor.nemgine.misc.Side;
 
 public class ModelManager {
 
-	private static HashMap<Integer, Model> models = new HashMap<Integer, Model>();
+	protected static HashMap<Integer, Model> models = new HashMap<Integer, Model>();
 	private static int modelCounter = 0;
 	private static int squareModel = 0;
-	private static int fontModel = 0;
 	
 	protected static Model fontModelInstance = null;
 	
@@ -346,23 +345,11 @@ public class ModelManager {
 		normalsArray[current * 3 + 2] = currentNorm.getZ();
 	}
 	
-	protected static void initializeFontModel() {
-		fontModel = generateModels();
-		if (!initializeModel(fontModel, Registry.MODEL_SQUARE)) {
-			Loader.failedToLoadResource(Registry.LOADING_SCREEN_ERROR);
-		}
-		fontModelInstance = models.get(fontModel);
-	}
-	
 	protected static void initializeSquareModel() {
 		squareModel = generateModels();
 		if (!initializeModel(squareModel, Registry.MODEL_SQUARE)) {
 			Loader.failedToLoadResource(Registry.LOADING_SCREEN_ERROR);
 		}
-	}
-	
-	public static int getFontModelID() {
-		return fontModel;
 	}
 	
 	public static int getSquareModelID() {

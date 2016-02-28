@@ -3,6 +3,7 @@ package com.nemezor.nemgine.main;
 import java.util.ArrayList;
 
 import com.nemezor.nemgine.exceptions.ThreadException;
+import com.nemezor.nemgine.graphics.Tessellator;
 import com.nemezor.nemgine.misc.ErrorScreen;
 import com.nemezor.nemgine.misc.Registry;
 
@@ -76,12 +77,15 @@ public class BindableThread extends Thread {
 				frame_begin = System.currentTimeMillis();
 				
 				render.render();
+				Tessellator.refresh();
 				
 				if (FRAME_SKIP != Registry.INVALID && NEXT_RENDER + (RENDER_SLEEP * FRAME_SKIP) < System.currentTimeMillis()) {
-					ThreadException e = new ThreadException(Registry.THREAD_RENDER_KEEPUP_1 + ((System.currentTimeMillis() - NEXT_RENDER) / (RENDER_SLEEP != 0 ? RENDER_SLEEP : 1)) + Registry.THREAD_RENDER_KEEPUP_2);
-					e.setBindCause(render);
-					e.setThrower(this);
-					e.printStackTrace();
+					if (Nemgine.printThreadKeepUp) {
+						ThreadException e = new ThreadException(Registry.THREAD_RENDER_KEEPUP_1 + ((System.currentTimeMillis() - NEXT_RENDER) / (RENDER_SLEEP != 0 ? RENDER_SLEEP : 1)) + Registry.THREAD_RENDER_KEEPUP_2);
+						e.setBindCause(render);
+						e.setThrower(this);
+						e.printStackTrace();
+					}
 					NEXT_RENDER = System.currentTimeMillis() + (RENDER_SLEEP - average_time_per_frame);
 				}
 				
@@ -95,10 +99,12 @@ public class BindableThread extends Thread {
 				tick.tick();
 				
 				if (TICK_SKIP != Registry.INVALID && NEXT_TICK + (TICK_SLEEP * TICK_SKIP) < System.currentTimeMillis()) {
-					ThreadException e = new ThreadException(Registry.THREAD_TICK_KEEPUP_1 + ((System.currentTimeMillis() - NEXT_TICK) / (TICK_SLEEP != 0 ? TICK_SLEEP : 1)) + Registry.THREAD_TICK_KEEPUP_2);
-					e.setBindCause(tick);
-					e.setThrower(this);
-					e.printStackTrace();
+					if (Nemgine.printThreadKeepUp) {
+						ThreadException e = new ThreadException(Registry.THREAD_TICK_KEEPUP_1 + ((System.currentTimeMillis() - NEXT_TICK) / (TICK_SLEEP != 0 ? TICK_SLEEP : 1)) + Registry.THREAD_TICK_KEEPUP_2);
+						e.setBindCause(tick);
+						e.setThrower(this);
+						e.printStackTrace();
+					}
 					NEXT_TICK = System.currentTimeMillis() + (TICK_SLEEP - average_time_per_tick);
 				}
 				

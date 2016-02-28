@@ -38,6 +38,7 @@ public class Nemgine {
 	
 	protected static boolean hasRenderThread = false;
 	protected static String name;
+	protected static boolean printThreadKeepUp = true;
 	
 	private Nemgine() {}
 
@@ -278,7 +279,7 @@ public class Nemgine {
 		thread.tick = loop;
 		return true;
 	}
-
+	
 	public static synchronized boolean isRunning() {
 		return isRunning;
 	}
@@ -287,6 +288,10 @@ public class Nemgine {
 		isRunning = false;
 	}
 	
+	public static void printThreadKeepUpWarnings(boolean print) {
+		printThreadKeepUp = print;
+	}
+
 	public static Side getSide() {
 		return headless ? Side.SERVER : Side.CLIENT;
 	}

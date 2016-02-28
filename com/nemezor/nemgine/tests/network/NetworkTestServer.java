@@ -1,5 +1,7 @@
 package com.nemezor.nemgine.tests.network;
 
+import java.util.ArrayList;
+
 import com.nemezor.nemgine.console.Console;
 import com.nemezor.nemgine.console.Input;
 import com.nemezor.nemgine.debug.DebugPacket;
@@ -22,7 +24,7 @@ public class NetworkTestServer implements IMainTickLoop {
 		Nemgine.start(args, NetworkTestServer.class);
 	}
 	
-	private volatile NetworkObject client;
+	private volatile ArrayList<NetworkObject> clients = new ArrayList<NetworkObject>();
 	private volatile int socketId = 0;
 	
 	@Application(contained=true, path="tests/network", name="Network Test | Server", side=Side.SERVER)
@@ -42,7 +44,7 @@ public class NetworkTestServer implements IMainTickLoop {
 	@Network
 	public void connectionEstablished(NetworkObject obj) {
 		Logger.log("Connection with " + obj.getAddress().toString() + " established");
-		client = obj;
+		clients.add(obj);
 	}
 	
 	@Network
@@ -59,10 +61,9 @@ public class NetworkTestServer implements IMainTickLoop {
 	
 	@Override
 	public void tick() {
-		if (client == null) {
-			return;
+		for (NetworkObject client : clients) {
+			client.sendPacket(new DebugPacket("blargh"));
 		}
-		client.sendPacket(new DebugPacket("blargh"));
 	}
 
 	@Override
