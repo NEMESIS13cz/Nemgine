@@ -106,7 +106,7 @@ public class TextureManager {
 		return new Dimension(tex.width, tex.height);
 	}
 	
-	public static boolean initializeTexture(int id, String file) {
+	public static boolean initializeTextureFile(int id, String file) {
 		if (currentTexture == id) {
 			return false;
 		}
@@ -117,8 +117,8 @@ public class TextureManager {
 		if (Loader.loading()) {
 			Loader.loadingTexture(new File(file).getName());
 		}
-		tex = loadTexture(file);
-		if (tex == null) {
+		BufferedImage image = readImage(file);
+		if (image == null) {
 			TextureException ex = new TextureException(Registry.TEXTURE_MANAGER_LOADER_GLOBAL_ERROR);
 			ex.setThrower(Registry.TEXTURE_MANAGER_NAME);
 			ex.setTextureInfo(file);
@@ -128,26 +128,62 @@ public class TextureManager {
 			}
 			return false;
 		}
-		textures.put(id, tex);
+		return initializeTextureImageARGB(id, image);
+	}
+	
+	public static boolean initializeTextureImageARGB(int id, BufferedImage image) {
+		return initializeTexturePixelsARGB(id, image.getRGB(0, 0, image.getWidth(), image.getHeight(), new int[image.getWidth() * image.getHeight()], 0, image.getWidth()), image.getWidth(), image.getHeight());
+	}
+	
+	public static boolean initializeTextureImageABGR(int id, BufferedImage image) {
+		return initializeTexturePixelsABGR(id, image.getRGB(0, 0, image.getWidth(), image.getHeight(), new int[image.getWidth() * image.getHeight()], 0, image.getWidth()), image.getWidth(), image.getHeight());
+	}
+	
+	public static boolean initializeTexturePixelsARGB(int id, int[] pixels, int width, int height) {
+		int[] data = new int[width * height];
+		for (int i = 0; i < width * height; i++) {
+			int alpha = (pixels[i] & 0xFF000000) >> 24;
+			int red = (pixels[i] & 0xFF0000) >> 16;
+			int green = (pixels[i] & 0xFF00) >> 8;
+			int blue = (pixels[i] & 0xFF);
+
+			data[i] = alpha << 24 | blue << 16 | green << 8 | red;
+		}
+		return initializeTexturePixelsABGR(id, pixels, width, height);
+	}
+	
+	public static boolean initializeTexturePixelsABGR(int id, int[] pixels, int width, int height) {
+		if (currentTexture == id) {
+			return false;
+		}
+		Texture tex = textures.get(id);
+		if (tex == null || tex.id != Registry.INVALID) {
+			return false;
+		}
+		IntBuffer res = BufferUtils.createIntBuffer(pixels.length);
+		res.put(pixels).flip();
+
+		int glid = GL11.glGenTextures();
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, glid);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
+		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, width, height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, res);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+		
+		textures.put(id, new Texture(glid, width, height));
 		if (Loader.loading()) {
 			Loader.textureLoaded();
 		}
 		return true;
 	}
 	
-	private static Texture loadTexture(String file) {
-		int[] pixels = null;
-		int w = Registry.INVALID;
-		int h = Registry.INVALID;
-		
+	private static BufferedImage readImage(String file) {
 		try {
 			InputStream stream = Nemgine.class.getResourceAsStream("/" + file);
 			BufferedImage image = ImageIO.read(stream);
-			w = image.getWidth();
-			h = image.getHeight();
-			pixels = new int[w * h];
-			image.getRGB(0, 0, w, h, pixels, 0, w);
 			stream.close();
+			return image;
 		} catch (IOException e) {
 			TextureException ex = new TextureException(Registry.TEXTURE_LOADER_NOT_FOUND);
 			ex.setThrower(Registry.TEXTURE_LOADER_NAME);
@@ -156,29 +192,6 @@ public class TextureManager {
 			e.printStackTrace();
 			return null;
 		}
-
-		int[] data = new int[w * h];
-		for (int i = 0; i < w * h; i++) {
-			int alpha = (pixels[i] & 0xFF000000) >> 24;
-			int red = (pixels[i] & 0xFF0000) >> 16;
-			int green = (pixels[i] & 0xFF00) >> 8;
-			int blue = (pixels[i] & 0xFF);
-
-			data[i] = alpha << 24 | blue << 16 | green << 8 | red;
-		}
-
-		IntBuffer res = BufferUtils.createIntBuffer(pixels.length);
-		res.put(data).flip();
-
-		int id = GL11.glGenTextures();
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-		GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
-		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, w, h, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, res);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-
-		return new Texture(id, w, h);
 	}
 	
 	protected static int loadMissingTextureAndLogo() {
@@ -220,7 +233,7 @@ public class TextureManager {
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 
 		int id = generateTextures();
-		initializeTexture(id, Registry.TEXTURE_LOGO_PATH);
+		initializeTextureFile(id, Registry.TEXTURE_LOGO_PATH);
 		return id;
 	}
 }

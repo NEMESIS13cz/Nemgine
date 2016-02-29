@@ -34,8 +34,6 @@ public class ModelManager {
 	private static int modelCounter = 0;
 	private static int squareModel = 0;
 	
-	protected static Model fontModelInstance = null;
-	
 	private ModelManager() {}
 	
 	public static synchronized int generateModels() {

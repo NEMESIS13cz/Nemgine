@@ -158,8 +158,19 @@ public class Nemgine {
 			}
 			Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_SHUTDOWN_EXIT + exitCode, false);
 			Logger.close();
-			System.gc();
-			System.exit(exitCode);
+			Thread exitThread = new Thread() {
+				
+				public void run() {
+					while (Nemgine.threadsRunning()) {
+						try {
+							sleep(1);
+						} catch (InterruptedException e) {}
+					}
+					System.gc();
+					System.exit(exitCode);
+				}
+			};
+			exitThread.start();
 		}
 	}
 

@@ -4,15 +4,9 @@ import java.awt.Graphics;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.nio.FloatBuffer;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.Matrix4f;
 
 import com.nemezor.nemgine.graphics.util.Font;
@@ -31,41 +25,58 @@ public class FontManager {
 			return Registry.INVALID;
 		}
 		fontCounter++;
-		fonts.put(fontCounter, new Font());
+		fonts.put(fontCounter, new Font(TextureManager.generateTextures()));
 		return fontCounter;
 	}
 	
-	public static void drawString(int fontId, String string, Matrix4f transformation, Matrix4f projection, String transformationAttribName, String projectionAttribName) {
-		char[] chars = string.toCharArray();
+	public static void drawString(int fontId, int x, int y, String string, Matrix4f transformation, Matrix4f projection, String transformationAttribName, String projectionAttribName) {
 		Font font = fonts.get(fontId);
 		
 		if (font.state == Registry.INVALID || Nemgine.getSide().isServer()) {
 			return;
 		}
+		char[] chars = string.toCharArray();
 		
-		int VAOid = ModelManager.fontModelInstance.id.get(DisplayManager.getCurrentDisplayID());
+		TextureManager.bindTexture(font.textureId);
+		ShaderManager.bindShader(ShaderManager.getTextureShaderID());
+		ShaderManager.loadMatrix4(ShaderManager.getTextureShaderID(), transformationAttribName, transformation);
+		ShaderManager.loadMatrix4(ShaderManager.getTextureShaderID(), projectionAttribName, projection);
+		GLHelper.enableBlending();
+		Tessellator.start();
 		
 		for (char c : chars) {
-			GLCharacter ch = font.chars.get(c);
-			GL30.glBindVertexArray(VAOid);
-			FloatBuffer buf = BufferUtils.createFloatBuffer(8);
-			buf.put(ch.textureCoords);
-			buf.flip();
-			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, ModelManager.fontModelInstance.VBOids.get(DisplayManager.getCurrentDisplayID())[2]);
-			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buf, GL15.GL_STATIC_DRAW);
-			GL20.glVertexAttribPointer(1, 2, GL11.GL_FLOAT, false, 0, 0);
-			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-			GL30.glBindVertexArray(0);
+			GLCharacter glchar = font.chars.get(c);
+			float[] texCoords = glchar.textureCoords;
+			Tessellator.addVertex(x, y, 0);
+			Tessellator.addTexCoord(texCoords[0], texCoords[1]);
+			Tessellator.addVertex(x + glchar.width, y, 0);
+			Tessellator.addTexCoord(texCoords[2], texCoords[1]);
+			Tessellator.addVertex(x + glchar.width, y + glchar.height, 0);
+			Tessellator.addTexCoord(texCoords[2], texCoords[3]);
 			
+			Tessellator.addVertex(x + glchar.width, y + glchar.height, 0);
+			Tessellator.addTexCoord(texCoords[2], texCoords[3]);
+			Tessellator.addVertex(x, y + glchar.height, 0);
+			Tessellator.addTexCoord(texCoords[0], texCoords[3]);
+			Tessellator.addVertex(x, y, 0);
+			Tessellator.addTexCoord(texCoords[0], texCoords[1]);
 			
+			x += glchar.width;
 		}
+		
+		Tessellator.finish();
+		GLHelper.disableBlending();
 	}
 	
 	public static boolean initializeFont(int id, java.awt.Font font) {
 		if (Nemgine.getSide().isServer()) {
 			return false;
 		}
-		ArrayList<GLCharacter> chars = new ArrayList<GLCharacter>();
+		Font nFont = fonts.get(id);
+		if (nFont == null || nFont.state != Registry.INVALID) {
+			return false;
+		}
+		HashMap<Character, GLCharacter> charMap = new HashMap<Character, GLCharacter>();
 		
 		int currX = 0;
 		int currY = 0;
@@ -73,18 +84,20 @@ public class FontManager {
 		int width = 0;
 		int height = 0;
 		FontRenderContext context = new FontRenderContext(null, true, true);
+		BufferedImage temp = new BufferedImage(1, 1, BufferedImage.TYPE_4BYTE_ABGR);
+		Graphics tempGraphics = temp.getGraphics();
+		tempGraphics.setFont(font);
+		Rectangle2D r = font.getMaxCharBounds(context);
+		highest = (int)r.getHeight();
 		
 		for (int i = 0; i < 0xFFFF; i++) {
 			if (font.canDisplay(i)) {
-				Rectangle2D r = font.getMaxCharBounds(context);
 				if (currX + r.getWidth() > Platform.getOpenGLTextureSize()) {
 					currX = 0;
 					currY += highest;
 				}
-				if (r.getHeight() > highest) {
-					highest = (int)r.getHeight();
-				}
-				chars.add(new GLCharacter((char)i, currX, currY, (int)r.getWidth(), (int)r.getHeight()));
+				GLCharacter glchar = new GLCharacter((char)i, currX, currY, tempGraphics.getFontMetrics().charWidth((char)i), highest + tempGraphics.getFontMetrics().getDescent() - 1);
+				charMap.put(glchar.character, glchar);
 				currX += r.getWidth();
 				if (currX + 1 > width) {
 					width = currX + 1;
@@ -97,19 +110,16 @@ public class FontManager {
 		Graphics g = texture.getGraphics();
 		g.setFont(font);
 		
-		for (GLCharacter c : chars) {
-			g.drawString(String.valueOf(c.character), c.x, c.y);
+		Iterator<Character> iter = charMap.keySet().iterator();
+		while (iter.hasNext()) {
+			GLCharacter c = charMap.get(iter.next());
+			g.drawString(String.valueOf(c.character), c.x, c.y + highest);
 			c.initialize(texture.getWidth(), texture.getHeight());
 		}
 		g.dispose();
-		/*
-		try {
-			ImageIO.write(texture, "PNG", new File("fonts.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}*/
+		TextureManager.initializeTextureImageABGR(nFont.textureId, texture);
+		nFont.initializeFont(charMap, font);
 		
-		
-		return false;
+		return true;
 	}
 }

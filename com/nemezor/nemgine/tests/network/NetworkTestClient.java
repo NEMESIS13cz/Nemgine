@@ -68,7 +68,7 @@ public class NetworkTestClient implements IMainRenderLoop {
 			logo = ModelManager.generateModels();
 			testTexture = TextureManager.generateTextures();
 		}else if (e == GLResourceEvent.LOAD_RESOURCES) {
-			TextureManager.initializeTexture(testTexture, "com/nemezor/nemgine/tests/old/gui/test_texture.png");
+			TextureManager.initializeTextureFile(testTexture, "com/nemezor/nemgine/tests/old/gui/test_texture.png");
 			
 			ShaderManager.initializeShader(shader, "com/nemezor/nemgine/tests/old/gui/shader.vert", 
 												   "com/nemezor/nemgine/tests/old/gui/shader.frag", 

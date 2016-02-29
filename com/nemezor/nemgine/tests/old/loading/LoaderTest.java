@@ -116,7 +116,7 @@ public class LoaderTest implements IMainRenderLoop {
 					"com/nemezor/nemgine/tests/test_shaders/test_" + i + ".fragment", new String[] {"projection", "transformation"}, new String[] {"position"}, new int[] {0});
 		}
 		for (int i = 0; i < 2000; i++) {
-			TextureManager.initializeTexture(textureIDs[i], "com/nemezor/nemgine/tests/test_images/test_" + i + ".png");
+			TextureManager.initializeTextureFile(textureIDs[i], "com/nemezor/nemgine/tests/test_images/test_" + i + ".png");
 		}
 	}
 

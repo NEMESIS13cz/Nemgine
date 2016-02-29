@@ -1,5 +1,7 @@
 package com.nemezor.nemgine.tests.glfw;
 
+import java.awt.Font;
+
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
@@ -10,7 +12,6 @@ import com.nemezor.nemgine.graphics.FontManager;
 import com.nemezor.nemgine.graphics.GLHelper;
 import com.nemezor.nemgine.graphics.ModelManager;
 import com.nemezor.nemgine.graphics.ShaderManager;
-import com.nemezor.nemgine.graphics.Tessellator;
 import com.nemezor.nemgine.graphics.TextureManager;
 import com.nemezor.nemgine.graphics.util.Camera;
 import com.nemezor.nemgine.graphics.util.Display;
@@ -62,7 +63,7 @@ public class GLFWTest implements IMainRenderLoop {
 			testTexture = TextureManager.generateTextures();
 			font = FontManager.generateFonts();
 		}else if (e == GLResourceEvent.LOAD_RESOURCES) {
-			TextureManager.initializeTexture(testTexture, "com/nemezor/nemgine/tests/old/gui/test_texture.png");
+			TextureManager.initializeTextureFile(testTexture, "com/nemezor/nemgine/tests/old/gui/test_texture.png");
 			
 			ShaderManager.initializeShader(shader, "com/nemezor/nemgine/tests/old/gui/shader.vert", 
 												   "com/nemezor/nemgine/tests/old/gui/shader.frag", 
@@ -81,7 +82,7 @@ public class GLFWTest implements IMainRenderLoop {
 			ModelManager.initializeModel(model, "com/nemezor/nemgine/tests/old/reflection/dragon.obj");
 			ModelManager.initializeModel(logo, "com/nemezor/nemgine/tests/old/reflection/nemgine.obj");
 			
-			//FontManager.initializeFont(font, new Font("Monospace", Font.BOLD, 24));
+			FontManager.initializeFont(font, new Font("Monospace", Font.BOLD, 24));
 		}
 	}
 	
@@ -110,22 +111,8 @@ public class GLFWTest implements IMainRenderLoop {
 		ModelManager.renderModel(model, 0, shader, transform, window.getPerspectiveProjectionMatrix(), "transformation", "projection");
 
 		ModelManager.renderModel(logo, 0, logoShader, logoTransform, window.getPerspectiveProjectionMatrix(), "transformation", "projection");
-
-		ShaderManager.bindShader(ShaderManager.getColorShaderID());
-		ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", currColor.invert().getColorAsVector());
-		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "transformation", logoTransform);
-		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "projection", window.getPerspectiveProjectionMatrix());
-		TextureManager.unbindTexture();
 		
-		Tessellator.start();
-		
-		Tessellator.addVertex(10, 10, 0);
-		Tessellator.addVertex(10, -10, 0);
-		Tessellator.addVertex(-10, 0, 0);
-		
-		Tessellator.finish();
-		
-		ModelManager.renderModelWithColor(ModelManager.getSquareModelID(), testTexture, ShaderManager.getTextureShaderID(), testTransform, GLHelper.initBasicOrthographicProjectionMatrix(), new Color(1, 1, 1, 0.5f), "transformation", "projection", "color");
+		FontManager.drawString(font, 20, 5, "Hello, this is a very long piece of useless text just to test my fonts!", new Matrix4f(), GLHelper.initOrthographicProjectionMatrix(0, window.getWidth(), 0, window.getHeight(), 0, 1), "transformation", "projection");
 		
 		ModelManager.finishRendering();
 		angle++;

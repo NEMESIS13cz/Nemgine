@@ -90,7 +90,7 @@ public class GuiTest implements IMainRenderLoop {
 	
 	@Override
 	public void loadResources() {
-		TextureManager.initializeTexture(testTexture, "com/nemezor/nemgine/tests/gui/test_texture.png");
+		TextureManager.initializeTextureFile(testTexture, "com/nemezor/nemgine/tests/gui/test_texture.png");
 		
 		ShaderManager.initializeShader(shader, "com/nemezor/nemgine/tests/gui/shader.vert", 
 											   "com/nemezor/nemgine/tests/gui/shader.frag", 

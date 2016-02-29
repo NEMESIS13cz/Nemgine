@@ -11,13 +11,13 @@ public class Font {
 	public java.awt.Font font;
 	public int state;
 	
-	public Font() {
+	public Font(int texId) {
+		this.textureId = texId;
 		state = Registry.INVALID;
 	}
 	
-	public void initializeFont(HashMap<Character, GLCharacter> chars, int texId, java.awt.Font font) {
+	public void initializeFont(HashMap<Character, GLCharacter> chars, java.awt.Font font) {
 		this.chars = chars;
-		this.textureId = texId;
 		this.font = font;
 		this.state = 0;
 	}
