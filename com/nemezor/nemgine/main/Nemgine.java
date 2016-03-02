@@ -32,7 +32,6 @@ public class Nemgine {
 	private static int threadCounter = 0;
 	private static boolean isRunning = false;
 	private static boolean headless = false;
-	private static boolean compat = false;
 	private static long context = 0;
 	private static GLFWErrorCallback errCb = null;
 	
@@ -72,7 +71,6 @@ public class Nemgine {
 				boolean contained = InputParams.containsEntry(Registry.PARAM_CONTAINED) ? InputParams.getBoolean(Registry.PARAM_CONTAINED) : ann.contained();
 				headless = InputParams.containsEntry(Registry.PARAM_SERVER) ? InputParams.getBoolean(Registry.PARAM_SERVER) : ann.side().isServer();
 				name = ann.name();
-				compat = InputParams.containsEntry(Registry.PARAM_COMPAT) ? InputParams.getBoolean(Registry.PARAM_COMPAT) : ann.compatibilityMode();
 				
 				if (entry == null || (resources == null && !headless)) {
 					Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_RESOLVE_NONE, false);
@@ -305,10 +303,6 @@ public class Nemgine {
 
 	public static Side getSide() {
 		return headless ? Side.SERVER : Side.CLIENT;
-	}
-	
-	public static boolean isInCompatibilityMode() {
-		return compat;
 	}
 	
 	public static String getApplicationName() {

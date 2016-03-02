@@ -48,9 +48,6 @@ public class FrameBufferManager {
 		currentBufferData = buffer;
 		currentBuffer = id;
 		inFrameBuffer = true;
-		if (Nemgine.isInCompatibilityMode()) {
-			return;
-		}
 		TextureManager.unbindTexture();
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, buffer.id);
 		GL11.glViewport(0, 0, buffer.w, buffer.h);
@@ -64,15 +61,12 @@ public class FrameBufferManager {
 		currentBuffer = 0;
 		currentBufferData = null;
 		inFrameBuffer = false;
-		if (Nemgine.isInCompatibilityMode()) {
-			return;
-		}
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
 		GL11.glViewport(0, 0, window.getWidth(), window.getHeight());
 	}
 	
 	public static void bindFrameBufferTexture(int id, int texture) {
-		if (currentBuffer == id || currentBufferTex == id || Nemgine.isInCompatibilityMode()) {
+		if (currentBuffer == id || currentBufferTex == id) {
 			return;
 		}
 		FrameBuffer buffer = buffers.get(id);
@@ -93,7 +87,7 @@ public class FrameBufferManager {
 	}
 	
 	public static void unbindFrameBufferTexture() {
-		if (currentBufferTex == 0 || Nemgine.getSide() == Side.SERVER || Nemgine.isInCompatibilityMode()) {
+		if (currentBufferTex == 0 || Nemgine.getSide() == Side.SERVER) {
 			return;
 		}
 		currentBufferTex = 0;
@@ -101,7 +95,7 @@ public class FrameBufferManager {
 	}
 	
 	public static void dispose(int id) {
-		if (currentBuffer == id || Nemgine.getSide() == Side.SERVER || Nemgine.isInCompatibilityMode()) {
+		if (currentBuffer == id || Nemgine.getSide() == Side.SERVER) {
 			return;
 		}
 		FrameBuffer buffer = buffers.get(id);
@@ -115,7 +109,7 @@ public class FrameBufferManager {
 	}
 	
 	public static Dimension getFrameBufferResolution(int id) {
-		if (Nemgine.getSide() == Side.SERVER || Nemgine.isInCompatibilityMode()) {
+		if (Nemgine.getSide() == Side.SERVER) {
 			return new Dimension(Registry.INVALID, Registry.INVALID);
 		}
 		if (currentBuffer == id) {
@@ -129,7 +123,7 @@ public class FrameBufferManager {
 	}
 	
 	public static void disposeAll() {
-		if (Nemgine.getSide() == Side.SERVER || Nemgine.isInCompatibilityMode()) {
+		if (Nemgine.getSide() == Side.SERVER) {
 			return;
 		}
 		Iterator<Integer> keys = buffers.keySet().iterator();
@@ -144,7 +138,7 @@ public class FrameBufferManager {
 	}
 	
 	public static boolean initializeFrameBuffer(Display window, int id, int width, int height, boolean textureBuffer, boolean depthTextureBuffer, boolean depthBuffer) {
-		if (currentBuffer == id || Nemgine.isInCompatibilityMode()) {
+		if (currentBuffer == id) {
 			return false;
 		}
 		FrameBuffer buffer = buffers.get(id);

@@ -12,7 +12,6 @@ import com.nemezor.nemgine.misc.Side;
 public @interface Application {
 	
 	boolean contained() default false;
-	boolean compatibilityMode() default false;
 	Side side() default Side.CLIENT;
 	String name();
 	String path();

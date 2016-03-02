@@ -160,7 +160,6 @@ public final class Registry {
 	// Parameters
 	public static final String PARAM_CONTAINED = "NGcontained";
 	public static final String PARAM_SERVER = "NGserver";
-	public static final String PARAM_COMPAT = "NGcompat";
 	
 	// Fonts
 	public static final String FONT_MANAGER_NAME = "Nemgine Font Manager";
