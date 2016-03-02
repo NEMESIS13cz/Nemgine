@@ -12,6 +12,8 @@ import org.lwjgl.util.vector.Matrix4f;
 import com.nemezor.nemgine.graphics.util.Font;
 import com.nemezor.nemgine.graphics.util.GLCharacter;
 import com.nemezor.nemgine.main.Nemgine;
+import com.nemezor.nemgine.misc.Color;
+import com.nemezor.nemgine.misc.Logger;
 import com.nemezor.nemgine.misc.Platform;
 import com.nemezor.nemgine.misc.Registry;
 
@@ -29,7 +31,11 @@ public class FontManager {
 		return fontCounter;
 	}
 	
-	public static void drawString(int fontId, int x, int y, String string, Matrix4f transformation, Matrix4f projection, String transformationAttribName, String projectionAttribName) {
+	public static void drawString(int fontId, int x, int y, String string, Matrix4f transformation, Matrix4f projection) {
+		drawString(fontId, x, y, string, Registry.FONT_DEFAULT_COLOR, transformation, projection);
+	}
+	
+	public static void drawString(int fontId, int x, int y, String string, Color color, Matrix4f transformation, Matrix4f projection) {
 		Font font = fonts.get(fontId);
 		
 		if (font.state == Registry.INVALID || Nemgine.getSide().isServer()) {
@@ -38,14 +44,18 @@ public class FontManager {
 		char[] chars = string.toCharArray();
 		
 		TextureManager.bindTexture(font.textureId);
-		ShaderManager.bindShader(ShaderManager.getTextureShaderID());
-		ShaderManager.loadMatrix4(ShaderManager.getTextureShaderID(), transformationAttribName, transformation);
-		ShaderManager.loadMatrix4(ShaderManager.getTextureShaderID(), projectionAttribName, projection);
+		ShaderManager.bindShader(ShaderManager.getFontShaderID());
+		ShaderManager.loadMatrix4(ShaderManager.getFontShaderID(), Registry.FONT_SHADER_TRANSFORMATION_ATTRIBUTE, transformation);
+		ShaderManager.loadMatrix4(ShaderManager.getFontShaderID(), Registry.FONT_SHADER_PROJECTION_ATTRIBUTE, projection);
+		ShaderManager.loadVector4(ShaderManager.getFontShaderID(), Registry.FONT_SHADER_COLOR_ATTRIBUTE, color.getColorAsVector());
 		GLHelper.enableBlending();
 		Tessellator.start();
 		
 		for (char c : chars) {
 			GLCharacter glchar = font.chars.get(c);
+			if (glchar == null) {
+				continue;
+			}
 			float[] texCoords = glchar.textureCoords;
 			Tessellator.addVertex(x, y, 0);
 			Tessellator.addTexCoord(texCoords[0], texCoords[1]);
@@ -68,9 +78,16 @@ public class FontManager {
 		GLHelper.disableBlending();
 	}
 	
-	public static boolean initializeFont(int id, java.awt.Font font) {
+	public static boolean initializeFont(int id, String name, int style, int size) {
 		if (Nemgine.getSide().isServer()) {
 			return false;
+		}
+		java.awt.Font font;
+		if (Platform.isFontAvailable(name)) {
+			font = new java.awt.Font(name, style, size);
+		}else{
+			Logger.log(Registry.FONT_MANAGER_NAME, Registry.FONT_NOT_FOUND_MESSAGE_1 + name + Registry.FONT_NOT_FOUND_MESSAGE_2 + Registry.FONT_FALLBACK_FONT + Registry.FONT_NOT_FOUND_MESSAGE_3, false);
+			font = new java.awt.Font(Registry.FONT_FALLBACK_FONT, style, size);
 		}
 		Font nFont = fonts.get(id);
 		if (nFont == null || nFont.state != Registry.INVALID) {
@@ -106,7 +123,8 @@ public class FontManager {
 		}
 		height = currY + highest;
 		
-		BufferedImage texture = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+		tempGraphics.dispose();
+		BufferedImage texture = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
 		Graphics g = texture.getGraphics();
 		g.setFont(font);
 		
@@ -117,7 +135,7 @@ public class FontManager {
 			c.initialize(texture.getWidth(), texture.getHeight());
 		}
 		g.dispose();
-		TextureManager.initializeTextureImageABGR(nFont.textureId, texture);
+		TextureManager.initializeTextureImageGrayscale(nFont.textureId, texture);
 		nFont.initializeFont(charMap, font);
 		
 		return true;

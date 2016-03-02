@@ -35,8 +35,9 @@ public class ShaderManager {
 	private static int currentShader = 0;
 	private static Shader currentShaderData = null;
 	
-	private static int guiShaderColored;
-	private static int guiShaderTextured;
+	private static int colorShader;
+	private static int textureShader;
+	private static int fontShader;
 	
 	private ShaderManager() {}
 
@@ -338,21 +339,27 @@ public class ShaderManager {
 		return id;
 	}
 	
-	protected static void generateGuiShaderIDs() {
-		guiShaderColored = generateShaders();
-		guiShaderTextured = generateShaders();
+	protected static void generateDefaultShaderIDs() {
+		colorShader = generateShaders();
+		textureShader = generateShaders();
+		fontShader = generateShaders();
 	}
 	
-	protected static void loadGuiShaders() {
-		initializeShader(guiShaderColored, Registry.GUI_COLORED_SHADER_VERTEX, Registry.GUI_COLORED_SHADER_FRAGMENT, new String[] {"projection", "transformation", "color"}, new String[] {"position"}, new int[] {0});
-		initializeShader(guiShaderTextured, Registry.GUI_TEXTURED_SHADER_VERTEX, Registry.GUI_TEXTURED_SHADER_FRAGMENT, new String[] {"projection", "transformation", "color"}, new String[] {"position"}, new int[] {0});
+	protected static void loadDefaultShaders() {
+		initializeShader(colorShader, Registry.COLOR_SHADER_VERTEX, Registry.COLOR_SHADER_FRAGMENT, new String[] {"projection", "transformation", "color"}, new String[] {"position"}, new int[] {0});
+		initializeShader(textureShader, Registry.TEXTURE_SHADER_VERTEX, Registry.TEXTURE_SHADER_FRAGMENT, new String[] {"projection", "transformation", "color"}, new String[] {"position"}, new int[] {0});
+		initializeShader(fontShader, Registry.TEXTURE_SHADER_VERTEX, Registry.FONT_SHADER_FRAGMENT, new String[] {"projection", "transformation", "color"}, new String[] {"position"}, new int[] {0});
 	}
 	
 	public static int getColorShaderID() {
-		return guiShaderColored;
+		return colorShader;
 	}
 	
 	public static int getTextureShaderID() {
-		return guiShaderTextured;
+		return textureShader;
+	}
+	
+	public static int getFontShaderID() {
+		return fontShader;
 	}
 }

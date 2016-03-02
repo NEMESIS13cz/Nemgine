@@ -131,12 +131,47 @@ public class TextureManager {
 		return initializeTextureImageARGB(id, image);
 	}
 	
+	public static boolean initializeTextureImageGrayscale(int id, BufferedImage image) {
+		return initializeTexturePixelsGrayscale(id, image.getRGB(0, 0, image.getWidth(), image.getHeight(), new int[image.getWidth() * image.getHeight()], 0, image.getWidth()), image.getWidth(), image.getHeight());
+	}
+	
 	public static boolean initializeTextureImageARGB(int id, BufferedImage image) {
 		return initializeTexturePixelsARGB(id, image.getRGB(0, 0, image.getWidth(), image.getHeight(), new int[image.getWidth() * image.getHeight()], 0, image.getWidth()), image.getWidth(), image.getHeight());
 	}
 	
 	public static boolean initializeTextureImageABGR(int id, BufferedImage image) {
 		return initializeTexturePixelsABGR(id, image.getRGB(0, 0, image.getWidth(), image.getHeight(), new int[image.getWidth() * image.getHeight()], 0, image.getWidth()), image.getWidth(), image.getHeight());
+	}
+	
+	public static boolean initializeTexturePixelsGrayscale(int id, int[] pixels_, int width, int height) {
+		if (currentTexture == id) {
+			return false;
+		}
+		Texture tex = textures.get(id);
+		if (tex == null || tex.id != Registry.INVALID) {
+			return false;
+		}
+		byte[] pixels = new byte[width * height];
+		for (int i = 0; i < pixels.length; i++) {
+			pixels[i] = (byte)(pixels_[i] >> 16);
+		}
+		
+		ByteBuffer res = BufferUtils.createByteBuffer(pixels.length);
+		res.put(pixels).flip();
+
+		int glid = GL11.glGenTextures();
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, glid);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
+		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RED, width, height, 0, GL11.GL_RED, GL11.GL_UNSIGNED_BYTE, res);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+		
+		textures.put(id, new Texture(glid, width, height));
+		if (Loader.loading()) {
+			Loader.textureLoaded();
+		}
+		return true;
 	}
 	
 	public static boolean initializeTexturePixelsARGB(int id, int[] pixels, int width, int height) {

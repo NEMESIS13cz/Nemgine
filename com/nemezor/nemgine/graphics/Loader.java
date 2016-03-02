@@ -88,7 +88,7 @@ public class Loader {
 		initialized = true;
 		update();
 		
-		ShaderManager.generateGuiShaderIDs();
+		ShaderManager.generateDefaultShaderIDs();
 		return GLFW.glfwGetCurrentContext();
 	}
 	
@@ -117,7 +117,7 @@ public class Loader {
 			return;
 		}
 		
-		ShaderManager.loadGuiShaders();
+		ShaderManager.loadDefaultShaders();
 		
 		loaded = true;
 	}

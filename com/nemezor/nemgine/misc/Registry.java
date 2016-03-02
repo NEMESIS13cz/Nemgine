@@ -39,6 +39,9 @@ public final class Registry {
 	public static final int RSA_ENCRYPTION_KEY_LENGTH = 4096;
 	public static final int AES_ENCRYPTION_KEY_LENGTH = 256;
 	
+	// Fonts
+	public static final Color FONT_DEFAULT_COLOR = new Color(0xFFFFFFFF);
+	
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	// Main
@@ -68,10 +71,6 @@ public final class Registry {
 	// Misc
 	public static final String LOGO_IMAGE_PATH = "com/nemezor/nemgine/resources/logo.png";
 	public static final String LOGO_IMAGE_LOAD_ERROR = "Failed to load logo image!";
-	public static final String GUI_COLORED_SHADER_FRAGMENT = "com/nemezor/nemgine/resources/gui_colored.fragment";
-	public static final String GUI_COLORED_SHADER_VERTEX = "com/nemezor/nemgine/resources/gui_colored.vertex";
-	public static final String GUI_TEXTURED_SHADER_FRAGMENT = "com/nemezor/nemgine/resources/gui_textured.fragment";
-	public static final String GUI_TEXTURED_SHADER_VERTEX = "com/nemezor/nemgine/resources/gui_textured.vertex";
 	
 	// Logging
 	public static final String LOG_FILE_PATH = "/logs";
@@ -116,6 +115,15 @@ public final class Registry {
 	public static final String SHADER_LOGO_FRAGMENT = "com/nemezor/nemgine/resources/logo.fragment";
 	public static final String SHADER_PROGRESS_BAR_VERTEX = "com/nemezor/nemgine/resources/loader_bar.vertex";
 	public static final String SHADER_PROGRESS_BAR_FRAGMENT = "com/nemezor/nemgine/resources/loader_bar.fragment";
+	public static final String COLOR_SHADER_FRAGMENT = "com/nemezor/nemgine/resources/color.frag";
+	public static final String COLOR_SHADER_VERTEX = "com/nemezor/nemgine/resources/color.vert";
+	public static final String TEXTURE_SHADER_FRAGMENT = "com/nemezor/nemgine/resources/texture.frag";
+	public static final String TEXTURE_SHADER_VERTEX = "com/nemezor/nemgine/resources/texture.vert";
+	public static final String FONT_SHADER_FRAGMENT = "com/nemezor/nemgine/resources/font.frag";
+	
+	public static final String FONT_SHADER_COLOR_ATTRIBUTE = "color";
+	public static final String FONT_SHADER_PROJECTION_ATTRIBUTE = "projection";
+	public static final String FONT_SHADER_TRANSFORMATION_ATTRIBUTE = "transformation";
 	
 	// Models
 	public static final String MODEL_EXCEPTION_NO_ACCESSOR = "Anonymous Model Accessor";
@@ -153,4 +161,11 @@ public final class Registry {
 	public static final String PARAM_CONTAINED = "NGcontained";
 	public static final String PARAM_SERVER = "NGserver";
 	public static final String PARAM_COMPAT = "NGcompat";
+	
+	// Fonts
+	public static final String FONT_MANAGER_NAME = "Nemgine Font Manager";
+	public static final String FONT_FALLBACK_FONT = "Monospaced";
+	public static final String FONT_NOT_FOUND_MESSAGE_1 = "Could not find font '";
+	public static final String FONT_NOT_FOUND_MESSAGE_2 = "', defaulting to '";
+	public static final String FONT_NOT_FOUND_MESSAGE_3 = "'";
 }

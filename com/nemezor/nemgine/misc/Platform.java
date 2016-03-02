@@ -1,5 +1,7 @@
 package com.nemezor.nemgine.misc;
 
+import java.awt.GraphicsEnvironment;
+
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
@@ -22,6 +24,7 @@ public class Platform {
 	private static int openGLTextureSize = Registry.INVALID;
 	private static GLVersion openGLVersion = new GLVersion(Registry.INVALID, Registry.INVALID);
 	private static GLVersion GLSLVersion = new GLVersion(Registry.INVALID, Registry.INVALID);
+	private static String[] availableFonts;
 	
 	private static Runtime runtime = Runtime.getRuntime();
 	
@@ -74,6 +77,9 @@ public class Platform {
 		} catch (NumberFormatException e) {}
 
 		GLFW.glfwDestroyWindow(window);
+		
+		GraphicsEnvironment e = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		availableFonts = e.getAvailableFontFamilyNames();
 	}
 	
 	public static GLVersion getOpenGLVersion() {
@@ -153,15 +159,15 @@ public class Platform {
 		GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_FALSE);
 		GLFW.glfwWindowHint(GLFW.GLFW_DOUBLE_BUFFER, GLFW.GLFW_TRUE);
 		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
-		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 3);/*
-		if (Nemgine.isInCompatibilityMode()) {
-			GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_ANY_PROFILE);
-			GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
-			GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 0);
-		}else{
-			GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
-			GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
-			GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 2);
-		}*/
+		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 3);
+	}
+	
+	public static boolean isFontAvailable(String name) {
+		for (String s : availableFonts) {
+			if (s.equals(name)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
