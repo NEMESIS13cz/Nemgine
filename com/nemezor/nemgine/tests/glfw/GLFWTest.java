@@ -23,6 +23,7 @@ import com.nemezor.nemgine.main.Application;
 import com.nemezor.nemgine.main.IMainRenderLoop;
 import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.Color;
+import com.nemezor.nemgine.misc.Platform;
 
 public class GLFWTest implements IMainRenderLoop {
 
@@ -82,7 +83,7 @@ public class GLFWTest implements IMainRenderLoop {
 			ModelManager.initializeModel(model, "com/nemezor/nemgine/tests/old/reflection/dragon.obj");
 			ModelManager.initializeModel(logo, "com/nemezor/nemgine/tests/old/reflection/nemgine.obj");
 			
-			FontManager.initializeFont(font, "Monospaced", Font.PLAIN, 16);
+			FontManager.initializeFont(font, "Monospaced", Font.PLAIN, 150);
 		}
 	}
 	
@@ -112,7 +113,7 @@ public class GLFWTest implements IMainRenderLoop {
 
 		ModelManager.renderModel(logo, 0, logoShader, logoTransform, window.getPerspectiveProjectionMatrix(), "transformation", "projection");
 		
-		FontManager.drawString(font, 20, 5, "lmao it works", currColor.invert(), new Matrix4f(), GLHelper.initOrthographicProjectionMatrix(0, window.getWidth(), 0, window.getHeight(), 0, 1));
+		FontManager.drawString(font, 20, 5, (Platform.getUsedMemory() / 1048576) + "/" + (Platform.getAllocatedMemory() / 1048576) + "MB", currColor.invert(), new Matrix4f(), GLHelper.initOrthographicProjectionMatrix(0, window.getWidth(), 0, window.getHeight(), 0, 1));
 		
 		ModelManager.finishRendering();
 		angle++;

@@ -41,6 +41,8 @@ public class Loader {
 	protected static int modelProgress = 0;
 	protected static int textureProgress = 0;
 	
+	protected static boolean silent = false;
+	
 	public static long initialize(String title) {
 		if (initialized) {
 			return Registry.INVALID;
@@ -187,6 +189,6 @@ public class Loader {
 	}
 	
 	public static boolean loading() {
-		return initialized ? !isDone : false;
+		return initialized ? isDone ? false : !silent : false;
 	}
 }

@@ -7,12 +7,10 @@ import com.nemezor.nemgine.misc.Registry;
 public class Font {
 
 	public HashMap<Character, GLCharacter> chars;
-	public int textureId;
 	public java.awt.Font font;
 	public int state;
 	
-	public Font(int texId) {
-		this.textureId = texId;
+	public Font() {
 		state = Registry.INVALID;
 	}
 	

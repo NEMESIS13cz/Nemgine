@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -27,7 +28,7 @@ public class FontManager {
 			return Registry.INVALID;
 		}
 		fontCounter++;
-		fonts.put(fontCounter, new Font(TextureManager.generateTextures()));
+		fonts.put(fontCounter, new Font());
 		return fontCounter;
 	}
 	
@@ -43,7 +44,6 @@ public class FontManager {
 		}
 		char[] chars = string.toCharArray();
 		
-		TextureManager.bindTexture(font.textureId);
 		ShaderManager.bindShader(ShaderManager.getFontShaderID());
 		ShaderManager.loadMatrix4(ShaderManager.getFontShaderID(), Registry.FONT_SHADER_TRANSFORMATION_ATTRIBUTE, transformation);
 		ShaderManager.loadMatrix4(ShaderManager.getFontShaderID(), Registry.FONT_SHADER_PROJECTION_ATTRIBUTE, projection);
@@ -56,6 +56,7 @@ public class FontManager {
 			if (glchar == null) {
 				continue;
 			}
+			TextureManager.bindTexture(glchar.glTex);
 			float[] texCoords = glchar.textureCoords;
 			Tessellator.addVertex(x, y, 0);
 			Tessellator.addTexCoord(texCoords[0], texCoords[1]);
@@ -100,20 +101,29 @@ public class FontManager {
 		int highest = 0;
 		int width = 0;
 		int height = 0;
+		ArrayList<Integer> textures = new ArrayList<Integer>();
+		Loader.silent = true;
 		FontRenderContext context = new FontRenderContext(null, true, true);
 		BufferedImage temp = new BufferedImage(1, 1, BufferedImage.TYPE_4BYTE_ABGR);
 		Graphics tempGraphics = temp.getGraphics();
 		tempGraphics.setFont(font);
 		Rectangle2D r = font.getMaxCharBounds(context);
-		highest = (int)r.getHeight();
+		highest = (int)r.getHeight() + tempGraphics.getFontMetrics().getAscent();
+		int currentTexture = TextureManager.generateTextures();
 		
 		for (int i = 0; i < 0xFFFF; i++) {
 			if (font.canDisplay(i)) {
-				if (currX + r.getWidth() > Platform.getOpenGLTextureSize()) {
+				if (currY + highest >= Platform.getOpenGLTextureSize()) {
+					textures.add(currentTexture);
+					currentTexture = TextureManager.generateTextures();
+					currY = 0;
+					currX = 0;
+				}
+				if (currX + r.getWidth() >= Platform.getOpenGLTextureSize()) {
 					currX = 0;
 					currY += highest;
 				}
-				GLCharacter glchar = new GLCharacter((char)i, currX, currY, tempGraphics.getFontMetrics().charWidth((char)i), highest + tempGraphics.getFontMetrics().getDescent() - 1);
+				GLCharacter glchar = new GLCharacter((char)i, currX, currY, tempGraphics.getFontMetrics().charWidth((char)i), highest + tempGraphics.getFontMetrics().getDescent(), currentTexture);
 				charMap.put(glchar.character, glchar);
 				currX += r.getWidth();
 				if (currX + 1 > width) {
@@ -122,21 +132,31 @@ public class FontManager {
 			}
 		}
 		height = currY + highest;
+		textures.add(currentTexture);
 		
 		tempGraphics.dispose();
-		BufferedImage texture = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
-		Graphics g = texture.getGraphics();
-		g.setFont(font);
+		HashMap<Integer, BufferedImage> images = new HashMap<Integer, BufferedImage>();
+		HashMap<Integer, Graphics> graphics = new HashMap<Integer, Graphics>();
+		for (int i = 0; i < textures.size(); i++) {
+			BufferedImage img = new BufferedImage(width, i + 1 == textures.size() ? height : Platform.getOpenGLTextureSize(), BufferedImage.TYPE_BYTE_GRAY);
+			images.put(textures.get(i), img);
+			graphics.put(textures.get(i), img.createGraphics());
+			graphics.get(textures.get(i)).setFont(font);
+		}
 		
 		Iterator<Character> iter = charMap.keySet().iterator();
 		while (iter.hasNext()) {
 			GLCharacter c = charMap.get(iter.next());
-			g.drawString(String.valueOf(c.character), c.x, c.y + highest);
-			c.initialize(texture.getWidth(), texture.getHeight());
+			BufferedImage img = images.get(c.glTex);
+			graphics.get(c.glTex).drawString(String.valueOf(c.character), c.x, c.y + highest);
+			c.initialize(img.getWidth(), img.getHeight());
 		}
-		g.dispose();
-		TextureManager.initializeTextureImageGrayscale(nFont.textureId, texture);
+		for (int tId : textures) {
+			graphics.get(tId).dispose();
+			TextureManager.initializeTextureImageGrayscale(tId, images.get(tId));
+		}
 		nFont.initializeFont(charMap, font);
+		Loader.silent = false;
 		
 		return true;
 	}
