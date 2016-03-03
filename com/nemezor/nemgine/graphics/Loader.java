@@ -1,15 +1,19 @@
 package com.nemezor.nemgine.graphics;
 
+import java.lang.reflect.Method;
+
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.vector.Matrix4f;
-import org.lwjgl.util.vector.Vector3f;
 
 import com.nemezor.nemgine.exceptions.WindowException;
+import com.nemezor.nemgine.graphics.util.GLResourceEvent;
+import com.nemezor.nemgine.graphics.util.LoaderSegment;
 import com.nemezor.nemgine.main.Nemgine;
+import com.nemezor.nemgine.misc.Color;
 import com.nemezor.nemgine.misc.ErrorScreen;
 import com.nemezor.nemgine.misc.Logger;
 import com.nemezor.nemgine.misc.Platform;
@@ -25,21 +29,17 @@ public class Loader {
 	private static int logoShader = 0;
 	private static int barShader = 0;
 	private static int texture = 0;
-	private static Matrix4f transformation;
-	private static Matrix4f perspective;
-	private static Matrix4f textureTransformation;
-	private static Matrix4f shaderTransformation;
-	private static Matrix4f modelTransformation;
 	private static long frameskip = Registry.ONE_SECOND_IN_MILLIS / Registry.LOADING_SCREEN_REFRESHRATE;
 	private static long lastFrame = 0;
 	private static long window;
+	private static Matrix4f projection = GLHelper.initBasicOrthographicProjectionMatrix();
+	private static Matrix4f textProjection = GLHelper.initOrthographicProjectionMatrix(0, Registry.LOADING_SCREEN_WIDTH, 0, Registry.LOADING_SCREEN_HEIGHT, 0, 1);
+	private static LoaderSegment segment;
 	
 	protected static int shaderCounter = 0;
 	protected static int modelCounter = 0;
 	protected static int textureCounter = 0;
-	protected static int shaderProgress = 0;
-	protected static int modelProgress = 0;
-	protected static int textureProgress = 0;
+	protected static int fontCounter = 0;
 	
 	protected static boolean silent = false;
 	
@@ -74,19 +74,23 @@ public class Loader {
 		GLFW.glfwShowWindow(window);
 		
 		GL11.glViewport(0, 0, Registry.LOADING_SCREEN_WIDTH, Registry.LOADING_SCREEN_HEIGHT);
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
 		ModelManager.initializeSquareModel();
+		FontManager.initializeDefaultFont();
 		texture = TextureManager.loadMissingTextureAndLogo();
 		logoShader = ShaderManager.loadLogoShaders();
 		barShader = ShaderManager.loadProgressBarShaders();
-		transformation = GLHelper.initTransformationMatrix(new Vector3f(0, 0.1f, 0), new Vector3f(90, 0, 0), new Vector3f(1, 0, 1));
-		textureTransformation = GLHelper.initTransformationMatrix(new Vector3f(0, 0.3f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f, 0, 0.1f));
-		shaderTransformation = GLHelper.initTransformationMatrix(new Vector3f(0, 0.5f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f, 0, 0.1f));
-		modelTransformation = GLHelper.initTransformationMatrix(new Vector3f(0, 0.7f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f, 0, 0.1f));
-		perspective = GLHelper.initOrthographicProjectionMatrix(-1, 1, 1, -1, -1, 1);
-
+		ShaderManager.bindShader(logoShader);
+		ShaderManager.loadMatrix4(logoShader, "projection", projection);
+		ShaderManager.loadMatrix4(logoShader, "transformation", new Matrix4f());
+		ShaderManager.loadVector4(logoShader, "color", new Color(0xFFFFFFFF).getColorAsVector());
+		ShaderManager.bindShader(barShader);
+		ShaderManager.loadMatrix4(barShader, "projection", projection);
+		ShaderManager.loadMatrix4(barShader, "transformation", new Matrix4f());
+		ShaderManager.loadFloat(barShader, "progress", 0);
+		ShaderManager.unbindShader();
+		
 		initialized = true;
 		update();
 		
@@ -107,6 +111,7 @@ public class Loader {
 		ShaderManager.dispose(logoShader);
 		ShaderManager.dispose(barShader);
 		TextureManager.dispose(texture);
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		isDone = true;
 	}
 	
@@ -119,9 +124,40 @@ public class Loader {
 			return;
 		}
 		
-		ShaderManager.loadDefaultShaders();
+		LoaderSegment textures = new LoaderSegment(Registry.LOADING_PROGRESS_GFX_TEXTURES, textureCounter * 2);
+		LoaderSegment models = new LoaderSegment(Registry.LOADING_PROGRESS_GFX_MODELS, modelCounter * 5);
+		LoaderSegment shaders = new LoaderSegment(Registry.LOADING_PROGRESS_GFX_SHADERS, shaderCounter * 4);
+		LoaderSegment fonts = new LoaderSegment(Registry.LOADING_PROGRESS_GFX_FONTS, fontCounter * 6);
 		
+		segment = new LoaderSegment(Registry.LOADING_PROGRESS_GFX_RESOURCES, 0);
+		segment.addSubsegment(textures);
+		segment.addSubsegment(models);
+		segment.addSubsegment(shaders);
+		segment.addSubsegment(fonts);
+		
+		ShaderManager.loadDefaultShaders();
+	}
+	
+	public static void beginLoadSequence(Method resources, Object instance) {
+		if (loaded) {
+			return;
+		}
 		loaded = true;
+		try {
+			resources.invoke(instance, GLResourceEvent.LOAD_TEXTURES);
+			segment.nextSubsegment();
+			resources.invoke(instance, GLResourceEvent.LOAD_MODELS);
+			segment.nextSubsegment();
+			resources.invoke(instance, GLResourceEvent.LOAD_SHADERS);
+			segment.nextSubsegment();
+			resources.invoke(instance, GLResourceEvent.LOAD_FONTS);
+			segment = null;
+		} catch (Exception e) {
+			Logger.log(Registry.NEMGINE_NAME, Registry.LOADING_RESOURCES_LOAD_FAILED, false);
+			e.printStackTrace();
+            GLFW.glfwTerminate();
+			System.exit(Registry.INVALID);
+		}
 	}
 	
 	private static void update() {
@@ -133,54 +169,113 @@ public class Loader {
 			lastFrame = System.currentTimeMillis();
 			return;
 		}
-		textureTransformation = GLHelper.initTransformationMatrix(new Vector3f(-0.8f + (0.8f * (float)textureProgress / (float)textureCounter), -0.3f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f * (float)textureProgress / (float)textureCounter, 0, 0.1f));
-		shaderTransformation = GLHelper.initTransformationMatrix(new Vector3f(-0.8f + (0.8f * (float)shaderProgress / (float)shaderCounter), -0.5f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f * (float)shaderProgress / (float)shaderCounter, 0, 0.1f));
-		modelTransformation = GLHelper.initTransformationMatrix(new Vector3f(-0.8f + (0.8f * (float)modelProgress / (float)modelCounter), -0.7f, 0), new Vector3f(90, 0, 0), new Vector3f(0.8f * (float)modelProgress / (float)modelCounter, 0, 0.1f));
-		
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		
-		ModelManager.renderModel(ModelManager.getSquareModelID(), texture, logoShader, transformation, perspective, "transformation", "projection");
-		ShaderManager.bindShader(barShader);
-		ShaderManager.loadFloat(barShader, "progress", (float)textureProgress / (float)textureCounter);
-		ModelManager.renderModel(ModelManager.getSquareModelID(), 0, barShader, textureTransformation, perspective, "transformation", "projection");
-		ShaderManager.loadFloat(barShader, "progress", (float)shaderProgress / (float)shaderCounter);
-		ModelManager.renderModel(ModelManager.getSquareModelID(), 0, barShader, shaderTransformation, perspective, "transformation", "projection");
-		ShaderManager.loadFloat(barShader, "progress", (float)modelProgress / (float)modelCounter);
-		ModelManager.renderModel(ModelManager.getSquareModelID(), 0, barShader, modelTransformation, perspective, "transformation", "projection");
+		ShaderManager.bindShader(logoShader);
+		TextureManager.bindTexture(texture);
+		Tessellator.start();
+		
+		Tessellator.addVertex(0, 0, 0);
+		Tessellator.addTexCoord(0, 0);
+		Tessellator.addVertex(1, 0, 0);
+		Tessellator.addTexCoord(1, 0);
+		Tessellator.addVertex(1, 1, 0);
+		Tessellator.addTexCoord(1, 1);
+		Tessellator.addVertex(1, 1, 0);
+		Tessellator.addTexCoord(1, 1);
+		Tessellator.addVertex(0, 1, 0);
+		Tessellator.addTexCoord(0, 1);
+		Tessellator.addVertex(0, 0, 0);
+		Tessellator.addTexCoord(0, 0);
 
+		Tessellator.finish();
+		
+		if (segment != null) {
+			renderSegment(segment, 0);
+		}
+		
 		ModelManager.finishRendering();
+		
 		GLFW.glfwSwapBuffers(window);
 		GLFW.glfwPollEvents();
 		lastFrame = System.currentTimeMillis();
 	}
 	
+	private static void renderSegment(LoaderSegment segment, float offset) {
+		TextureManager.unbindTexture();
+		ShaderManager.bindShader(barShader);
+		float progress = segment.getProgress();
+		ShaderManager.loadFloat(barShader, "progress", progress);
+		progress *= 0.8f;
+		progress += 0.1f;
+		Tessellator.start();
+		
+		Tessellator.addVertex(0.1f, 0.6f + offset, 0);
+		Tessellator.addVertex(progress, 0.6f + offset, 0);
+		Tessellator.addVertex(progress, 0.68f + offset, 0);
+		Tessellator.addVertex(progress, 0.68f + offset, 0);
+		Tessellator.addVertex(0.1f, 0.68f + offset, 0);
+		Tessellator.addVertex(0.1f, 0.6f + offset, 0);
+		
+		Tessellator.finish();
+		
+		FontManager.drawString(FontManager.getDefaultFontID(), 0.098f * Registry.LOADING_SCREEN_WIDTH, (0.495f + offset) * Registry.LOADING_SCREEN_HEIGHT, segment.getLabel(), new Color(0xFFFFFFFF), new Matrix4f(), textProjection);
+		
+		if (segment.getSubsegment() != null) {
+			renderSegment(segment.getSubsegment(), offset + 0.14f);
+		}
+	}
+	
 	protected static void loadingTexture(String name) {
 		Logger.logSilently("Loading Texture: " + name);
+		segment.setLabel(name);
+		segment.stepProgress();
 		update();
 	}
 	
 	protected static void textureLoaded() {
-		textureProgress++;
+		segment.stepProgress();
 		update();
 	}
 	
 	protected static void loadingShader(String name) {
 		Logger.logSilently("Loading Shader: " + name);
+		segment.setLabel(name);
+		segment.stepProgress();
 		update();
 	}
 	
 	protected static void shaderLoaded() {
-		shaderProgress++;
+		segment.stepProgress();
 		update();
 	}
 	
 	protected static void loadingModel(String name) {
 		Logger.logSilently("Loading Model: " + name);
+		segment.setLabel(name);
+		segment.stepProgress();
 		update();
 	}
 	
 	protected static void modelLoaded() {
-		modelProgress++;
+		segment.stepProgress();
+		update();
+	}
+	
+	protected static void loadingFont(String name) {
+		Logger.logSilently("Loading Font: " + name);
+		segment.setLabel(name);
+		segment.stepProgress();
+		update();
+	}
+	
+	protected static void fontLoaded() {
+		segment.stepProgress();
+		update();
+	}
+	
+	protected static void stepLoader() {
+		segment.stepProgress();
 		update();
 	}
 	

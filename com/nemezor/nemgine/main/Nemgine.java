@@ -42,9 +42,10 @@ public class Nemgine {
 	private Nemgine() {}
 
 	public static void start(String[] args, Class<?> application) {
-		EventQueue.invokeLater(new Runnable() {
+		EventQueue.invokeLater(new Thread() {
 
 			public void run() {
+				setName(Registry.NEMGINE_NAME);
 				isRunning = true;
 				Method entry = null;
 				Method resources = null;
@@ -109,18 +110,11 @@ public class Nemgine {
 						System.exit(Registry.INVALID);
 					}
 					Loader.loadDefaultResources();
-					try {
-						resources.invoke(instance, GLResourceEvent.LOAD_RESOURCES);
-					} catch (Exception e) {
-						Logger.log(Registry.NEMGINE_NAME, Registry.LOADING_RESOURCES_LOAD_FAILED, false);
-						e.printStackTrace();
-			            GLFW.glfwTerminate();
-						System.exit(Registry.INVALID);
-					}
+					Loader.beginLoadSequence(resources, instance);
 					Loader.finish();
 					GL11.glFinish();
 				}
-				
+				System.gc();
 				try {
 					entry.invoke(instance);
 				} catch (Exception e) {

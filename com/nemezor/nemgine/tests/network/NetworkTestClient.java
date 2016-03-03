@@ -61,31 +61,38 @@ public class NetworkTestClient implements IMainRenderLoop {
 	@OpenGLResources
 	public void loadResources(GLResourceEvent e) {
 		if (e == GLResourceEvent.GENERATE_IDS) {
+			
 			shader = ShaderManager.generateShaders();
 			logoShader = ShaderManager.generateShaders();
 			water = ShaderManager.generateShaders();
 			model = ModelManager.generateModels();
 			logo = ModelManager.generateModels();
 			testTexture = TextureManager.generateTextures();
-		}else if (e == GLResourceEvent.LOAD_RESOURCES) {
-			TextureManager.initializeTextureFile(testTexture, "com/nemezor/nemgine/tests/old/gui/test_texture.png");
+			
+		}else if (e == GLResourceEvent.LOAD_MODELS) {
+			
+			ModelManager.initializeModel(model, "com/nemezor/nemgine/tests/old/reflection/dragon.obj");
+			ModelManager.initializeModel(logo, "com/nemezor/nemgine/tests/old/reflection/nemgine.obj");
+			
+		}else if (e == GLResourceEvent.LOAD_SHADERS) {
 			
 			ShaderManager.initializeShader(shader, "com/nemezor/nemgine/tests/old/gui/shader.vert", 
 												   "com/nemezor/nemgine/tests/old/gui/shader.frag", 
 												   new String[] {"projection", "transformation", "lightVectorIn", "lightColorIn"}, 
 												   new String[] {"position", "normal"}, new int[] {0, 2});
 			ShaderManager.initializeShader(logoShader, "com/nemezor/nemgine/tests/old/reflection/logo.vertex", 
-													   "com/nemezor/nemgine/tests/old/reflection/logo.fragment", 
-													   new String[] {"projection", "transformation"}, 
-													   new String[] {"position"}, new int[] {0});
+												   "com/nemezor/nemgine/tests/old/reflection/logo.fragment", 
+												   new String[] {"projection", "transformation"}, 
+												   new String[] {"position"}, new int[] {0});
 			ShaderManager.initializeShader(water, "com/nemezor/nemgine/tests/old/reflection/reflection.vertex", 
 												   "com/nemezor/nemgine/tests/old/reflection/reflection.fragment", 
 												   new String[] {"projection", "transformation", "light"}, 
 												   new String[] {"position", "normal"}, new int[] {0, 2});
 			
+		}else if (e == GLResourceEvent.LOAD_TEXTURES) {
 			
-			ModelManager.initializeModel(model, "com/nemezor/nemgine/tests/old/reflection/dragon.obj");
-			ModelManager.initializeModel(logo, "com/nemezor/nemgine/tests/old/reflection/nemgine.obj");
+			TextureManager.initializeTextureFile(testTexture, "com/nemezor/nemgine/tests/old/gui/test_texture.png");
+			
 		}
 	}
 

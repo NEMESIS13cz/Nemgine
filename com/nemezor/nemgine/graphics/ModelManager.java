@@ -216,6 +216,9 @@ public class ModelManager {
 			}
 			return false;
 		}
+		if (Loader.loading()) {
+			Loader.stepLoader();
+		}
 		int VAOid = GL30.glGenVertexArrays();
 		GL30.glBindVertexArray(VAOid);
 		IntBuffer ind = BufferUtils.createIntBuffer(data.indices.length);
@@ -263,6 +266,10 @@ public class ModelManager {
 			}
 			reader.close();
 			
+			if (Loader.loading()) {
+				Loader.stepLoader();
+			}
+			
 			for (String buf : lines) {
 				if (buf == null) {
 					continue;
@@ -296,6 +303,9 @@ public class ModelManager {
 				processVertex(vertex1, indices, textures, normals, texturesArray, normalsArray, textured);
 				processVertex(vertex2, indices, textures, normals, texturesArray, normalsArray, textured);
 				processVertex(vertex3, indices, textures, normals, texturesArray, normalsArray, textured);
+			}
+			if (Loader.loading()) {
+				Loader.stepLoader();
 			}
 			
 			verticesArray = new float[vertices.size() * 3];

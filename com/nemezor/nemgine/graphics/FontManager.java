@@ -14,6 +14,7 @@ import com.nemezor.nemgine.graphics.util.Font;
 import com.nemezor.nemgine.graphics.util.GLCharacter;
 import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.Color;
+import com.nemezor.nemgine.misc.FontMetrics;
 import com.nemezor.nemgine.misc.Logger;
 import com.nemezor.nemgine.misc.Platform;
 import com.nemezor.nemgine.misc.Registry;
@@ -22,6 +23,7 @@ public class FontManager {
 
 	private static HashMap<Integer, Font> fonts = new HashMap<Integer, Font>();
 	private static int fontCounter = 0;
+	private static int defaultFont;
 	
 	public static synchronized int generateFonts() {
 		if (Nemgine.getSide().isServer()) {
@@ -29,14 +31,17 @@ public class FontManager {
 		}
 		fontCounter++;
 		fonts.put(fontCounter, new Font());
+		if (Loader.loading()) {
+			Loader.fontCounter++;
+		}
 		return fontCounter;
 	}
 	
-	public static void drawString(int fontId, int x, int y, String string, Matrix4f transformation, Matrix4f projection) {
+	public static void drawString(int fontId, float x, float y, String string, Matrix4f transformation, Matrix4f projection) {
 		drawString(fontId, x, y, string, Registry.FONT_DEFAULT_COLOR, transformation, projection);
 	}
 	
-	public static void drawString(int fontId, int x, int y, String string, Color color, Matrix4f transformation, Matrix4f projection) {
+	public static void drawString(int fontId, float x, float y, String string, Color color, Matrix4f transformation, Matrix4f projection) {
 		Font font = fonts.get(fontId);
 		
 		if (font.state == Registry.INVALID || Nemgine.getSide().isServer()) {
@@ -94,6 +99,9 @@ public class FontManager {
 		if (nFont == null || nFont.state != Registry.INVALID) {
 			return false;
 		}
+		if (Loader.loading()) {
+			Loader.loadingFont(font.getFontName());
+		}
 		HashMap<Character, GLCharacter> charMap = new HashMap<Character, GLCharacter>();
 		
 		int currX = 0;
@@ -102,20 +110,26 @@ public class FontManager {
 		int width = 0;
 		int height = 0;
 		ArrayList<Integer> textures = new ArrayList<Integer>();
-		Loader.silent = true;
 		FontRenderContext context = new FontRenderContext(null, true, true);
 		BufferedImage temp = new BufferedImage(1, 1, BufferedImage.TYPE_4BYTE_ABGR);
 		Graphics tempGraphics = temp.getGraphics();
 		tempGraphics.setFont(font);
 		Rectangle2D r = font.getMaxCharBounds(context);
 		highest = (int)r.getHeight() + tempGraphics.getFontMetrics().getAscent();
+		Loader.silent = true;
 		int currentTexture = TextureManager.generateTextures();
+		Loader.silent = false;
+		if (Loader.loading()) {
+			Loader.stepLoader();
+		}
 		
 		for (int i = 0; i < 0xFFFF; i++) {
 			if (font.canDisplay(i)) {
 				if (currY + highest >= Platform.getOpenGLTextureSize()) {
 					textures.add(currentTexture);
+					Loader.silent = true;
 					currentTexture = TextureManager.generateTextures();
+					Loader.silent = false;
 					currY = 0;
 					currX = 0;
 				}
@@ -131,6 +145,9 @@ public class FontManager {
 				}
 			}
 		}
+		if (Loader.loading()) {
+			Loader.stepLoader();
+		}
 		height = currY + highest;
 		textures.add(currentTexture);
 		
@@ -143,6 +160,9 @@ public class FontManager {
 			graphics.put(textures.get(i), img.createGraphics());
 			graphics.get(textures.get(i)).setFont(font);
 		}
+		if (Loader.loading()) {
+			Loader.stepLoader();
+		}
 		
 		Iterator<Character> iter = charMap.keySet().iterator();
 		while (iter.hasNext()) {
@@ -151,13 +171,30 @@ public class FontManager {
 			graphics.get(c.glTex).drawString(String.valueOf(c.character), c.x, c.y + highest);
 			c.initialize(img.getWidth(), img.getHeight());
 		}
+		if (Loader.loading()) {
+			Loader.stepLoader();
+		}
+		Loader.silent = true;
 		for (int tId : textures) {
 			graphics.get(tId).dispose();
 			TextureManager.initializeTextureImageGrayscale(tId, images.get(tId));
 		}
-		nFont.initializeFont(charMap, font);
 		Loader.silent = false;
+		nFont.initializeFont(charMap, new FontMetrics(font.getFamily(), font.getFontName(), font.getSize(), font.getStyle()));
+		if (Loader.loading()) {
+			Loader.fontLoaded();
+		}
 		
 		return true;
+	}
+	
+	public static int getDefaultFontID() {
+		return defaultFont;
+	}
+	
+	protected static void initializeDefaultFont() {
+		Loader.silent = true;
+		defaultFont = FontManager.generateFonts();
+		FontManager.initializeFont(defaultFont, Registry.FONT_FALLBACK_FONT, Registry.FONT_DEFAULT_FONT_STYLE, Registry.FONT_DEFAULT_FONT_SIZE);
 	}
 }

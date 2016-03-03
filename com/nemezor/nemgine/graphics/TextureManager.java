@@ -175,14 +175,13 @@ public class TextureManager {
 	}
 	
 	public static boolean initializeTexturePixelsARGB(int id, int[] pixels, int width, int height) {
-		int[] data = new int[width * height];
 		for (int i = 0; i < width * height; i++) {
 			int alpha = (pixels[i] & 0xFF000000) >> 24;
 			int red = (pixels[i] & 0xFF0000) >> 16;
 			int green = (pixels[i] & 0xFF00) >> 8;
 			int blue = (pixels[i] & 0xFF);
 
-			data[i] = alpha << 24 | blue << 16 | green << 8 | red;
+			pixels[i] = alpha << 24 | blue << 16 | green << 8 | red;
 		}
 		return initializeTexturePixelsABGR(id, pixels, width, height);
 	}
@@ -268,7 +267,9 @@ public class TextureManager {
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 
 		int id = generateTextures();
+		Loader.silent = true;
 		initializeTextureFile(id, Registry.TEXTURE_LOGO_PATH);
+		Loader.silent = false;
 		return id;
 	}
 }

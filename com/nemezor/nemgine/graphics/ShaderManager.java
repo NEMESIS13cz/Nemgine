@@ -48,7 +48,7 @@ public class ShaderManager {
 		shaderCounter++;
 		shaders.put(shaderCounter, new Shader());
 		if (Loader.loading()) {
-			Loader.shaderCounter += 2;
+			Loader.shaderCounter++;
 		}
 		return shaderCounter;
 	}
@@ -260,8 +260,7 @@ public class ShaderManager {
 			return false;
 		}
 		if (Loader.loading()) {
-			Loader.shaderLoaded();
-			Loader.loadingShader(new File(fragmentFile).getName());
+			Loader.stepLoader();
 		}
 		shader.fragID = loadShader(fragmentFile, EnumShaderType.FRAGMENT);
 		if (shader.fragID == Registry.INVALID) {
@@ -275,7 +274,7 @@ public class ShaderManager {
 			return false;
 		}
 		if (Loader.loading()) {
-			Loader.shaderLoaded();
+			Loader.stepLoader();
 		}
 		shader.progID = GL20.glCreateProgram();
 		GL20.glAttachShader(shader.progID, shader.vertID);
@@ -288,6 +287,9 @@ public class ShaderManager {
 		for (String uni : uniforms) {
 			int uniId = GL20.glGetUniformLocation(shader.progID, uni);
 			shader.data.put(uni, uniId);
+		}
+		if (Loader.loading()) {
+			Loader.shaderLoaded();
 		}
 		return true;
 	}
@@ -328,27 +330,31 @@ public class ShaderManager {
 	}
 	
 	protected static int loadLogoShaders() {
+		Loader.silent = true;
 		int id = generateShaders();
-		initializeShader(id, Registry.SHADER_LOGO_VERTEX, Registry.SHADER_LOGO_FRAGMENT, new String[] {"projection", "transformation"}, new String[] {"position"}, new int[] {0});
+		initializeShader(id, Registry.TEXTURE_SHADER_VERTEX, Registry.TEXTURE_SHADER_FRAGMENT, new String[] {"projection", "transformation", "color"}, new String[] {"position"}, new int[] {0});
+		Loader.silent = false;
 		return id;
 	}
 	
 	protected static int loadProgressBarShaders() {
+		Loader.silent = true;
 		int id = generateShaders();
+		fontShader = generateShaders();
 		initializeShader(id, Registry.SHADER_PROGRESS_BAR_VERTEX, Registry.SHADER_PROGRESS_BAR_FRAGMENT, new String[] {"projection", "transformation", "progress"}, new String[] {"position"}, new int[] {0});
+		initializeShader(fontShader, Registry.TEXTURE_SHADER_VERTEX, Registry.FONT_SHADER_FRAGMENT, new String[] {"projection", "transformation", "color"}, new String[] {"position"}, new int[] {0});
+		Loader.silent = false;
 		return id;
 	}
 	
 	protected static void generateDefaultShaderIDs() {
 		colorShader = generateShaders();
 		textureShader = generateShaders();
-		fontShader = generateShaders();
 	}
 	
 	protected static void loadDefaultShaders() {
 		initializeShader(colorShader, Registry.COLOR_SHADER_VERTEX, Registry.COLOR_SHADER_FRAGMENT, new String[] {"projection", "transformation", "color"}, new String[] {"position"}, new int[] {0});
 		initializeShader(textureShader, Registry.TEXTURE_SHADER_VERTEX, Registry.TEXTURE_SHADER_FRAGMENT, new String[] {"projection", "transformation", "color"}, new String[] {"position"}, new int[] {0});
-		initializeShader(fontShader, Registry.TEXTURE_SHADER_VERTEX, Registry.FONT_SHADER_FRAGMENT, new String[] {"projection", "transformation", "color"}, new String[] {"position"}, new int[] {0});
 	}
 	
 	public static int getColorShaderID() {

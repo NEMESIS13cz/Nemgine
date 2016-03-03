@@ -41,6 +41,8 @@ public final class Registry {
 	
 	// Fonts
 	public static final Color FONT_DEFAULT_COLOR = new Color(0xFFFFFFFF);
+	public static final int FONT_DEFAULT_FONT_SIZE = 20;
+	public static final int FONT_DEFAULT_FONT_STYLE = Font.PLAIN;
 	
 	////////////////////////////////////////////////////////////////////////////////////////
 
@@ -111,8 +113,6 @@ public final class Registry {
 	public static final String SHADER_LOADER_LOAD_ERROR = "Failed to load shader file!";
 	public static final String SHADER_LOADER_COMPILE_ERROR = "Failed to compile shader program!";
 	public static final String SHADER_LOADER_NAME = "Nemgine Shader Loader";
-	public static final String SHADER_LOGO_VERTEX = "com/nemezor/nemgine/resources/logo.vertex";
-	public static final String SHADER_LOGO_FRAGMENT = "com/nemezor/nemgine/resources/logo.fragment";
 	public static final String SHADER_PROGRESS_BAR_VERTEX = "com/nemezor/nemgine/resources/loader_bar.vertex";
 	public static final String SHADER_PROGRESS_BAR_FRAGMENT = "com/nemezor/nemgine/resources/loader_bar.fragment";
 	public static final String COLOR_SHADER_FRAGMENT = "com/nemezor/nemgine/resources/color.frag";
@@ -146,6 +146,11 @@ public final class Registry {
 	public static final String LOADING_SCREEN_ERROR = "Failed to load resources.";
 	public static final String LOADING_RESOURCES_GENERATE_IDS_FAILED = "Failed to generate OpenGL resource IDs.";
 	public static final String LOADING_RESOURCES_LOAD_FAILED = "Failed to load OpenGL resources.";
+	public static final String LOADING_PROGRESS_GFX_RESOURCES = "Loading Graphical Resources";
+	public static final String LOADING_PROGRESS_GFX_TEXTURES = "Loading Textures";
+	public static final String LOADING_PROGRESS_GFX_MODELS = "Loading Models";
+	public static final String LOADING_PROGRESS_GFX_SHADERS = "Loading Shaders";
+	public static final String LOADING_PROGRESS_GFX_FONTS = "Loading Fonts";
 	
 	// Network
 	public static final String NETWORK_MANAGER_NAME = "Nemgine Network Manager";
