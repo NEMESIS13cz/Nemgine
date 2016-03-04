@@ -66,7 +66,7 @@ public class GLFWTest implements IMainRenderLoop {
 			
 		}else if (e == GLResourceEvent.LOAD_FONTS) {
 			
-			FontManager.initializeFont(font, "Monospaced", Font.PLAIN, 5);
+			FontManager.initializeFont(font, "Monospaced", Font.PLAIN, 10);
 			
 		}else if (e == GLResourceEvent.LOAD_MODELS) {
 			
@@ -105,7 +105,7 @@ public class GLFWTest implements IMainRenderLoop {
 		
 		window.fill(new Color(0x0000FFFF));
 		
-		Matrix4f transform = GLHelper.initTransformationMatrix(cam, new Vector3f(0, -5, -25), new Vector3f(0, (float)Math.toRadians(angle), 0), new Vector3f(1f, 1f, 1f));
+		Matrix4f transform = GLHelper.initTransformationMatrix(cam, new Vector3f(0, -5, -25), new Vector3f(0, 0, 0), new Vector3f(1f, 1f, 1f));
 		Matrix4f logoTransform = GLHelper.initTransformationMatrix(cam, new Vector3f(-15, 10, -30), new Vector3f((float)Math.toRadians(15 + angle), (float)Math.toRadians(25 + angle), (float)Math.toRadians(15)), new Vector3f(1, 1, 1));
 		
 		ShaderManager.bindShader(shader);
@@ -168,7 +168,8 @@ public class GLFWTest implements IMainRenderLoop {
 	@Override
 	public void setUpRender() {
 		windowID = DisplayManager.generateDisplays();
-		window = DisplayManager.initializeDisplay(windowID, 70.0f, 1280, 720, 0.002f, 500.0f, true);
+		window = DisplayManager.initializeDisplay(windowID, 70.0f, 1280, 720, 0.02f, 1500.0f, true);
+		window.setWireframeRender(true);
 		windowID2 = DisplayManager.generateDisplays();
 		window2 = DisplayManager.initializeDisplay(windowID2, 70.0f, 600, 400, 0.002f, 500.0f, true);
 		window2.changeTitle(Nemgine.getApplicationName() + " | Window: 2");

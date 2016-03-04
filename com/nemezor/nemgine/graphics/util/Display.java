@@ -32,6 +32,7 @@ public class Display {
 	private boolean invalid = false;
 	private volatile boolean resized = false;
 	private GLFWWindowSizeCallback sizeCallback;
+	private boolean wireframe = false;
 	
 	public Display(int status) {
 		this.status = status;
@@ -153,6 +154,17 @@ public class Display {
 	
 	public boolean isInvalid() {
 		return invalid;
+	}
+	
+	public void setWireframeRender(boolean on) {
+		if (wireframe != on) {
+			if (on) {
+				GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
+			}else{
+				GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+			}
+			wireframe = on;
+		}
 	}
 	
 	private void resize() {

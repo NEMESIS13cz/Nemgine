@@ -111,7 +111,6 @@ public class Loader {
 		ShaderManager.dispose(logoShader);
 		ShaderManager.dispose(barShader);
 		TextureManager.dispose(texture);
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		isDone = true;
 	}
 	
@@ -208,6 +207,12 @@ public class Loader {
 
 		Tessellator.addVertex(0.1f, 0.6f + offset, 0);
 		Tessellator.addVertex(0.9f, 0.6f + offset, 0);
+		Tessellator.addVertex(0.1f, 0.68f + offset, 0);
+		Tessellator.addVertex(0.9f, 0.68f + offset, 0);
+		Tessellator.addVertex(0.9f, 0.6f + offset, 0);
+		Tessellator.addVertex(0.9f, 0.68f + offset, 0);
+		Tessellator.addVertex(0.1f, 0.6f + offset, 0);
+		Tessellator.addVertex(0.1f, 0.68f + offset, 0);
 		
 		Tessellator.finish();
 		Tessellator.start(Tessellator.QUADS);

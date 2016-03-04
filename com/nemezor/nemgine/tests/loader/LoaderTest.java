@@ -31,7 +31,6 @@ public class LoaderTest implements IMainRenderLoop {
 	private int model;
 	private int logo;
 	private int angle = 0;
-	private int water;
 	private int testTexture;
 	private int font;
 
@@ -59,7 +58,6 @@ public class LoaderTest implements IMainRenderLoop {
 			
 			shader = ShaderManager.generateShaders();
 			logoShader = ShaderManager.generateShaders();
-			water = ShaderManager.generateShaders();
 			model = ModelManager.generateModels();
 			logo = ModelManager.generateModels();
 			testTexture = TextureManager.generateTextures();
@@ -86,26 +84,22 @@ public class LoaderTest implements IMainRenderLoop {
 			
 		}else if (e == GLResourceEvent.LOAD_MODELS) {
 			
-			ModelManager.initializeModel(model, "com/nemezor/nemgine/tests/old/reflection/dragon.obj");
-			ModelManager.initializeModel(logo, "com/nemezor/nemgine/tests/old/reflection/nemgine.obj");
+			ModelManager.initializeModel(model, "dragon.obj");
+			ModelManager.initializeModel(logo, "nemgine.obj");
 			for (int i = 0; i < modelIDs.length; i++) {
 				ModelManager.initializeModel(modelIDs[i], "com/nemezor/nemgine/tests/test_models/test_" + (i % 1000) + ".obj");
 			}
 			
 		}else if (e == GLResourceEvent.LOAD_SHADERS) {
 			
-			ShaderManager.initializeShader(shader, "com/nemezor/nemgine/tests/old/gui/shader.vert", 
-												   "com/nemezor/nemgine/tests/old/gui/shader.frag", 
+			ShaderManager.initializeShader(shader, "com/nemezor/nemgine/tests/dragon.vert", 
+												   "com/nemezor/nemgine/tests/dragon.frag", 
 												   new String[] {"projection", "transformation", "lightVectorIn", "lightColorIn"}, 
 												   new String[] {"position", "normal"}, new int[] {0, 2});
-			ShaderManager.initializeShader(logoShader, "com/nemezor/nemgine/tests/old/reflection/logo.vertex", 
-												   "com/nemezor/nemgine/tests/old/reflection/logo.fragment", 
+			ShaderManager.initializeShader(logoShader, "com/nemezor/nemgine/tests/logo.vert", 
+												   "com/nemezor/nemgine/tests/logo.frag", 
 												   new String[] {"projection", "transformation"}, 
 												   new String[] {"position"}, new int[] {0});
-			ShaderManager.initializeShader(water, "com/nemezor/nemgine/tests/old/reflection/reflection.vertex", 
-												   "com/nemezor/nemgine/tests/old/reflection/reflection.fragment", 
-												   new String[] {"projection", "transformation", "light"}, 
-												   new String[] {"position", "normal"}, new int[] {0, 2});
 			for (int i = 0; i < shaderIDs.length; i++) {
 				ShaderManager.initializeShader(shaderIDs[i], "com/nemezor/nemgine/tests/test_shaders/test_" + (i % 1000) + ".vertex", 
 						"com/nemezor/nemgine/tests/test_shaders/test_" + (i % 1000) + ".fragment", new String[] {"projection", "transformation"}, new String[] {"position"}, new int[] {0});
@@ -113,7 +107,7 @@ public class LoaderTest implements IMainRenderLoop {
 			
 		}else if (e == GLResourceEvent.LOAD_TEXTURES) {
 			
-			TextureManager.initializeTextureFile(testTexture, "com/nemezor/nemgine/tests/old/gui/test_texture.png");
+			TextureManager.initializeTextureFile(testTexture, "com/nemezor/nemgine/tests/test_texture.png");
 			for (int i = 0; i < textureIDs.length; i++) {
 				TextureManager.initializeTextureFile(textureIDs[i], "com/nemezor/nemgine/tests/test_images/test_" + (i % 1000) + ".png");
 			}
@@ -157,7 +151,7 @@ public class LoaderTest implements IMainRenderLoop {
 	public void setUpRender() {
 		windowID = DisplayManager.generateDisplays();
 		window = DisplayManager.initializeDisplay(windowID, 70.0f, 1280, 720, 0.002f, 500.0f, true);
-
+		
 		ShaderManager.bindShader(shader);
 		ShaderManager.loadMatrix4(shader, "projection", window.getPerspectiveProjectionMatrix());
 		ShaderManager.loadMatrix4(shader, "transformation", new Matrix4f());
@@ -165,10 +159,6 @@ public class LoaderTest implements IMainRenderLoop {
 		ShaderManager.bindShader(logoShader);
 		ShaderManager.loadMatrix4(logoShader, "projection", window.getPerspectiveProjectionMatrix());
 		ShaderManager.loadMatrix4(logoShader, "transformation", new Matrix4f());
-		ShaderManager.bindShader(water);
-		ShaderManager.loadMatrix4(water, "projection", window.getPerspectiveProjectionMatrix());
-		ShaderManager.loadMatrix4(water, "transformation", new Matrix4f());
-		ShaderManager.loadVector3(water, "light", new Vector3f(-50, 30, 10));
 		ShaderManager.unbindShader();
 	}
 

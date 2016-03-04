@@ -296,13 +296,11 @@ public class ModelManager {
 					continue;
 				}
 				String[] current = buf.split(" ");
-				String[] vertex1 = current[1].split("/");
-				String[] vertex2 = current[2].split("/");
-				String[] vertex3 = current[3].split("/");
-				
-				processVertex(vertex1, indices, textures, normals, texturesArray, normalsArray, textured);
-				processVertex(vertex2, indices, textures, normals, texturesArray, normalsArray, textured);
-				processVertex(vertex3, indices, textures, normals, texturesArray, normalsArray, textured);
+
+				for (int i = 1; i < current.length; i++) {
+					String[] vertex = current[i].split("/");
+					processVertex(vertex, indices, textures, normals, texturesArray, normalsArray, textured);
+				}
 			}
 			if (Loader.loading()) {
 				Loader.stepLoader();

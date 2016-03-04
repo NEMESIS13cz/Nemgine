@@ -59,7 +59,7 @@ public class TessObject {
 		if (mode == Tessellator.TRIANGLES || mode == Tessellator.QUADS) {
 			GL11.glDrawElements(GL11.GL_TRIANGLES, indicesLength, GL11.GL_UNSIGNED_INT, 0);
 		}else if (mode == Tessellator.LINES) {
-			GL11.glDrawElements(GL11.GL_LINE_STRIP, indicesLength, GL11.GL_UNSIGNED_INT, 0);
+			GL11.glDrawElements(GL11.GL_LINES, indicesLength, GL11.GL_UNSIGNED_INT, 0);
 		}else if (mode == Tessellator.POINTS) {
 			GL11.glDrawElements(GL11.GL_POINTS, indicesLength, GL11.GL_UNSIGNED_INT, 0);
 		}
