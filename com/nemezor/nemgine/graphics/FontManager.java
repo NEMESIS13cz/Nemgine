@@ -54,7 +54,7 @@ public class FontManager {
 		ShaderManager.loadMatrix4(ShaderManager.getFontShaderID(), Registry.FONT_SHADER_PROJECTION_ATTRIBUTE, projection);
 		ShaderManager.loadVector4(ShaderManager.getFontShaderID(), Registry.FONT_SHADER_COLOR_ATTRIBUTE, color.getColorAsVector());
 		GLHelper.enableBlending();
-		Tessellator.start();
+		Tessellator.start(Tessellator.QUADS);
 		
 		for (char c : chars) {
 			GLCharacter glchar = font.chars.get(c);
@@ -69,13 +69,8 @@ public class FontManager {
 			Tessellator.addTexCoord(texCoords[2], texCoords[1]);
 			Tessellator.addVertex(x + glchar.width, y + glchar.height, 0);
 			Tessellator.addTexCoord(texCoords[2], texCoords[3]);
-			
-			Tessellator.addVertex(x + glchar.width, y + glchar.height, 0);
-			Tessellator.addTexCoord(texCoords[2], texCoords[3]);
 			Tessellator.addVertex(x, y + glchar.height, 0);
 			Tessellator.addTexCoord(texCoords[0], texCoords[3]);
-			Tessellator.addVertex(x, y, 0);
-			Tessellator.addTexCoord(texCoords[0], texCoords[1]);
 			
 			x += glchar.width;
 		}

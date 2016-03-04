@@ -13,6 +13,11 @@ import com.nemezor.nemgine.misc.Utils;
 
 public class Tessellator {
 
+	public static final int POINTS = 0x1;
+	public static final int TRIANGLES = 0x2;
+	public static final int QUADS = 0x3;
+	public static final int LINES = 0x4;
+	
 	private static HashMap<Integer, ArrayList<TessObject>> objects = new HashMap<Integer, ArrayList<TessObject>>();
 	private static HashMap<Integer, Integer> index = new HashMap<Integer, Integer>();
 	private static ArrayList<Float> currentVertex = new ArrayList<Float>();
@@ -20,6 +25,7 @@ public class Tessellator {
 	private static ArrayList<Float> currentNormal = new ArrayList<Float>();
 	private static int current = 0;
 	private static boolean tessellating = false;
+	private static int mode = 0;
 	
 	/**
 	 * Do not call this!!!
@@ -32,6 +38,7 @@ public class Tessellator {
 		currentVertex.clear();
 		currentTexture.clear();
 		currentNormal.clear();
+		mode = 0;
 		
 		Iterator<Integer> iter = index.keySet().iterator();
 		while (iter.hasNext()) {
@@ -39,7 +46,7 @@ public class Tessellator {
 		}
 	}
 	
-	public static void start() {
+	public static void start(int tessellationMode) {
 		if (tessellating) {
 			Logger.log(Registry.TESSELLATOR_ALREADY_RUNNING);
 			return;
@@ -52,6 +59,7 @@ public class Tessellator {
 		currentTexture.clear();
 		currentNormal.clear();
 		current = DisplayManager.getCurrentDisplayID();
+		mode = tessellationMode;
 		tessellating = true;
 	}
 	
@@ -70,8 +78,26 @@ public class Tessellator {
 		float[] verData = Utils.toPrimitiveArray(currentVertex);
 		float[] texData = Utils.toPrimitiveArray(currentTexture);
 		float[] norData = Utils.toPrimitiveArray(currentNormal);
+		ModelData data = null;
 		
-		ModelData data = new ModelData(verData, norData, texData, Utils.range(0, verData.length));
+		if (mode == Tessellator.QUADS) {
+			if (verData.length % 4 != 0) {
+				Logger.log(Registry.TESSELLATOR_INVALID_DATA);
+				return;
+			}
+			int[] indices = new int[(int)(verData.length * 1.5f)];
+			for (int i = 0, j = 0; i < verData.length; i += 4, j += 6) {
+				indices[j] = i;
+				indices[j + 1] = i + 1;
+				indices[j + 2] = i + 2;
+				indices[j + 3] = i + 2;
+				indices[j + 4] = i + 3;
+				indices[j + 5] = i;
+			}
+			data = new ModelData(verData, norData, texData, indices);
+		}else{
+			data = new ModelData(verData, norData, texData, Utils.range(0, verData.length / 3));
+		}
 		ArrayList<TessObject> objs = objects.get(DisplayManager.getCurrentDisplayID());
 		if (objs == null) {
 			objs = new ArrayList<TessObject>();
@@ -90,9 +116,10 @@ public class Tessellator {
 			obj = objs.get(index_);
 			obj.upload(data);
 		}
-		obj.render();
+		obj.render(mode);
 		
 		index.put(DisplayManager.getCurrentDisplayID(), index.get(DisplayManager.getCurrentDisplayID()) + 1);
+		mode = 0;
 		tessellating = false;
 	}
 	

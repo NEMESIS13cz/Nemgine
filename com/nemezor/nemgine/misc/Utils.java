@@ -21,4 +21,13 @@ public class Utils {
 		}
 		return ret;
 	}
+	
+	public static String arrayToString(float[] array) {
+		String s = "list[";
+		for (int i = 0; i < array.length - 1; i++) {
+			s += array[i] + ", ";
+		}
+		s += array[array.length - 1];
+		return s + "]";
+	}
 }

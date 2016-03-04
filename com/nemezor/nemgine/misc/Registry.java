@@ -137,6 +137,7 @@ public final class Registry {
 	public static final String TESSELLATOR_ALREADY_RUNNING = "Already tessellating!";
 	public static final String TESSELLATOR_NOT_RUNNING = "Not tessellating!";
 	public static final String TESSELLATOR_SWITCHED_CONTEXTS = "Windows switched during tessellation!";
+	public static final String TESSELLATOR_INVALID_DATA = "Invalid data!";
 	
 	// Loading
 	public static final String LOADING_SCREEN_FONT = "Courier New";

@@ -37,7 +37,6 @@ public class GLFWTest implements IMainRenderLoop {
 	private int model;
 	private int logo;
 	private int angle = 0;
-	private int water;
 	private int testTexture;
 	private int font;
 	
@@ -60,7 +59,6 @@ public class GLFWTest implements IMainRenderLoop {
 			
 			shader = ShaderManager.generateShaders();
 			logoShader = ShaderManager.generateShaders();
-			water = ShaderManager.generateShaders();
 			model = ModelManager.generateModels();
 			logo = ModelManager.generateModels();
 			testTexture = TextureManager.generateTextures();
@@ -72,27 +70,23 @@ public class GLFWTest implements IMainRenderLoop {
 			
 		}else if (e == GLResourceEvent.LOAD_MODELS) {
 			
-			ModelManager.initializeModel(model, "com/nemezor/nemgine/tests/old/reflection/dragon.obj");
-			ModelManager.initializeModel(logo, "com/nemezor/nemgine/tests/old/reflection/nemgine.obj");
+			ModelManager.initializeModel(model, "dragon.obj");
+			ModelManager.initializeModel(logo, "nemgine.obj");
 			
 		}else if (e == GLResourceEvent.LOAD_SHADERS) {
 			
-			ShaderManager.initializeShader(shader, "com/nemezor/nemgine/tests/old/gui/shader.vert", 
-												   "com/nemezor/nemgine/tests/old/gui/shader.frag", 
+			ShaderManager.initializeShader(shader, "com/nemezor/nemgine/tests/dragon.vert", 
+												   "com/nemezor/nemgine/tests/dragon.frag", 
 												   new String[] {"projection", "transformation", "lightVectorIn", "lightColorIn"}, 
 												   new String[] {"position", "normal"}, new int[] {0, 2});
-			ShaderManager.initializeShader(logoShader, "com/nemezor/nemgine/tests/old/reflection/logo.vertex", 
-												   "com/nemezor/nemgine/tests/old/reflection/logo.fragment", 
+			ShaderManager.initializeShader(logoShader, "com/nemezor/nemgine/tests/logo.vert", 
+												   "com/nemezor/nemgine/tests/logo.frag", 
 												   new String[] {"projection", "transformation"}, 
 												   new String[] {"position"}, new int[] {0});
-			ShaderManager.initializeShader(water, "com/nemezor/nemgine/tests/old/reflection/reflection.vertex", 
-												   "com/nemezor/nemgine/tests/old/reflection/reflection.fragment", 
-												   new String[] {"projection", "transformation", "light"}, 
-												   new String[] {"position", "normal"}, new int[] {0, 2});
 			
 		}else if (e == GLResourceEvent.LOAD_TEXTURES) {
 			
-			TextureManager.initializeTextureFile(testTexture, "com/nemezor/nemgine/tests/old/gui/test_texture.png");
+			TextureManager.initializeTextureFile(testTexture, "com/nemezor/nemgine/tests/test_texture.png");
 			
 		}
 	}
@@ -149,7 +143,7 @@ public class GLFWTest implements IMainRenderLoop {
 			ShaderManager.loadVector4(ShaderManager.getTextureShaderID(), "color", new Color(0xFFFFFF80).getColorAsVector());
 			TextureManager.bindTexture(testTexture);
 			GLHelper.enableBlending();
-			Tessellator.start();
+			Tessellator.start(Tessellator.QUADS);
 			
 			Tessellator.addVertex(0, 0, 0);
 			Tessellator.addTexCoord(0, 0);
@@ -157,12 +151,8 @@ public class GLFWTest implements IMainRenderLoop {
 			Tessellator.addTexCoord(1, 0);
 			Tessellator.addVertex(0.5f, 0.5f, 0);
 			Tessellator.addTexCoord(1, 1);
-			Tessellator.addVertex(0.5f, 0.5f, 0);
-			Tessellator.addTexCoord(1, 1);
 			Tessellator.addVertex(0, 0.5f, 0);
 			Tessellator.addTexCoord(0, 1);
-			Tessellator.addVertex(0, 0, 0);
-			Tessellator.addTexCoord(0, 0);
 
 			Tessellator.finish();
 			GLHelper.disableBlending();
@@ -190,10 +180,6 @@ public class GLFWTest implements IMainRenderLoop {
 		ShaderManager.bindShader(logoShader);
 		ShaderManager.loadMatrix4(logoShader, "projection", window.getPerspectiveProjectionMatrix());
 		ShaderManager.loadMatrix4(logoShader, "transformation", new Matrix4f());
-		ShaderManager.bindShader(water);
-		ShaderManager.loadMatrix4(water, "projection", window.getPerspectiveProjectionMatrix());
-		ShaderManager.loadMatrix4(water, "transformation", new Matrix4f());
-		ShaderManager.loadVector3(water, "light", new Vector3f(-50, 30, 10));
 		ShaderManager.unbindShader();
 	}
 

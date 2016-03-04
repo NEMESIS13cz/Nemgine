@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import com.nemezor.nemgine.graphics.GLHelper;
+import com.nemezor.nemgine.graphics.Tessellator;
 
 public class TessObject {
 
@@ -45,7 +46,7 @@ public class TessObject {
 		indicesLength = data.indices.length;
 	}
 	
-	public void render() {
+	public void render(int mode) {
 		GL30.glBindVertexArray(VAOid);
 		GL20.glEnableVertexAttribArray(0);
 		if (textured) {
@@ -55,7 +56,13 @@ public class TessObject {
 		if (textured) {
 			GL13.glActiveTexture(GL13.GL_TEXTURE0);
 		}
-		GL11.glDrawElements(GL11.GL_TRIANGLES, indicesLength, GL11.GL_UNSIGNED_INT, 0);
+		if (mode == Tessellator.TRIANGLES || mode == Tessellator.QUADS) {
+			GL11.glDrawElements(GL11.GL_TRIANGLES, indicesLength, GL11.GL_UNSIGNED_INT, 0);
+		}else if (mode == Tessellator.LINES) {
+			GL11.glDrawElements(GL11.GL_LINE_STRIP, indicesLength, GL11.GL_UNSIGNED_INT, 0);
+		}else if (mode == Tessellator.POINTS) {
+			GL11.glDrawElements(GL11.GL_POINTS, indicesLength, GL11.GL_UNSIGNED_INT, 0);
+		}
 		GL20.glDisableVertexAttribArray(0);
 		if (textured) {
 			GL20.glDisableVertexAttribArray(1);

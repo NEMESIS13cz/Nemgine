@@ -173,7 +173,7 @@ public class Loader {
 		
 		ShaderManager.bindShader(logoShader);
 		TextureManager.bindTexture(texture);
-		Tessellator.start();
+		Tessellator.start(Tessellator.QUADS);
 		
 		Tessellator.addVertex(0, 0, 0);
 		Tessellator.addTexCoord(0, 0);
@@ -181,12 +181,8 @@ public class Loader {
 		Tessellator.addTexCoord(1, 0);
 		Tessellator.addVertex(1, 1, 0);
 		Tessellator.addTexCoord(1, 1);
-		Tessellator.addVertex(1, 1, 0);
-		Tessellator.addTexCoord(1, 1);
 		Tessellator.addVertex(0, 1, 0);
 		Tessellator.addTexCoord(0, 1);
-		Tessellator.addVertex(0, 0, 0);
-		Tessellator.addTexCoord(0, 0);
 
 		Tessellator.finish();
 		
@@ -208,14 +204,18 @@ public class Loader {
 		ShaderManager.loadFloat(barShader, "progress", progress);
 		progress *= 0.8f;
 		progress += 0.1f;
-		Tessellator.start();
+		Tessellator.start(Tessellator.LINES);
+
+		Tessellator.addVertex(0.1f, 0.6f + offset, 0);
+		Tessellator.addVertex(0.9f, 0.6f + offset, 0);
+		
+		Tessellator.finish();
+		Tessellator.start(Tessellator.QUADS);
 		
 		Tessellator.addVertex(0.1f, 0.6f + offset, 0);
 		Tessellator.addVertex(progress, 0.6f + offset, 0);
 		Tessellator.addVertex(progress, 0.68f + offset, 0);
-		Tessellator.addVertex(progress, 0.68f + offset, 0);
 		Tessellator.addVertex(0.1f, 0.68f + offset, 0);
-		Tessellator.addVertex(0.1f, 0.6f + offset, 0);
 		
 		Tessellator.finish();
 		
@@ -228,7 +228,7 @@ public class Loader {
 	
 	protected static void loadingTexture(String name) {
 		Logger.logSilently("Loading Texture: " + name);
-		segment.setLabel(name);
+		segment.setLabel(Registry.LOADING_PROGRESS_GFX_TEXTURES + " (" + name + ")");
 		segment.stepProgress();
 		update();
 	}
@@ -240,7 +240,7 @@ public class Loader {
 	
 	protected static void loadingShader(String name) {
 		Logger.logSilently("Loading Shader: " + name);
-		segment.setLabel(name);
+		segment.setLabel(Registry.LOADING_PROGRESS_GFX_SHADERS + " (" + name + ")");
 		segment.stepProgress();
 		update();
 	}
@@ -252,7 +252,7 @@ public class Loader {
 	
 	protected static void loadingModel(String name) {
 		Logger.logSilently("Loading Model: " + name);
-		segment.setLabel(name);
+		segment.setLabel(Registry.LOADING_PROGRESS_GFX_MODELS + " (" + name + ")");
 		segment.stepProgress();
 		update();
 	}
@@ -264,7 +264,7 @@ public class Loader {
 	
 	protected static void loadingFont(String name) {
 		Logger.logSilently("Loading Font: " + name);
-		segment.setLabel(name);
+		segment.setLabel(Registry.LOADING_PROGRESS_GFX_FONTS + " (" + name + ")");
 		segment.stepProgress();
 		update();
 	}
