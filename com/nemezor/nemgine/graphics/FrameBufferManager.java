@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL32;
@@ -51,7 +52,7 @@ public class FrameBufferManager {
 		TextureManager.unbindTexture();
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, buffer.id);
 		GL11.glViewport(0, 0, buffer.w, buffer.h);
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+		GL11.glClear((buffer.texture != Registry.INVALID ? GL11.GL_COLOR_BUFFER_BIT : 0) | (buffer.depth != Registry.INVALID ? GL11.GL_DEPTH_BUFFER_BIT : 0));
 	}
 	
 	public static void unbindFrameBuffer(Display window) {
@@ -147,24 +148,28 @@ public class FrameBufferManager {
 		}
 		int glId = GL30.glGenFramebuffers();
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, glId);
-		GL11.glDrawBuffer(GL30.GL_COLOR_ATTACHMENT0);
 		int texture = Registry.INVALID;
 		int textureDepth = Registry.INVALID;
 		int depth = Registry.INVALID;
 		if (textureBuffer) {
 			texture = GL11.glGenTextures();
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture);
-			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB, width, height, 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, (ByteBuffer)null);
+			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, width, height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer)null);
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
 			GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, texture, 0);
 		}
 		if (depthTextureBuffer) {
 			textureDepth = GL11.glGenTextures();
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureDepth);
-			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL14.GL_DEPTH_COMPONENT32, width, height, 0, GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT, (ByteBuffer)null);
+			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_DEPTH_COMPONENT, width, height, 0, GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT, (ByteBuffer)null);
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_COMPARE_MODE, GL14.GL_COMPARE_R_TO_TEXTURE);
 			GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, textureDepth, 0);
 		}
 		if (depthBuffer) {
@@ -172,6 +177,17 @@ public class FrameBufferManager {
 			GL30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, depth);
 			GL30.glRenderbufferStorage(GL30.GL_RENDERBUFFER, GL11.GL_DEPTH_COMPONENT, width, height);
 			GL30.glFramebufferRenderbuffer(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, GL30.GL_RENDERBUFFER, depth);
+		}
+		if (textureBuffer) {
+			GL11.glDrawBuffer(GL30.GL_COLOR_ATTACHMENT0);
+		}else{
+			GL11.glDrawBuffer(GL11.GL_NONE);
+			GL11.glReadBuffer(GL11.GL_NONE);
+		}
+		if (GL30.glCheckFramebufferStatus(GL30.GL_FRAMEBUFFER) != GL30.GL_FRAMEBUFFER_COMPLETE) {
+			GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
+			GL11.glViewport(0, 0, window.getWidth(), window.getHeight());
+			return false;
 		}
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
 		GL11.glViewport(0, 0, window.getWidth(), window.getHeight());
