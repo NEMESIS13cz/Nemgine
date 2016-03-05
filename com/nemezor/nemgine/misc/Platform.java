@@ -158,8 +158,8 @@ public class Platform {
 		GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
 		GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_FALSE);
 		GLFW.glfwWindowHint(GLFW.GLFW_DOUBLE_BUFFER, GLFW.GLFW_TRUE);
-		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
-		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 3);
+		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, Registry.SUPPORTED_OPENGL_VERSION.getMajorVersion());
+		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, Registry.SUPPORTED_OPENGL_VERSION.getMinorVersion());
 	}
 	
 	public static boolean isFontAvailable(String name) {

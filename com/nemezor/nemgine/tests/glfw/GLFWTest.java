@@ -36,7 +36,7 @@ public class GLFWTest implements IMainRenderLoop {
 	private int logoShader;
 	private int model;
 	private int logo;
-	private int angle = 0;
+	private int angle = 330 * 15;
 	private int testTexture;
 	private int font;
 	
@@ -49,7 +49,7 @@ public class GLFWTest implements IMainRenderLoop {
 		int thread = Nemgine.generateThreads("Render", true);
 		Nemgine.bindRenderLoop(thread, this);
 		Nemgine.startThread(thread);
-		cam = new Camera(new Vector3f(), new Vector3f());
+		cam = new Camera(new Vector3f(0, 40, 0), new Vector3f());
 		Nemgine.printThreadKeepUpWarnings(false);
 	}
 	
@@ -70,7 +70,7 @@ public class GLFWTest implements IMainRenderLoop {
 			
 		}else if (e == GLResourceEvent.LOAD_MODELS) {
 			
-			ModelManager.initializeModel(model, "dragon.obj");
+			ModelManager.initializeModel(model, "test2.obj");
 			ModelManager.initializeModel(logo, "nemgine.obj");
 			
 		}else if (e == GLResourceEvent.LOAD_SHADERS) {
@@ -103,27 +103,30 @@ public class GLFWTest implements IMainRenderLoop {
 		}
 		window.prepareRender();
 		
-		window.fill(new Color(0x0000FFFF));
+		window.fill(new Color(0x000000FF));
 		
-		Matrix4f transform = GLHelper.initTransformationMatrix(cam, new Vector3f(0, -5, -25), new Vector3f(0, (float)Math.toRadians(angle), 0), new Vector3f(1f, 1f, 1f));
+		Matrix4f transform = GLHelper.initTransformationMatrix(cam, new Vector3f(0, -5, -25), new Vector3f((float)Math.PI / 18, 0, (float)Math.PI / -18), new Vector3f(0.1f, 0.1f, 0.1f));
 		Matrix4f logoTransform = GLHelper.initTransformationMatrix(cam, new Vector3f(-15, 10, -30), new Vector3f((float)Math.toRadians(15 + angle), (float)Math.toRadians(25 + angle), (float)Math.toRadians(15)), new Vector3f(1, 1, 1));
-		
+		/*
 		ShaderManager.bindShader(shader);
 		ShaderManager.loadVector4(shader, "lightColorIn", (currColor = colorizer.getNext(currColor)).getColorAsVector());
-		ShaderManager.unbindShader();
-		
+		ShaderManager.unbindShader();*/
+
+		transform.translate(new Vector3f(50000, 0, 0));
+		transform.rotate((float)Math.toRadians(angle / 15.0f), new Vector3f(0, 1, 0));
+		transform.translate(new Vector3f(-50000, 0, 0));
 		ModelManager.renderModel(model, 0, shader, transform, window.getPerspectiveProjectionMatrix(), "transformation", "projection");
 
-		ModelManager.renderModel(logo, 0, logoShader, logoTransform, window.getPerspectiveProjectionMatrix(), "transformation", "projection");
+		//ModelManager.renderModel(logo, 0, logoShader, logoTransform, window.getPerspectiveProjectionMatrix(), "transformation", "projection");
 		
-		FontManager.drawString(FontManager.getDefaultFontID(), 20, 5, (Platform.getUsedMemory() / 1048576) + "/" + (Platform.getAllocatedMemory() / 1048576) + "MB", currColor.invert(), new Matrix4f(), GLHelper.initOrthographicProjectionMatrix(0, window.getWidth(), 0, window.getHeight(), 0, 1));
+		FontManager.drawString(FontManager.getDefaultFontID(), 20, 5, (Platform.getUsedMemory() / 1048576) + "/" + (Platform.getAllocatedMemory() / 1048576) + "MB", new Color(0xFFFFFFFF), new Matrix4f(), GLHelper.initOrthographicProjectionMatrix(0, window.getWidth(), 0, window.getHeight(), 0, 1));
 		
 		ModelManager.finishRendering();
 		angle++;
 		
 		handleInput();
 		
-		window.finishRender();
+		window.finishRender();/*
 		if (!window2.isInvalid()) {
 			DisplayManager.switchDisplay(windowID2);
 			window2.prepareRender();
@@ -162,21 +165,22 @@ public class GLFWTest implements IMainRenderLoop {
 			if (window2.closeRequested()) {
 				DisplayManager.dispose(windowID2);
 			}
-		}
+		}*/
 	}
 
 	@Override
 	public void setUpRender() {
 		windowID = DisplayManager.generateDisplays();
-		window = DisplayManager.initializeDisplay(windowID, 70.0f, 1280, 720, 0.02f, 1500.0f, true);
-		windowID2 = DisplayManager.generateDisplays();
-		window2 = DisplayManager.initializeDisplay(windowID2, 70.0f, 600, 400, 0.002f, 500.0f, true);
-		window2.changeTitle(Nemgine.getApplicationName() + " | Window: 2");
+		window = DisplayManager.initializeDisplay(windowID, 70.0f, 1280, 720, 0.1f, 1500000.0f, true);
+		//windowID2 = DisplayManager.generateDisplays();
+		//window2 = DisplayManager.initializeDisplay(windowID2, 70.0f, 600, 400, 0.002f, 500.0f, true);
+		//window2.changeTitle(Nemgine.getApplicationName() + " | Window: 2");
 
 		ShaderManager.bindShader(shader);
 		ShaderManager.loadMatrix4(shader, "projection", window.getPerspectiveProjectionMatrix());
 		ShaderManager.loadMatrix4(shader, "transformation", new Matrix4f());
 		ShaderManager.loadVector3(shader, "lightVectorIn", new Vector3f(-50, 100, 100));
+		ShaderManager.loadVector4(shader, "lightColorIn", new Color(0xE4EAFFFF).getColorAsVector());
 		ShaderManager.bindShader(logoShader);
 		ShaderManager.loadMatrix4(logoShader, "projection", window.getPerspectiveProjectionMatrix());
 		ShaderManager.loadMatrix4(logoShader, "transformation", new Matrix4f());
@@ -195,7 +199,7 @@ public class GLFWTest implements IMainRenderLoop {
 
 	@Override
 	public long getRenderSleepInterval() {
-		return 16;
+		return 50;
 	}
 
 	@Override

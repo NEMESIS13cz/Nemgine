@@ -7,7 +7,7 @@ public final class Registry {
 	// Main
 	public static final int ERROR_SCREEN_WIDTH = 600;
 	public static final int ERROR_SCREEN_HEIGHT = 400;
-	public static final int OPENGL_OFFICIAL_SUPPORTED_VERSION = 32;
+	public static final GLVersion SUPPORTED_OPENGL_VERSION = new GLVersion(3, 3);
 	
 	// Misc
 	public static final int ONE_SECOND_IN_MILLIS = 1000;
