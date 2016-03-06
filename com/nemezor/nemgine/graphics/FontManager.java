@@ -65,13 +65,13 @@ public class FontManager {
 			}
 			TextureManager.bindTexture(glchar.glTex);
 			float[] texCoords = glchar.textureCoords;
-			Tessellator.addVertex(x, y, 0);
+			Tessellator.addVertex(x, y - glchar.height, 0);
 			Tessellator.addTexCoord(texCoords[0], texCoords[1]);
-			Tessellator.addVertex(x + glchar.width, y, 0);
+			Tessellator.addVertex(x + glchar.width, y - glchar.height, 0);
 			Tessellator.addTexCoord(texCoords[2], texCoords[1]);
-			Tessellator.addVertex(x + glchar.width, y + glchar.height, 0);
+			Tessellator.addVertex(x + glchar.width, y, 0);
 			Tessellator.addTexCoord(texCoords[2], texCoords[3]);
-			Tessellator.addVertex(x, y + glchar.height, 0);
+			Tessellator.addVertex(x, y, 0);
 			Tessellator.addTexCoord(texCoords[0], texCoords[3]);
 			
 			x += glchar.width;
