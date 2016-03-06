@@ -1,99 +1,79 @@
 package com.nemezor.nemgine.graphics.gui;
 
-import java.util.ArrayList;
+import java.awt.Point;
+import java.util.HashMap;
 
-import com.nemezor.nemgine.graphics.GLHelper;
+import org.lwjgl.opengl.GL11;
+
+import com.nemezor.nemgine.graphics.util.Display;
 import com.nemezor.nemgine.input.Mouse;
-import com.nemezor.nemgine.misc.RenderAttributes;
+import com.nemezor.nemgine.misc.Color;
+import com.nemezor.nemgine.misc.Registry;
 
-public class Gui { //TODO FIX ALL THE THINGS
+public abstract class Gui {
+	
+	public static Color primaryColor = Registry.GUI_DEFAULT_PRIMARY_COLOR;
+	public static Color secondaryColor = Registry.GUI_DEFAULT_SECONDARY_COLOR;
+	public static Color accentColor = Registry.GUI_DEFAULT_ACCENT_COLOR;
+	
+	private HashMap<String, IGuiComponent> components = new HashMap<String, IGuiComponent>();
+	private boolean firstRender = true;
+	
+	public abstract void populate(int rasterWidth, int rasterHeight);
+	
+	public void render(Display window) {
+		if (firstRender) {
+			resize(window);
+			firstRender = false;
+		}
+		if (window.displayResized()) {
+			resize(window);
+		}
+		update(window);
 
-	private int state;
-	private ArrayList<IGuiComponent> components = new ArrayList<IGuiComponent>();
-	protected int width, height, canvasWidth, canvasHeight;
-	
-	public Gui(int state, int cW, int cH) {
-		this.state = state;
-		this.canvasWidth = cW;
-		this.canvasHeight = cH;
-	}
-	
-	public int getState() {
-		return state;
-	}
-	
-	public void initialize() {
-		state = 0;
-	}
-	
-	public void dispose() {
-		for (IGuiComponent c : components) {
-			c.dispose();
+		GL11.glDisable(GL11.GL_DEPTH_TEST);
+		GL11.glLineWidth(2);
+		for (IGuiComponent c : components.values()) {
+			c.render(window);
 		}
+		GL11.glLineWidth(1);
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
 	}
 	
-	protected void addComponent(IGuiComponent c) {
-		c.initialize(canvasWidth, canvasHeight);
-		c.resize(width, height);
-		components.add(c);
+	public boolean remove(String name, IGuiComponent component) {
+		if (components.containsKey(name)) {
+			components.remove(name);
+			return true;
+		}
+		return false;
 	}
 	
-	public void resize() {
-		//width = Display.getWidth();
-		//height = Display.getHeight();
-		
-		for (IGuiComponent c : components) {
-			c.resize(width, height);
+	public boolean add(String name, IGuiComponent component) {
+		if (components.containsKey(name)) {
+			return false;
+		}
+		components.put(name, component);
+		return true;
+	}
+	
+	private void resize(Display window) {
+		for (IGuiComponent c : components.values()) {
+			c.resize(window);
 		}
 	}
 	
-	public void render() {
-		float mouseX = Mouse.getAbsoluteX();
-		float mouseY = Mouse.getAbsoluteY();
-		ArrayList<IGuiComponent> transparent = new ArrayList<IGuiComponent>();
-		ArrayList<IGuiComponent> texturedTransparent = new ArrayList<IGuiComponent>();
-		ArrayList<IGuiComponent> regular = new ArrayList<IGuiComponent>();
-		ArrayList<IGuiComponent> textured = new ArrayList<IGuiComponent>();
-		
-		for (IGuiComponent c : components) {
-			RenderAttributes a = c.getRenderAttributes();
-			if (a.isTransparent()) {
-				if (a.isTextured()) {
-					texturedTransparent.add(c);
-				}else{
-					transparent.add(c);
-				}
-			}else{
-				if (a.isTextured()) {
-					textured.add(c);
-				}else{
-					regular.add(c);
-				}
-			}
+	private void update(Display window) {
+		Point mouse = Mouse.getMousePosition(window);
+		boolean left = Mouse.isButtonDown(window, 0);
+		boolean right = Mouse.isButtonDown(window, 1);
+		for (IGuiComponent c : components.values()) {
+			c.update((int)mouse.getX(), (int)mouse.getY(), left, right);
 		}
-		
-		for (IGuiComponent c : regular) {
-			c.render(mouseX, mouseY);
-		}
-		for (IGuiComponent c : textured) {
-			c.render(mouseX, mouseY);
-		}
-		GLHelper.enableBlending();
-		for (IGuiComponent c : transparent) {
-			c.render(mouseX, mouseY);
-		}
-		for (IGuiComponent c : texturedTransparent) {
-			c.render(mouseX, mouseY);
-		}
-		GLHelper.disableBlending();
 	}
 	
-	public void update() {
-		float mouseX = Mouse.getAbsoluteX();
-		float mouseY = Mouse.getAbsoluteY();
-		
-		for (IGuiComponent c : components) {
-			c.update(mouseX, mouseY);
-		}
+	public static void setColorTheme(Color primary, Color secondary, Color accent) {
+		primaryColor = primary.clone();
+		secondaryColor = secondary.clone();
+		accentColor = accent.clone();
 	}
 }

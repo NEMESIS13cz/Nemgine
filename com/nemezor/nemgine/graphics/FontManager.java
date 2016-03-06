@@ -1,6 +1,7 @@
 package com.nemezor.nemgine.graphics;
 
 import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -49,7 +50,6 @@ public class FontManager {
 		if (font.state == Registry.INVALID || Nemgine.getSide().isServer()) {
 			return;
 		}
-		char[] chars = string.toCharArray();
 		
 		ShaderManager.bindShader(ShaderManager.getFontShaderID());
 		ShaderManager.loadMatrix4(ShaderManager.getFontShaderID(), Registry.FONT_SHADER_TRANSFORMATION_ATTRIBUTE, transformation);
@@ -58,7 +58,7 @@ public class FontManager {
 		GLHelper.enableBlending();
 		Tessellator.start(Tessellator.QUADS);
 		
-		for (char c : chars) {
+		for (char c : string.toCharArray()) {
 			GLCharacter glchar = font.chars.get(c);
 			if (glchar == null) {
 				continue;
@@ -79,6 +79,70 @@ public class FontManager {
 		
 		Tessellator.finish();
 		GLHelper.disableBlending();
+	}
+	
+	public static int getStringHeight(int fontId, String string) {
+		Font font = fonts.get(fontId);
+		
+		if (font.state == Registry.INVALID || Nemgine.getSide().isServer()) {
+			return Registry.INVALID;
+		}
+		int height = Registry.INVALID;
+		
+		for (char c : string.toCharArray()) {
+			GLCharacter glc = font.chars.get(c);
+			if (glc == null) {
+				return Registry.INVALID;
+			}
+			int cHeight = glc.height;
+			if (cHeight > height) {
+				height = cHeight;
+			}
+		}
+		
+		return height;
+	}
+	
+	public static int getStringWidth(int fontId, String string) {
+		Font font = fonts.get(fontId);
+		
+		if (font.state == Registry.INVALID || Nemgine.getSide().isServer()) {
+			return Registry.INVALID;
+		}
+		int width = 0;
+		
+		for (char c : string.toCharArray()) {
+			GLCharacter glc = font.chars.get(c);
+			if (glc == null) {
+				return Registry.INVALID;
+			}
+			width += glc.width;
+		}
+		
+		return width;
+	}
+	
+	public static Rectangle getStringBounds(int fontId, String string) {
+		Font font = fonts.get(fontId);
+		
+		if (font.state == Registry.INVALID || Nemgine.getSide().isServer()) {
+			return new Rectangle(Registry.INVALID, Registry.INVALID);
+		}
+		int width = 0;
+		int height = Registry.INVALID;
+		
+		for (char c : string.toCharArray()) {
+			GLCharacter glc = font.chars.get(c);
+			if (glc == null) {
+				return new Rectangle(Registry.INVALID, Registry.INVALID);
+			}
+			width += glc.width;
+			if (glc.height > height) {
+				height = glc.height;
+			}
+		}
+		
+		return new Rectangle(width, height);
 	}
 	
 	public static boolean initializeFont(int id, String name, int style, int size) {

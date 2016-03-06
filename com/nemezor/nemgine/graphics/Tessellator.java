@@ -88,7 +88,7 @@ public class Tessellator {
 				return;
 			}
 			int[] indices = new int[(int)(verData.length * 1.5f)];
-			for (int i = 0, j = 0; i < verData.length; i += 4, j += 6) {
+			for (int i = 0, j = 0; i < verData.length; i += 12, j += 6) {
 				indices[j] = i;
 				indices[j + 1] = i + 1;
 				indices[j + 2] = i + 2;
@@ -134,6 +134,12 @@ public class Tessellator {
 		currentNormal.add(x);
 		currentNormal.add(y);
 		currentNormal.add(z);
+	}
+	
+	public static void addVertex(float x, float y) {
+		currentVertex.add(x);
+		currentVertex.add(y);
+		currentVertex.add(0.0f);
 	}
 	
 	public static void addVertex(float x, float y, float z) {

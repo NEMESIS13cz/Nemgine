@@ -38,6 +38,7 @@ public class Nemgine {
 	protected static boolean hasRenderThread = false;
 	protected static String name;
 	protected static boolean printThreadKeepUp = true;
+	protected static boolean debug = false;
 	
 	private Nemgine() {}
 
@@ -72,6 +73,8 @@ public class Nemgine {
 				boolean contained = InputParams.containsEntry(Registry.PARAM_CONTAINED) ? InputParams.getBoolean(Registry.PARAM_CONTAINED) : ann.contained();
 				headless = InputParams.containsEntry(Registry.PARAM_SERVER) ? InputParams.getBoolean(Registry.PARAM_SERVER) : ann.side().isServer();
 				name = ann.name();
+				debug = InputParams.containsEntry(Registry.PARAM_DEBUG) ? InputParams.getBoolean(Registry.PARAM_DEBUG) : false;
+				printThreadKeepUp = InputParams.containsEntry(Registry.PARAM_KEEPUP) ? InputParams.getBoolean(Registry.PARAM_KEEPUP) : true;
 				
 				if (entry == null || (resources == null && !headless)) {
 					Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_RESOLVE_NONE, false);
@@ -294,6 +297,10 @@ public class Nemgine {
 	public static void printThreadKeepUpWarnings(boolean print) {
 		printThreadKeepUp = print;
 	}
+	
+	public static void debug(boolean debug) {
+		Nemgine.debug = debug;
+	}
 
 	public static Side getSide() {
 		return headless ? Side.SERVER : Side.CLIENT;
@@ -305,5 +312,9 @@ public class Nemgine {
 	
 	public static long getOpenGLContext() {
 		return context;
+	}
+	
+	public static boolean isDebugMode() {
+		return debug;
 	}
 }

@@ -17,6 +17,8 @@ public class GLCharacter {
 	}
 	
 	public void initialize(float texW, float texH) {
+		height /= 2;
+		y += height;
 		textureCoords = new float[] {x / texW, y / texH, (x + width) / texW, (y + height) / texH};
 	}
 }

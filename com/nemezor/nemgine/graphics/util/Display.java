@@ -14,6 +14,7 @@ import org.lwjgl.util.vector.Matrix4f;
 
 import com.nemezor.nemgine.exceptions.WindowException;
 import com.nemezor.nemgine.graphics.GLHelper;
+import com.nemezor.nemgine.input.Mouse;
 import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.Color;
 import com.nemezor.nemgine.misc.Platform;
@@ -25,6 +26,7 @@ public class Display {
 	private boolean invalid = false;
 	private boolean wireframe = false;
 	private volatile boolean resized = false;
+	private volatile boolean lastFrameResized = false;
 	private int status;
 	private long window;
 	private float FOV;
@@ -128,13 +130,16 @@ public class Display {
 		if (resized) {
 			resize();
 			resized = false;
+			lastFrameResized = true;
 		}
+		Mouse.update(this);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 	}
 	
 	public void finishRender() {
 		GLFW.glfwSwapBuffers(window);
 		GLFW.glfwPollEvents();
+		lastFrameResized = false;
 	}
 	
 	public void dispose() {
@@ -187,5 +192,9 @@ public class Display {
 		persp = GLHelper.initPerspectiveProjectionMatrix(FOV, width, height, zNear, zFar);
 		ortho = GLHelper.initOrthographicProjectionMatrix(-width / 2, width / 2, -height / 2, height / 2, zNear, zFar);
 		ortho2D = GLHelper.initOrthographicProjectionMatrix(0, width, 0, height, 0, 1);
+	}
+	
+	public boolean displayResized() {
+		return lastFrameResized;
 	}
 }

@@ -215,7 +215,7 @@ public class Loader {
 		
 		Tessellator.finish();
 		
-		FontManager.drawString(FontManager.getDefaultFontID(), 0.098f * Registry.LOADING_SCREEN_WIDTH, (0.495f + offset) * Registry.LOADING_SCREEN_HEIGHT, segment.getLabel(), Registry.LOADING_SCREEN_FONT_COLOR, new Matrix4f(), textProjection);
+		FontManager.drawString(FontManager.getDefaultFontID(), 0.098f * Registry.LOADING_SCREEN_WIDTH, (0.595f + offset) * Registry.LOADING_SCREEN_HEIGHT, segment.getLabel(), Registry.LOADING_SCREEN_FONT_COLOR, new Matrix4f(), textProjection);
 		
 		if (segment.getSubsegment() != null) {
 			renderSegment(segment.getSubsegment(), offset + 0.14f);

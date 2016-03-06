@@ -15,6 +15,7 @@ public final class Registry {
 	public static final int ONE_SECOND_IN_MILLIS = 1000;
 	public static final int INVALID = -1;
 	public static final int COLOR_NORMALIZER_VALUE = 255;
+	public static final Color GUI_DEBUG_OUTLINE_COLOR = new Color(0xFF0000FF);
 	
 	// Threads
 	public static final int DEFAULT_FRAMESKIP_TRESHOLD = 5;
@@ -41,6 +42,14 @@ public final class Registry {
 	public static final Color FONT_DEFAULT_COLOR = new Color(0xFFFFFFFF);
 	public static final int FONT_DEFAULT_FONT_SIZE = 20;
 	public static final int FONT_DEFAULT_FONT_STYLE = Font.PLAIN;
+	
+	// GUI
+	public static final int GUI_DEFAULT_RASTER_WIDTH = 1600;
+	public static final int GUI_DEFAULT_RASTER_HEIGHT = 900;
+	public static final Color GUI_DEFAULT_PRIMARY_COLOR = new Color(0xD9D9D9FF);
+	public static final Color GUI_DEFAULT_SECONDARY_COLOR = new Color(0xCFCFCFFF);
+	public static final Color GUI_DEFAULT_ACCENT_COLOR = new Color(0x99D1FFFF);
+	public static final Color GUI_DEFAULT_FONT_COLOR = new Color(0x000000FF);
 	
 	////////////////////////////////////////////////////////////////////////////////////////
 
@@ -169,6 +178,8 @@ public final class Registry {
 	// Parameters
 	public static final String PARAM_CONTAINED = "NGcontained";
 	public static final String PARAM_SERVER = "NGserver";
+	public static final String PARAM_DEBUG = "NGdebug";
+	public static final String PARAM_KEEPUP = "NGkeepUpWarnings";
 	
 	// Fonts
 	public static final String FONT_MANAGER_NAME = "Nemgine Font Manager";

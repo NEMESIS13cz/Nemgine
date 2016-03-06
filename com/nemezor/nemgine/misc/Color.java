@@ -7,6 +7,10 @@ public class Color {
 
 	private Vector4f color;
 	
+	public Color(Color c) {
+		color = c.getColorAsVector();
+	}
+	
 	public Color(float red, float green, float blue) {
 		this(red, green, blue, 1.0f);
 	}
@@ -28,7 +32,7 @@ public class Color {
 	}
 	
 	public Vector4f getColorAsVector() {
-		return color;
+		return new Vector4f(color);
 	}
 	
 	public Vector3f getColorRGBAsVector() {
@@ -69,5 +73,13 @@ public class Color {
 	
 	public Color invert() {
 		return new Color(1 - color.x, 1 - color.y, 1 - color.z, color.w);
+	}
+	
+	public Color clone() {
+		return new Color(this);
+	}
+	
+	public String toString() {
+		return "color[R: " + getRedAsInt() + ", G: " + getGreenAsInt() + ", B: " + getBlueAsInt() + ", A: " + getAlphaAsInt() + "]";
 	}
 }

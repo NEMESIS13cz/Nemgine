@@ -1,18 +1,14 @@
 package com.nemezor.nemgine.graphics.gui;
 
-import com.nemezor.nemgine.misc.RenderAttributes;
+import com.nemezor.nemgine.graphics.util.Display;
+import com.nemezor.nemgine.misc.Anchors;
+import com.nemezor.nemgine.misc.IGuiListener;
 
-public interface IGuiComponent { //TODO FIX ALL THE THINGS
-
-	public void update(float mouseX, float mouseY);
+public interface IGuiComponent {
 	
-	public void render(float mouseX, float mouseY);
-	
-	public void initialize(int canvasWidth, int canvasHeight);
-	
-	public void resize(int width, int height);
-	
-	public RenderAttributes getRenderAttributes();
-	
-	public void dispose();
+	void render(Display window);
+	void update(int mouseX, int mouseY, boolean leftButton, boolean rightButton);
+	void resize(Display window);
+	void anchor(Anchors anchor);
+	void setListener(IGuiListener listener);
 }

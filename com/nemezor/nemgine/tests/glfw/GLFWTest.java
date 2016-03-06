@@ -1,6 +1,7 @@
 package com.nemezor.nemgine.tests.glfw;
 
 import java.awt.Font;
+import java.awt.Point;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.util.vector.Matrix4f;
@@ -92,7 +93,7 @@ public class GLFWTest implements IMainRenderLoop {
 		transform.translate(new Vector3f(-50000, 0, 0));
 		ModelManager.renderModel(model, 0, shader, transform, window.getPerspectiveProjectionMatrix(), "transformation", "projection");
 
-		FontManager.drawString(FontManager.getDefaultFontID(), 20, 5, (Platform.getUsedMemory() / 1048576) + "/" + (Platform.getAllocatedMemory() / 1048576) + "MB", new Color(0xFFFFFFFF), new Matrix4f(), GLHelper.initOrthographicProjectionMatrix(0, window.getWidth(), 0, window.getHeight(), 0, 1));
+		FontManager.drawString(FontManager.getDefaultFontID(), 20, 40, (Platform.getUsedMemory() / 1048576) + "/" + (Platform.getAllocatedMemory() / 1048576) + "MB", new Color(0xFFFFFFFF), new Matrix4f(), GLHelper.initOrthographicProjectionMatrix(0, window.getWidth(), 0, window.getHeight(), 0, 1));
 		
 		ModelManager.finishRendering();
 		angle++;
@@ -106,7 +107,7 @@ public class GLFWTest implements IMainRenderLoop {
 	public void setUpRender() {
 		windowID = DisplayManager.generateDisplays();
 		window = DisplayManager.initializeDisplay(windowID, 70.0f, 1280, 720, 0.1f, 1500000.0f, true);
-
+		
 		ShaderManager.bindShader(shader);
 		ShaderManager.loadMatrix4(shader, "projection", window.getPerspectiveProjectionMatrix());
 		ShaderManager.loadMatrix4(shader, "transformation", new Matrix4f());
@@ -144,16 +145,16 @@ public class GLFWTest implements IMainRenderLoop {
 	public static final float maxLookUp = 85;
 	public float mouseSensitivity = 2;
 	public int walkingSpeed = 200;
-	private double[] lastPos = new double[2];
+	private Point lastPos;
 	
 	public void handleInput() {
 		if (Mouse.isButtonDown(window, 0) && Mouse.isInsideWindow(window)) {
-			double[] pos = Mouse.getMousePosition(window);
+			Point pos = Mouse.getMousePosition(window);
 			if (lastPos == null) {
 				lastPos = pos;
 			}
-			float mouseDX = (float)(pos[0] - lastPos[0]) * mouseSensitivity * 0.16F;
-			float mouseDY = (float)(lastPos[1] - pos[1]) * mouseSensitivity * 0.16F;
+			float mouseDX = (float)(pos.getX() - lastPos.getX()) * mouseSensitivity * 0.16F;
+			float mouseDY = (float)(lastPos.getY() - pos.getY()) * mouseSensitivity * 0.16F;
 			lastPos = pos;
 			if (Math.toDegrees(cam.getRotation().y) + mouseDX >= 360) {
 				cam.getRotation().y = (float)Math.toRadians(Math.toDegrees(cam.getRotation().y) + mouseDX - 360);
