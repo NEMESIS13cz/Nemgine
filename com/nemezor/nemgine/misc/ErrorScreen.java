@@ -13,6 +13,8 @@ public class ErrorScreen {
 
 	private static boolean exit = false;
 	
+	private ErrorScreen() {}
+	
 	public static void show(String message, boolean shouldExit) { //TODO fix - JVM error
 		if (Nemgine.getSide() == Side.SERVER) {
 			if (!shouldExit) {

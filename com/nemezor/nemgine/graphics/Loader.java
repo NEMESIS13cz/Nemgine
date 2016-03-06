@@ -43,6 +43,8 @@ public class Loader {
 	
 	protected static boolean silent = false;
 	
+	private Loader() {}
+	
 	public static long initialize(String title) {
 		if (initialized) {
 			return Registry.INVALID;
@@ -95,6 +97,7 @@ public class Loader {
 		update();
 		
 		ShaderManager.generateDefaultShaderIDs();
+		
 		return GLFW.glfwGetCurrentContext();
 	}
 	
@@ -114,15 +117,11 @@ public class Loader {
 		isDone = true;
 	}
 	
-	public static void loadDefaultResources() {
+	public static void beginLoadSequence(Method resources, Object instance) {
 		if (loaded) {
 			return;
 		}
-		if (Nemgine.getSide() == Side.SERVER) {
-			loaded = true;
-			return;
-		}
-		
+		loaded = true;
 		LoaderSegment textures = new LoaderSegment(Registry.LOADING_PROGRESS_GFX_TEXTURES, textureCounter * 2);
 		LoaderSegment models = new LoaderSegment(Registry.LOADING_PROGRESS_GFX_MODELS, modelCounter * 5);
 		LoaderSegment shaders = new LoaderSegment(Registry.LOADING_PROGRESS_GFX_SHADERS, shaderCounter * 4);
@@ -133,20 +132,12 @@ public class Loader {
 		segment.addSubsegment(models);
 		segment.addSubsegment(shaders);
 		segment.addSubsegment(fonts);
-		
-		ShaderManager.loadDefaultShaders();
-	}
-	
-	public static void beginLoadSequence(Method resources, Object instance) {
-		if (loaded) {
-			return;
-		}
-		loaded = true;
 		try {
 			resources.invoke(instance, GLResourceEvent.LOAD_TEXTURES);
 			segment.nextSubsegment();
 			resources.invoke(instance, GLResourceEvent.LOAD_MODELS);
 			segment.nextSubsegment();
+			ShaderManager.loadDefaultShaders();
 			resources.invoke(instance, GLResourceEvent.LOAD_SHADERS);
 			segment.nextSubsegment();
 			resources.invoke(instance, GLResourceEvent.LOAD_FONTS);
@@ -224,7 +215,7 @@ public class Loader {
 		
 		Tessellator.finish();
 		
-		FontManager.drawString(FontManager.getDefaultFontID(), 0.098f * Registry.LOADING_SCREEN_WIDTH, (0.495f + offset) * Registry.LOADING_SCREEN_HEIGHT, segment.getLabel(), new Color(0xFFFFFFFF), new Matrix4f(), textProjection);
+		FontManager.drawString(FontManager.getDefaultFontID(), 0.098f * Registry.LOADING_SCREEN_WIDTH, (0.495f + offset) * Registry.LOADING_SCREEN_HEIGHT, segment.getLabel(), Registry.LOADING_SCREEN_FONT_COLOR, new Matrix4f(), textProjection);
 		
 		if (segment.getSubsegment() != null) {
 			renderSegment(segment.getSubsegment(), offset + 0.14f);
@@ -232,7 +223,7 @@ public class Loader {
 	}
 	
 	protected static void loadingTexture(String name) {
-		Logger.logSilently("Loading Texture: " + name);
+		Logger.log(Registry.LOADING_SCREEN_NAME, "Loading Texture: " + name);
 		segment.setLabel(Registry.LOADING_PROGRESS_GFX_TEXTURES + " (" + name + ")");
 		segment.stepProgress();
 		update();
@@ -244,7 +235,7 @@ public class Loader {
 	}
 	
 	protected static void loadingShader(String name) {
-		Logger.logSilently("Loading Shader: " + name);
+		Logger.log(Registry.LOADING_SCREEN_NAME, "Loading Shader: " + name);
 		segment.setLabel(Registry.LOADING_PROGRESS_GFX_SHADERS + " (" + name + ")");
 		segment.stepProgress();
 		update();
@@ -256,7 +247,7 @@ public class Loader {
 	}
 	
 	protected static void loadingModel(String name) {
-		Logger.logSilently("Loading Model: " + name);
+		Logger.log(Registry.LOADING_SCREEN_NAME, "Loading Model: " + name);
 		segment.setLabel(Registry.LOADING_PROGRESS_GFX_MODELS + " (" + name + ")");
 		segment.stepProgress();
 		update();
@@ -268,7 +259,7 @@ public class Loader {
 	}
 	
 	protected static void loadingFont(String name) {
-		Logger.logSilently("Loading Font: " + name);
+		Logger.log(Registry.LOADING_SCREEN_NAME, "Loading Font: " + name);
 		segment.setLabel(Registry.LOADING_PROGRESS_GFX_FONTS + " (" + name + ")");
 		segment.stepProgress();
 		update();

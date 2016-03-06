@@ -4,6 +4,8 @@ import java.awt.Font;
 
 public final class Registry {
 	
+	private Registry() {}
+	
 	// Main
 	public static final int ERROR_SCREEN_WIDTH = 600;
 	public static final int ERROR_SCREEN_HEIGHT = 400;
@@ -25,11 +27,7 @@ public final class Registry {
 	// Loading
 	public static final int LOADING_SCREEN_WIDTH = 800;
 	public static final int LOADING_SCREEN_HEIGHT = 450;
-	public static final int LOADING_SCREEN_FONT_SIZE = 16;
-	public static final int LOADING_SCREEN_FONT_X = 400;
-	public static final int LOADING_SCREEN_FONT_Y = 340;
-	public static final int LOADING_SCREEN_FONT_PROPERTIES = Font.BOLD;
-	public static final int LOADING_SCREEN_FONT_COLOR = 0x6a9df9;
+	public static final Color LOADING_SCREEN_FONT_COLOR = new Color(0xFFFFFFFF);
 	public static final int LOADING_SCREEN_REFRESHRATE = 60;
 	
 	// Network
@@ -63,6 +61,7 @@ public final class Registry {
 	public static final String NEMGINE_OPENGL_VERSION_OUT_OF_DATE = "Your OpenGL version is not sufficient to run Nemgine.";
 	public static final String NEMGINE_FAILED_TO_INITIALIZE_GLFW = "Failed to initialize GLFW.";
 	public static final String NEMGINE_FAILED_TO_INSTANTIATE_APPLICATION = "Failed to create an instance of application class.";
+	public static final String NEMGINE_EXIT_THREAD_NAME = "Exit Thread";
 	
 	// Window
 	public static final String WINDOW_EXCEPTION_NO_ACCESSOR = "Anonymous Window Accessor";
@@ -73,6 +72,7 @@ public final class Registry {
 	// Misc
 	public static final String LOGO_IMAGE_PATH = "com/nemezor/nemgine/resources/logo.png";
 	public static final String LOGO_IMAGE_LOAD_ERROR = "Failed to load logo image!";
+	public static final String PLATFORM_REFRESH_THREAD = "Platform Utility Thread";
 	
 	// Logging
 	public static final String LOG_FILE_PATH = "/logs";
@@ -92,6 +92,9 @@ public final class Registry {
 	public static final String THREAD_ALREADY_RUNNING = "Thread is already running!";
 	public static final String THREAD_ALREADY_AUXILIARY = "Thread is already auxiliary thread!";
 	public static final String THREAD_ALREADY_MAIN = "Thread is already a main render or main tick thread!";
+	public static final String THREAD_AUX_LOOP_NAME = "Auxiliary loop";
+	public static final String THREAD_TICK_LOOP_NAME = "Main tick loop";
+	public static final String THREAD_RENDER_LOOP_NAME = "Main render loop";
 	
 	// Textures
 	public static final String TEXTURE_EXCEPTION_NO_ACCESSOR = "Anonymous Texture Accessor";
@@ -140,7 +143,6 @@ public final class Registry {
 	public static final String TESSELLATOR_INVALID_DATA = "Invalid data!";
 	
 	// Loading
-	public static final String LOADING_SCREEN_FONT = "Courier New";
 	public static final String PARAMS_ARG_PREFIX_1 = "-";
 	public static final String PARAMS_ARG_PREFIX_2 = "--";
 	public static final String PARAMS_SEPARATOR = "=";
@@ -152,6 +154,7 @@ public final class Registry {
 	public static final String LOADING_PROGRESS_GFX_MODELS = "Loading Models";
 	public static final String LOADING_PROGRESS_GFX_SHADERS = "Loading Shaders";
 	public static final String LOADING_PROGRESS_GFX_FONTS = "Loading Fonts";
+	public static final String LOADING_SCREEN_NAME = "Resource Loader";
 	
 	// Network
 	public static final String NETWORK_MANAGER_NAME = "Nemgine Network Manager";

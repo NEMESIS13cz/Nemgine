@@ -109,12 +109,11 @@ public class Nemgine {
 			            GLFW.glfwTerminate();
 						System.exit(Registry.INVALID);
 					}
-					Loader.loadDefaultResources();
 					Loader.beginLoadSequence(resources, instance);
 					Loader.finish();
 					GL11.glFinish();
 				}
-				System.gc();
+				Platform.freeUpMemory();
 				try {
 					entry.invoke(instance);
 				} catch (Exception e) {
@@ -148,16 +147,17 @@ public class Nemgine {
 				DisplayManager.disposeAll();
 				GLFW.glfwTerminate();
 			}
-			Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_SHUTDOWN_EXIT + exitCode, false);
-			Logger.close();
 			Thread exitThread = new Thread() {
 				
 				public void run() {
+					setName(Registry.NEMGINE_EXIT_THREAD_NAME);
 					while (Nemgine.threadsRunning()) {
 						try {
 							sleep(1);
 						} catch (InterruptedException e) {}
 					}
+					Logger.log(Registry.NEMGINE_SHUTDOWN_EXIT + exitCode);
+					Logger.close();
 					System.gc();
 					System.exit(exitCode);
 				}

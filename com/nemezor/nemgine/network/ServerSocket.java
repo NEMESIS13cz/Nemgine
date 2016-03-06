@@ -21,7 +21,7 @@ public class ServerSocket implements ISocket {
 	private int state;
 	protected HashMap<NetworkObject, ArrayList<IPacket>> queue = new HashMap<NetworkObject, ArrayList<IPacket>>();
 	
-	public ServerSocket(int id, Address addr) {
+	protected ServerSocket(int id, Address addr) {
 		try {
 			sock = new java.net.ServerSocket(addr.getPort());
 		} catch (IOException e) {

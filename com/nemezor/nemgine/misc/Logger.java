@@ -9,8 +9,6 @@ import java.util.Date;
 import com.nemezor.nemgine.console.Console;
 
 public class Logger {
-
-	private Logger() {}
 	
 	private static final SimpleDateFormat fileFormat = new SimpleDateFormat(Registry.LOG_FILE_DATE_FORMAT);
 	private static final SimpleDateFormat msgFormat = new SimpleDateFormat(Registry.LOG_MESSAGE_DATE_FORMAT);
@@ -20,6 +18,8 @@ public class Logger {
 	private static String lastDate;
 	private static int fileNum = 1;
 	private static String appFile;
+
+	private Logger() {}
 	
 	public static void initialize(String appFilePath) {
 		appFile = appFilePath;
@@ -74,12 +74,16 @@ public class Logger {
 		Console.out.println(message);
 	}
 	
-	public static synchronized void logSilently(String msg) {
+	public static void logSilently(String msg) {
 		log(Thread.currentThread().getName(), msg, true);
 	}
 	
-	public static synchronized void log(String msg) {
+	public static void log(String msg) {
 		log(Thread.currentThread().getName(), msg, false);
+	}
+	
+	public static void log(String sender, String msg) {
+		log(sender, msg, false);
 	}
 	
 	public static synchronized void log(String sender, String msg, boolean silent) {

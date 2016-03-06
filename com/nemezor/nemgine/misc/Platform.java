@@ -25,10 +25,17 @@ public class Platform {
 	private static GLVersion openGLVersion = new GLVersion(Registry.INVALID, Registry.INVALID);
 	private static GLVersion GLSLVersion = new GLVersion(Registry.INVALID, Registry.INVALID);
 	private static String[] availableFonts;
+	private static int cpuCores;
+	private static long freeMem;
+	private static long usedMem;
+	private static long allocMem;
+	private static long maxMem;
 	
 	private static Runtime runtime = Runtime.getRuntime();
 	
 	private static boolean initialized = false;
+	
+	private Platform() {}
 	
 	public static void initialize(boolean headless) {
 		if (initialized) {
@@ -80,13 +87,36 @@ public class Platform {
 		
 		GraphicsEnvironment e = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		availableFonts = e.getAvailableFontFamilyNames();
+		
+		Thread t = new Thread() {
+			
+			public void run() {
+				setName(Registry.PLATFORM_REFRESH_THREAD);
+				while (Nemgine.isRunning()) {
+					
+					refreshCPUAndMemory();
+					try {
+						Thread.sleep(Registry.ONE_SECOND_IN_MILLIS);
+					} catch (InterruptedException e) {}
+				}
+			}
+		};
+		t.start();
+	}
+	
+	public static void refreshCPUAndMemory() {
+		cpuCores = runtime.availableProcessors();
+		freeMem = runtime.freeMemory();
+		maxMem = runtime.maxMemory();
+		allocMem = runtime.totalMemory();
+		usedMem = maxMem - freeMem;
 	}
 	
 	public static GLVersion getOpenGLVersion() {
 		return openGLVersion.clone();
 	}
 	
-	public static GLVersion getGLSLVersion() {
+	public static GLVersion getOpenGLShadingLanguageVersion() {
 		return GLSLVersion.clone();
 	}
 
@@ -127,23 +157,23 @@ public class Platform {
 	}
 
 	public static int getCpuCores() {
-		return runtime.availableProcessors();
+		return cpuCores;
 	}
 
 	public static long getAllocatedMemory() {
-		return runtime.totalMemory();
+		return allocMem;
 	}
 
 	public static long getMaximumMemory() {
-		return runtime.maxMemory();
+		return maxMem;
 	}
 
 	public static long getFreeMemory() {
-		return runtime.freeMemory();
+		return freeMem;
 	}
 
 	public static long getUsedMemory() {
-		return runtime.totalMemory() - runtime.freeMemory();
+		return usedMem;
 	}
 
 	public static void freeUpMemory() {

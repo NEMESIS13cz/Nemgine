@@ -20,23 +20,27 @@ import com.nemezor.nemgine.misc.Platform;
 import com.nemezor.nemgine.misc.Registry;
 
 public class Display {
-	
+
+	private boolean init = false;
+	private boolean invalid = false;
+	private boolean wireframe = false;
+	private volatile boolean resized = false;
 	private int status;
+	private long window;
 	private float FOV;
 	private float width, height;
 	private float zNear, zFar;
 	private String title;
 	private Matrix4f persp;
-	private boolean init = false;
-	private long window;
-	private boolean invalid = false;
-	private volatile boolean resized = false;
+	private Matrix4f ortho;
+	private Matrix4f ortho2D;
 	private GLFWWindowSizeCallback sizeCallback;
-	private boolean wireframe = false;
 	
 	public Display(int status) {
 		this.status = status;
 		persp = new Matrix4f();
+		ortho = new Matrix4f();
+		ortho2D = new Matrix4f();
 		title = Nemgine.getApplicationName();
 	}
 	
@@ -112,6 +116,14 @@ public class Display {
 		return persp;
 	}
 	
+	public Matrix4f getOrthographicProjectionMatrix() {
+		return ortho;
+	}
+	
+	public Matrix4f get2DOrthographicProjectionMatrix() {
+		return ortho2D;
+	}
+	
 	public void prepareRender() {
 		if (resized) {
 			resize();
@@ -173,5 +185,7 @@ public class Display {
 		GLFW.glfwGetFramebufferSize(window, b1, b2);
 		GL11.glViewport(0, 0, b1.get(), b2.get());
 		persp = GLHelper.initPerspectiveProjectionMatrix(FOV, width, height, zNear, zFar);
+		ortho = GLHelper.initOrthographicProjectionMatrix(-width / 2, width / 2, -height / 2, height / 2, zNear, zFar);
+		ortho2D = GLHelper.initOrthographicProjectionMatrix(0, width, 0, height, 0, 1);
 	}
 }

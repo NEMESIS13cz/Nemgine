@@ -12,6 +12,8 @@ public class Mouse {
 	public static final int LEFT_MOUSE_BUTTON = 0;
 	public static final int RIGHT_MOUSE_BUTTON = 1;
 	
+	private Mouse() {}
+	
 	public static double[] getMousePosition(Display window) {
 		DoubleBuffer b1 = BufferUtils.createDoubleBuffer(1);
 		DoubleBuffer b2 = BufferUtils.createDoubleBuffer(1);

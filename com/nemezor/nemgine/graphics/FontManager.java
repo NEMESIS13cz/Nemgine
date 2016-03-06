@@ -25,6 +25,8 @@ public class FontManager {
 	private static int fontCounter = 0;
 	private static int defaultFont;
 	
+	private FontManager() {}
+	
 	public static synchronized int generateFonts() {
 		if (Nemgine.getSide().isServer()) {
 			return Registry.INVALID;

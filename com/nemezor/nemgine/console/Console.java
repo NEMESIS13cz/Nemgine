@@ -16,6 +16,8 @@ public class Console {
 	private static Method input = null;
 	private static Object obj = null;
 	
+	private Console() {}
+	
 	public static void registerInputListener(Object listener) {
 		if (input != null) {
 			return;

@@ -15,6 +15,8 @@ public class GuiManager {
 	private static Gui currentGui = null;
 	private static HashMap<Integer, Gui> guis = new HashMap<Integer, Gui>();
 	
+	private GuiManager() {}
+	
 	public static synchronized int generateGuis(int canvasWidth, int canvasHeight) {
 		if (Nemgine.getSide() == Side.SERVER) {
 			return Registry.INVALID;

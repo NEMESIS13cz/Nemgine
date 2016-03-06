@@ -1,16 +1,18 @@
 package com.nemezor.nemgine.main;
 
+import com.nemezor.nemgine.misc.Registry;
+
 public interface IAuxLoop {
 	
-	public abstract void update();
+	public void update();
 	
-	public abstract void setUp();
+	public void setUp();
 	
-	public abstract void cleanUp();
+	public void cleanUp();
 	
-	public abstract long getSleepInterval();
+	public long getSleepInterval();
 	
 	public default String getStacktraceAuxName() {
-		return "Auxiliary loop";
+		return Registry.THREAD_AUX_LOOP_NAME;
 	}
 }

@@ -13,11 +13,11 @@ import com.nemezor.nemgine.misc.Registry;
 
 public class DisplayManager {
 
-	private DisplayManager() {}
-
 	private static HashMap<Integer, Display> displays = new HashMap<Integer, Display>();
 	private static int displayCounter = 0;
 	private static int currentDisplay = 0;
+
+	private DisplayManager() {}
 	
 	public static synchronized int generateDisplays() {
 		if (Nemgine.getSide().isServer()) {

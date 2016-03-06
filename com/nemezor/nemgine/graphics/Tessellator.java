@@ -27,6 +27,8 @@ public class Tessellator {
 	private static boolean tessellating = false;
 	private static int mode = 0;
 	
+	private Tessellator() {}
+	
 	/**
 	 * Do not call this!!!
 	 */
@@ -75,9 +77,9 @@ public class Tessellator {
 			Logger.log(Registry.TESSELLATOR_SWITCHED_CONTEXTS);
 			return;
 		}
-		float[] verData = Utils.toPrimitiveArray(currentVertex);
-		float[] texData = Utils.toPrimitiveArray(currentTexture);
-		float[] norData = Utils.toPrimitiveArray(currentNormal);
+		float[] verData = Utils.toPrimitiveArrayf(currentVertex);
+		float[] texData = Utils.toPrimitiveArrayf(currentTexture);
+		float[] norData = Utils.toPrimitiveArrayf(currentNormal);
 		ModelData data = null;
 		
 		if (mode == Tessellator.QUADS) {

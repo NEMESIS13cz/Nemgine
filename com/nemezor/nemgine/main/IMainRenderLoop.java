@@ -1,5 +1,7 @@
 package com.nemezor.nemgine.main;
 
+import com.nemezor.nemgine.misc.Registry;
+
 public interface IMainRenderLoop {
 	
 	public void render();
@@ -15,6 +17,6 @@ public interface IMainRenderLoop {
 	public int getRenderFrameskipTreshold();
 	
 	public default String getStacktraceRenderName() {
-		return "Main render loop";
+		return Registry.THREAD_RENDER_LOOP_NAME;
 	}
 }

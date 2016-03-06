@@ -18,8 +18,6 @@ import com.nemezor.nemgine.misc.Registry;
 import com.nemezor.nemgine.misc.Side;
 
 public class FrameBufferManager {
-
-	private FrameBufferManager() {}
 	
 	private static HashMap<Integer, FrameBuffer> buffers = new HashMap<Integer, FrameBuffer>();
 	private static int bufferCounter = 0;
@@ -28,6 +26,8 @@ public class FrameBufferManager {
 	private static FrameBuffer currentBufferData = null;
 	
 	protected static boolean inFrameBuffer = false;
+
+	private FrameBufferManager() {}
 
 	public static synchronized int generateFrameBuffers() {
 		if (Nemgine.getSide() == Side.SERVER) {

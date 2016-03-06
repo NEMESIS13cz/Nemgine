@@ -18,6 +18,8 @@ public class NetworkManager {
 	private static ArrayList<NetworkListener> listeners = new ArrayList<NetworkListener>();
 	protected static ArrayList<NetworkObject> objects = new ArrayList<NetworkObject>();
 	
+	private NetworkManager() {}
+	
 	public static synchronized int generateClientSockets(int timeout) {
 		return generateSockets(Side.CLIENT, timeout);
 	}

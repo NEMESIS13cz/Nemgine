@@ -1,5 +1,7 @@
 package com.nemezor.nemgine.main;
 
+import com.nemezor.nemgine.misc.Registry;
+
 public interface IMainTickLoop {
 
 	public void tick();
@@ -15,6 +17,6 @@ public interface IMainTickLoop {
 	public int getTickTickskipTreshold();
 	
 	public default String getStacktraceTickName() {
-		return "Main tick loop";
+		return Registry.THREAD_TICK_LOOP_NAME;
 	}
 }

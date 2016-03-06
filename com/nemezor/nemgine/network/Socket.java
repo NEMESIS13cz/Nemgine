@@ -25,7 +25,7 @@ public class Socket implements ISocket {
 	private int timeout;
 	protected ArrayList<IPacket> queue = new ArrayList<IPacket>();
 	
-	public Socket(int id, Address addr, int timeout) {
+	protected Socket(int id, Address addr, int timeout) {
 		if (timeout > 0) {
 			this.timeout = timeout;
 		}else{
