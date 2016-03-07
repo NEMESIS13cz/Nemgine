@@ -5,6 +5,9 @@ import java.nio.IntBuffer;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWCharCallback;
+import org.lwjgl.glfw.GLFWCharModsCallback;
+import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.opengl.GL;
@@ -14,6 +17,7 @@ import org.lwjgl.util.vector.Matrix4f;
 
 import com.nemezor.nemgine.exceptions.WindowException;
 import com.nemezor.nemgine.graphics.GLHelper;
+import com.nemezor.nemgine.input.IKeyInput;
 import com.nemezor.nemgine.input.Mouse;
 import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.Color;
@@ -37,6 +41,10 @@ public class Display {
 	private Matrix4f ortho;
 	private Matrix4f ortho2D;
 	private GLFWWindowSizeCallback sizeCallback;
+	private GLFWKeyCallback keyCallback;
+	private GLFWCharCallback charCallback;
+	private GLFWCharModsCallback charModsCallback;
+	private volatile IKeyInput input;
 	
 	public Display(int status) {
 		this.status = status;
@@ -69,14 +77,41 @@ public class Display {
 		
 		sizeCallback = new GLFWWindowSizeCallback() {
 			@Override
-			public void invoke(long w, int wi, int he) {
+			public void invoke(long window, int wi, int he) {
 				width = wi;
 				height = he;
 				resized = true;
 			}
 		};
+		keyCallback = new GLFWKeyCallback() {
+			@Override
+			public void invoke(long window, int key, int scancode, int action, int mods) {
+				if (input != null) {
+					input.keyEvent(key, scancode, action, mods);
+				}
+			}
+		};
+		charCallback = new GLFWCharCallback() {
+			@Override
+			public void invoke(long window, int codepoint) {
+				if (input != null) {
+					input.charEvent((char)codepoint);
+				}
+			}
+		};
+		charModsCallback = new GLFWCharModsCallback() {
+			@Override
+			public void invoke(long window, int codepoint, int mods) {
+				if (input != null) {
+					input.charModsEvent((char)codepoint, mods);
+				}
+			}
+		};
 		
 		GLFW.glfwSetWindowSizeCallback(window, sizeCallback);
+		GLFW.glfwSetKeyCallback(window, keyCallback);
+		GLFW.glfwSetCharCallback(window, charCallback);
+		GLFW.glfwSetCharModsCallback(window, charModsCallback);
 		GLFW.glfwMakeContextCurrent(window);
 		GL.createCapabilities(Registry.OPENGL_FORWARD_COMPATIBLE);
 		GLFW.glfwShowWindow(window);
@@ -88,6 +123,10 @@ public class Display {
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		resize();
 		init = true;
+	}
+	
+	public void setKeyHandler(IKeyInput handler) {
+		input = handler;
 	}
 	
 	public boolean closeRequested() {

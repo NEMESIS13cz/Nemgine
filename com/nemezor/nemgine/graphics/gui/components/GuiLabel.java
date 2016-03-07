@@ -5,12 +5,8 @@ import java.awt.Rectangle;
 import org.lwjgl.util.vector.Matrix4f;
 
 import com.nemezor.nemgine.graphics.FontManager;
-import com.nemezor.nemgine.graphics.GLHelper;
-import com.nemezor.nemgine.graphics.ShaderManager;
-import com.nemezor.nemgine.graphics.Tessellator;
 import com.nemezor.nemgine.graphics.gui.IGuiComponent;
 import com.nemezor.nemgine.graphics.util.Display;
-import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.Anchors;
 import com.nemezor.nemgine.misc.Color;
 import com.nemezor.nemgine.misc.IGuiListener;
@@ -72,31 +68,6 @@ public class GuiLabel implements IGuiComponent {
 			FontManager.drawString(fontId, x, y + (int)bounds.getHeight(), text, hoverColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix());
 		}else{
 			FontManager.drawString(fontId, x, y + (int)bounds.getHeight(), text, fontColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix());
-		}
-		
-		if (Nemgine.isDebugMode()) {
-			GLHelper.enableBlending();
-			ShaderManager.bindShader(ShaderManager.getColorShaderID());
-			ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "transformation", new Matrix4f());
-			ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "projection", window.get2DOrthographicProjectionMatrix());
-			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Registry.GUI_DEBUG_OUTLINE_COLOR.getColorAsVector());
-			
-			Tessellator.start(Tessellator.LINES);
-			Tessellator.addVertex(x, y);
-			Tessellator.addVertex(x + (float)bounds.getWidth(), y);
-
-			Tessellator.addVertex(x, y + (float)bounds.getHeight());
-			Tessellator.addVertex(x + (float)bounds.getWidth(), y + (float)bounds.getHeight());
-			
-			Tessellator.addVertex(x, y);
-			Tessellator.addVertex(x, y + (float)bounds.getHeight());
-			
-			Tessellator.addVertex(x + (float)bounds.getWidth(), y);
-			Tessellator.addVertex(x + (float)bounds.getWidth(), y + (float)bounds.getHeight());
-			Tessellator.finish();
-			
-			ShaderManager.unbindShader();
-			GLHelper.disableBlending();
 		}
 	}
 

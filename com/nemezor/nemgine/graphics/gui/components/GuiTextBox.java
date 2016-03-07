@@ -7,14 +7,16 @@ import com.nemezor.nemgine.graphics.ShaderManager;
 import com.nemezor.nemgine.graphics.Tessellator;
 import com.nemezor.nemgine.graphics.gui.Gui;
 import com.nemezor.nemgine.graphics.gui.IGuiComponent;
+import com.nemezor.nemgine.graphics.gui.IGuiKeyListener;
 import com.nemezor.nemgine.graphics.util.Display;
+import com.nemezor.nemgine.input.InputCharacter;
 import com.nemezor.nemgine.misc.Anchors;
 import com.nemezor.nemgine.misc.Color;
 import com.nemezor.nemgine.misc.IGuiListener;
 import com.nemezor.nemgine.misc.MouseButton;
 import com.nemezor.nemgine.misc.Registry;
 
-public class GuiButton implements IGuiComponent {
+public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 
 	private int left, right, top, bottom;
 	private int x, y, width, height;
@@ -26,7 +28,7 @@ public class GuiButton implements IGuiComponent {
 	private boolean pressedLeft = false, pressedRight = false;
 	private boolean hover = false;
 	
-	public GuiButton(int x, int y, int width, int height, int rasterWidth, int rasterHeight) {
+	public GuiTextBox(int x, int y, int width, int height, int rasterWidth, int rasterHeight) {
 		left = x;
 		top = y;
 		right = rasterWidth - (x + width);
@@ -194,5 +196,16 @@ public class GuiButton implements IGuiComponent {
 	@Override
 	public void anchor(Anchors anchors) {
 		this.anch = anchors;
+	}
+
+	@Override
+	public void charEvent(InputCharacter c) {
+		if (c.getCode() != Registry.INVALID) {
+			if (c.getCode() == InputCharacter.BACKSPACE && text.length() > 0) {
+				text = text.substring(0, text.length() - 1);
+			}
+		}else{
+			text += c.getChar();
+		}
 	}
 }

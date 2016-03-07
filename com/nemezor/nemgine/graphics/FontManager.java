@@ -40,6 +40,33 @@ public class FontManager {
 		return fontCounter;
 	}
 	
+	public static void drawCenteredString(int fontId, float x, float y, String string, Matrix4f transformation, Matrix4f projection) {
+		drawCenteredString(fontId, x, y, string, Registry.FONT_DEFAULT_COLOR, transformation, projection);
+	}
+	
+	public static void drawCenteredString(int fontId, float x, float y, String string, Color color, Matrix4f transformation, Matrix4f projection) {
+		Rectangle bounds = getStringBounds(fontId, string);
+		drawString(fontId, x - bounds.width / 2, y + bounds.height / 2, string, color, transformation, projection);
+	}
+	
+	public static void drawHorizCenteredString(int fontId, float x, float y, String string, Matrix4f transformation, Matrix4f projection) {
+		drawHorizCenteredString(fontId, x, y, string, Registry.FONT_DEFAULT_COLOR, transformation, projection);
+	}
+	
+	public static void drawHorizCenteredString(int fontId, float x, float y, String string, Color color, Matrix4f transformation, Matrix4f projection) {
+		int width = getStringWidth(fontId, string);
+		drawString(fontId, x - width / 2, y, string, color, transformation, projection);
+	}
+	
+	public static void drawVertCenteredString(int fontId, float x, float y, String string, Matrix4f transformation, Matrix4f projection) {
+		drawVertCenteredString(fontId, x, y, string, Registry.FONT_DEFAULT_COLOR, transformation, projection);
+	}
+	
+	public static void drawVertCenteredString(int fontId, float x, float y, String string, Color color, Matrix4f transformation, Matrix4f projection) {
+		int height = getStringHeight(fontId, string);
+		drawString(fontId, x, y + height / 2, string, color, transformation, projection);
+	}
+	
 	public static void drawString(int fontId, float x, float y, String string, Matrix4f transformation, Matrix4f projection) {
 		drawString(fontId, x, y, string, Registry.FONT_DEFAULT_COLOR, transformation, projection);
 	}
@@ -49,6 +76,29 @@ public class FontManager {
 		
 		if (font.state == Registry.INVALID || Nemgine.getSide().isServer()) {
 			return;
+		}
+		if (Nemgine.isDebugMode()) {
+			Rectangle bounds = getStringBounds(fontId, string);
+			ShaderManager.bindShader(ShaderManager.getColorShaderID());
+			ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "transformation", transformation);
+			ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "projection", projection);
+			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Registry.DEBUG_TEXT_OUTLINE_COLOR.getColorAsVector());
+			
+			Tessellator.start(Tessellator.LINES);
+			Tessellator.addVertex(x, y);
+			Tessellator.addVertex(x + (float)bounds.getWidth(), y);
+
+			Tessellator.addVertex(x, y - (float)bounds.getHeight());
+			Tessellator.addVertex(x + (float)bounds.getWidth(), y - (float)bounds.getHeight());
+			
+			Tessellator.addVertex(x, y);
+			Tessellator.addVertex(x, y - (float)bounds.getHeight());
+			
+			Tessellator.addVertex(x + (float)bounds.getWidth(), y);
+			Tessellator.addVertex(x + (float)bounds.getWidth(), y - (float)bounds.getHeight());
+			Tessellator.finish();
+			
+			ShaderManager.unbindShader();
 		}
 		
 		ShaderManager.bindShader(ShaderManager.getFontShaderID());

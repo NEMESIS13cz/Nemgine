@@ -5,10 +5,10 @@ import com.nemezor.nemgine.graphics.gui.Gui;
 import com.nemezor.nemgine.graphics.util.Display;
 import com.nemezor.nemgine.graphics.util.GLResourceEvent;
 import com.nemezor.nemgine.graphics.util.OpenGLResources;
+import com.nemezor.nemgine.input.IKeyInput;
 import com.nemezor.nemgine.main.Application;
 import com.nemezor.nemgine.main.IMainRenderLoop;
 import com.nemezor.nemgine.main.Nemgine;
-import com.nemezor.nemgine.misc.Color;
 
 public class GuiTest implements IMainRenderLoop {
 
@@ -41,7 +41,7 @@ public class GuiTest implements IMainRenderLoop {
 			Nemgine.shutDown();
 		}
 		window.prepareRender();
-		window.fill(new Color(0xDDDDDDFF));
+		window.fill(Gui.primaryColor);
 		
 		gui.render(window);
 		
@@ -52,6 +52,20 @@ public class GuiTest implements IMainRenderLoop {
 	public void setUpRender() {
 		windowID = DisplayManager.generateDisplays();
 		window = DisplayManager.initializeDisplay(windowID, 70.0f, 1280, 720, 0.1f, 150.0f, true);
+		window.setKeyHandler(new IKeyInput() {
+			@Override
+			public void keyEvent(int key, int scancode, int action, int mods) {
+				gui.onKeyEvent(key, action);
+			}
+			@Override
+			public void charEvent(char character) {
+				
+			}
+			@Override
+			public void charModsEvent(char character, int mods) {
+				gui.onCharEvent(character);
+			}
+		});
 		
 		gui = new TestGui();
 		gui.populate(1280, 720);

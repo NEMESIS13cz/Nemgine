@@ -35,4 +35,8 @@ public class GLVersion {
 	public GLVersion clone() {
 		return new GLVersion(major, minor);
 	}
+	
+	public String toString() {
+		return major + "." + minor;
+	}
 }

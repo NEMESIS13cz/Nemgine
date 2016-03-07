@@ -73,8 +73,8 @@ public class Nemgine {
 				boolean contained = InputParams.containsEntry(Registry.PARAM_CONTAINED) ? InputParams.getBoolean(Registry.PARAM_CONTAINED) : ann.contained();
 				headless = InputParams.containsEntry(Registry.PARAM_SERVER) ? InputParams.getBoolean(Registry.PARAM_SERVER) : ann.side().isServer();
 				name = ann.name();
-				debug = InputParams.containsEntry(Registry.PARAM_DEBUG) ? InputParams.getBoolean(Registry.PARAM_DEBUG) : false;
-				printThreadKeepUp = InputParams.containsEntry(Registry.PARAM_KEEPUP) ? InputParams.getBoolean(Registry.PARAM_KEEPUP) : true;
+				debug = InputParams.containsEntry(Registry.PARAM_DEBUG) ? InputParams.getBoolean(Registry.PARAM_DEBUG) : debug;
+				printThreadKeepUp = InputParams.containsEntry(Registry.PARAM_KEEPUP) ? InputParams.getBoolean(Registry.PARAM_KEEPUP) : printThreadKeepUp;
 				
 				if (entry == null || (resources == null && !headless)) {
 					Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_RESOLVE_NONE, false);
@@ -103,6 +103,8 @@ public class Nemgine {
 				Platform.initialize(headless);
 				
 				if (!headless) {
+					boolean tempDebug = debug;
+					debug = false;
 					context = Loader.initialize(name);
 					try {
 						resources.invoke(instance, GLResourceEvent.GENERATE_IDS);
@@ -115,6 +117,7 @@ public class Nemgine {
 					Loader.beginLoadSequence(resources, instance);
 					Loader.finish();
 					GL11.glFinish();
+					debug = tempDebug;
 				}
 				Platform.freeUpMemory();
 				try {

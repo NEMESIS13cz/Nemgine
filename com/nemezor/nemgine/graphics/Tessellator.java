@@ -88,7 +88,7 @@ public class Tessellator {
 				return;
 			}
 			int[] indices = new int[(int)(verData.length * 1.5f)];
-			for (int i = 0, j = 0; i < verData.length; i += 12, j += 6) {
+			for (int i = 0, j = 0; i < verData.length / 3; i += 4, j += 6) {
 				indices[j] = i;
 				indices[j + 1] = i + 1;
 				indices[j + 2] = i + 2;

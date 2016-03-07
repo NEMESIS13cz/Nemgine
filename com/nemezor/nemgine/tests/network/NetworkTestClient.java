@@ -1,5 +1,7 @@
 package com.nemezor.nemgine.tests.network;
 
+import java.awt.Point;
+
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
@@ -186,22 +188,22 @@ public class NetworkTestClient implements IMainRenderLoop {
 	/**
 	 * Dirty stuff I found in one of my old projects, too lazy to recode it for now
 	 */
-	
+
 	public static final float maxLookDown = -85;
 	public static final float maxLookUp = 85;
 	public float mouseSensitivity = 2;
 	public int walkingSpeed = 200;
-	private double[] lastPos = new double[2];
+	private Point lastPos;
 	private boolean Qw, Ew;
 	
 	public void handleInput() {
 		if (Mouse.isButtonDown(window, 0) && Mouse.isInsideWindow(window)) {
-			double[] pos = Mouse.getMousePosition(window);
+			Point pos = Mouse.getMousePosition(window);
 			if (lastPos == null) {
 				lastPos = pos;
 			}
-			float mouseDX = (float)(pos[0] - lastPos[0]) * mouseSensitivity * 0.16F;
-			float mouseDY = (float)(lastPos[1] - pos[1]) * mouseSensitivity * 0.16F;
+			float mouseDX = (float)(pos.getX() - lastPos.getX()) * mouseSensitivity * 0.16F;
+			float mouseDY = (float)(lastPos.getY() - pos.getY()) * mouseSensitivity * 0.16F;
 			lastPos = pos;
 			if (Math.toDegrees(cam.getRotation().y) + mouseDX >= 360) {
 				cam.getRotation().y = (float)Math.toRadians(Math.toDegrees(cam.getRotation().y) + mouseDX - 360);

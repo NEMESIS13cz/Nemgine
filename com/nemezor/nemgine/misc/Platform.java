@@ -25,11 +25,11 @@ public class Platform {
 	private static GLVersion openGLVersion = new GLVersion(Registry.INVALID, Registry.INVALID);
 	private static GLVersion GLSLVersion = new GLVersion(Registry.INVALID, Registry.INVALID);
 	private static String[] availableFonts;
-	private static int cpuCores;
-	private static long freeMem;
-	private static long usedMem;
-	private static long allocMem;
-	private static long maxMem;
+	private static volatile int cpuCores;
+	private static volatile long freeMem;
+	private static volatile long usedMem;
+	private static volatile long allocMem;
+	private static volatile long maxMem;
 	
 	private static Runtime runtime = Runtime.getRuntime();
 	
@@ -91,12 +91,11 @@ public class Platform {
 		Thread t = new Thread() {
 			
 			public void run() {
-				setName(Registry.PLATFORM_REFRESH_THREAD);
+				setName(Registry.PLATFORM_NAME);
 				while (Nemgine.isRunning()) {
-					
 					refreshCPUAndMemory();
 					try {
-						Thread.sleep(Registry.ONE_SECOND_IN_MILLIS);
+						Thread.sleep(Registry.ONE_SECOND_IN_MILLIS * Registry.PLATFORM_MEMORY_POLL_REFRESH);
 					} catch (InterruptedException e) {}
 				}
 			}
@@ -104,12 +103,12 @@ public class Platform {
 		t.start();
 	}
 	
-	public static void refreshCPUAndMemory() {
+	private static void refreshCPUAndMemory() {
 		cpuCores = runtime.availableProcessors();
 		freeMem = runtime.freeMemory();
 		maxMem = runtime.maxMemory();
 		allocMem = runtime.totalMemory();
-		usedMem = maxMem - freeMem;
+		usedMem = allocMem - freeMem;
 	}
 	
 	public static GLVersion getOpenGLVersion() {
