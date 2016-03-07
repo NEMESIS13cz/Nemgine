@@ -51,7 +51,7 @@ public class GuiTest implements IMainRenderLoop {
 	@Override
 	public void setUpRender() {
 		windowID = DisplayManager.generateDisplays();
-		window = DisplayManager.initializeDisplay(windowID, 70.0f, 1280, 720, 0.1f, 150.0f, true);
+		window = DisplayManager.initializeDisplay(windowID, 70.0f, 800, 600, 0.1f, 150.0f, true);
 		window.setKeyHandler(new IKeyInput() {
 			@Override
 			public void keyEvent(int key, int scancode, int action, int mods) {
@@ -68,7 +68,7 @@ public class GuiTest implements IMainRenderLoop {
 		});
 		
 		gui = new TestGui();
-		gui.populate(1280, 720);
+		gui.populate(800, 600);
 	}
 
 	@Override

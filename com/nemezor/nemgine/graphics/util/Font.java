@@ -10,15 +10,18 @@ public class Font {
 	public HashMap<Character, GLCharacter> chars;
 	public int state;
 	public FontMetrics metrics;
+	public int heightPx, tabWidthPx;
 	
 	public Font() {
 		state = Registry.INVALID;
 	}
 	
-	public void initializeFont(HashMap<Character, GLCharacter> chars, FontMetrics metrics) {
+	public void initializeFont(HashMap<Character, GLCharacter> chars, FontMetrics metrics, int heightPx, int tab) {
 		this.chars = chars;
 		this.state = 0;
 		this.metrics = metrics;
+		this.heightPx = heightPx;
+		this.tabWidthPx = tab;
 	}
 	
 	public FontMetrics getMetrics() {

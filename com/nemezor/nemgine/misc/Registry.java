@@ -43,6 +43,7 @@ public final class Registry {
 	public static final Color FONT_DEFAULT_COLOR = new Color(0xFFFFFFFF);
 	public static final int FONT_DEFAULT_FONT_SIZE = 20;
 	public static final int FONT_DEFAULT_FONT_STYLE = Font.PLAIN;
+	public static final int FONT_TAB_WIDTH_IN_CHARS = 4;
 	
 	// GUI
 	public static final int GUI_DEFAULT_RASTER_WIDTH = 1600;

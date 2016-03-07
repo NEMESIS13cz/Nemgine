@@ -40,13 +40,178 @@ public class FontManager {
 		return fontCounter;
 	}
 	
+	public static int getFontHeight(int fontId) {
+		Font font = fonts.get(fontId);
+		
+		if (font == null || font.state == Registry.INVALID || Nemgine.getSide().isServer()) {
+			return Registry.INVALID;
+		}
+		return font.heightPx;
+	}
+	
+	public static String[] split(int fontId, String string, int maxLength) {
+		Font font = fonts.get(fontId);
+		
+		if (font == null || font.state == Registry.INVALID || Nemgine.getSide().isServer()) {
+			return null;
+		}
+		if (string.contains("\n")) {
+			return null;
+		}
+		if (getStringWidth(fontId, string) <= maxLength) {
+			return new String[] {string, null};
+		}
+		String[] strings = new String[2];
+		int width = 0;
+		int index = 0;
+		
+		for (char c : string.toCharArray()) {
+			if (c == '\r' || c == '\b' || c == '\f' || c == '\0') {
+				index++;
+				continue;
+			}else if (c == '\t') {
+				if (width + font.tabWidthPx > maxLength) {
+					if (index == 0) {
+						return null;
+					}
+					strings[0] = string.substring(0, index);
+					strings[1] = string.substring(index);
+					return strings;
+				}else{
+					width += font.tabWidthPx;
+				}
+				index++;
+				continue;
+			}
+			GLCharacter glchar = font.chars.get(c);
+			if (width + glchar.width > maxLength) {
+				if (index == 0) {
+					return null;
+				}
+				strings[0] = string.substring(0, index);
+				strings[1] = string.substring(index);
+				return strings;
+			}else{
+				width += glchar.width;
+			}
+			index++;
+		}
+		return null;
+	}
+	
+	public static String[] ellipsize(int fontId, String string, int maxLength) {
+		Font font = fonts.get(fontId);
+		
+		if (font == null || font.state == Registry.INVALID || Nemgine.getSide().isServer()) {
+			return null;
+		}
+		if (string.contains("\n")) {
+			return null;
+		}
+		if (getStringWidth(fontId, string) <= maxLength) {
+			return new String[] {string, null};
+		}
+		String[] strings = new String[2];
+		int width = 0;
+		int max = maxLength - getStringWidth(fontId, "...");
+		int index = 0;
+		
+		if (max <= 0) {
+			return null;
+		}
+		for (char c : string.toCharArray()) {
+			if (c == '\r' || c == '\b' || c == '\f' || c == '\0') {
+				index++;
+				continue;
+			}else if (c == '\t') {
+				if (width + font.tabWidthPx > max) {
+					if (index == 0) {
+						return null;
+					}
+					strings[0] = string.substring(0, index) + "...";
+					strings[1] = string.substring(index);
+					return strings;
+				}else{
+					width += font.tabWidthPx;
+				}
+				index++;
+				continue;
+			}
+			GLCharacter glchar = font.chars.get(c);
+			if (width + glchar.width > max) {
+				if (index == 0) {
+					return null;
+				}
+				strings[0] = string.substring(0, index) + "...";
+				strings[1] = string.substring(index);
+				return strings;
+			}else{
+				width += glchar.width;
+			}
+			index++;
+		}
+		return null;
+	}
+	
+	public static void drawStringInBounds(int fontId, float x, float y, String string, Rectangle bounds, Color color, boolean ellipsize, Matrix4f transformation, Matrix4f projection) {
+		Font font = fonts.get(fontId);
+		
+		if (font == null || font.state == Registry.INVALID || Nemgine.getSide().isServer()) {
+			return;
+		}
+		String[] lines = string.split("\n");
+		float beginY = y;
+		
+		for (String s : lines) {
+			int offset = drawStringWrapped(font, fontId, beginY, x, y, s, bounds, color, ellipsize, transformation, projection, 0);
+			if (offset == Registry.INVALID) {
+				return;
+			}
+			y += offset;
+			if (y + font.heightPx > beginY + bounds.height) {
+				return;
+			}
+		}
+	}
+	
+	private static int drawStringWrapped(Font font, int fontId, float beginY, float x, float y, String string, Rectangle bounds, Color color, boolean ellipsize, Matrix4f transformation, Matrix4f projection, int offsetIn) {
+		if (offsetIn == Registry.INVALID) {
+			return Registry.INVALID;
+		}
+		String[] strings;
+		int offset = 0;
+		if (ellipsize) {
+			strings = ellipsize(fontId, string, bounds.width);
+		}else{
+			strings = split(fontId, string, bounds.width);
+		}
+		if (strings != null) {
+			if (strings[0] != null) {
+				if (y + offsetIn + font.heightPx >= beginY + bounds.height) {
+					return Registry.INVALID;
+				}
+				drawString(fontId, x, y + offsetIn, strings[0], color, transformation, projection);
+				offset += font.heightPx;
+			}
+			if (strings[1] != null) {
+				offset += drawStringWrapped(font, fontId, beginY, x, y, strings[1], bounds, color, ellipsize, transformation, projection, offsetIn + offset);
+			}
+		}
+		return offset;
+	}
+	
 	public static void drawCenteredString(int fontId, float x, float y, String string, Matrix4f transformation, Matrix4f projection) {
 		drawCenteredString(fontId, x, y, string, Registry.FONT_DEFAULT_COLOR, transformation, projection);
 	}
 	
 	public static void drawCenteredString(int fontId, float x, float y, String string, Color color, Matrix4f transformation, Matrix4f projection) {
+		Font font = fonts.get(fontId);
+		
+		if (font == null || font.state == Registry.INVALID) {
+			return;
+		}
 		Rectangle bounds = getStringBounds(fontId, string);
-		drawString(fontId, x - bounds.width / 2, y + bounds.height / 2, string, color, transformation, projection);
+		drawString(fontId, x - bounds.width / 2, y + font.heightPx - bounds.height / 2, string, color, transformation, projection);
 	}
 	
 	public static void drawHorizCenteredString(int fontId, float x, float y, String string, Matrix4f transformation, Matrix4f projection) {
@@ -63,8 +228,13 @@ public class FontManager {
 	}
 	
 	public static void drawVertCenteredString(int fontId, float x, float y, String string, Color color, Matrix4f transformation, Matrix4f projection) {
+		Font font = fonts.get(fontId);
+		
+		if (font == null || font.state == Registry.INVALID) {
+			return;
+		}
 		int height = getStringHeight(fontId, string);
-		drawString(fontId, x, y + height / 2, string, color, transformation, projection);
+		drawString(fontId, x, y + font.heightPx - height / 2, string, color, transformation, projection);
 	}
 	
 	public static void drawString(int fontId, float x, float y, String string, Matrix4f transformation, Matrix4f projection) {
@@ -74,7 +244,7 @@ public class FontManager {
 	public static void drawString(int fontId, float x, float y, String string, Color color, Matrix4f transformation, Matrix4f projection) {
 		Font font = fonts.get(fontId);
 		
-		if (font.state == Registry.INVALID || Nemgine.getSide().isServer()) {
+		if (font == null || font.state == Registry.INVALID || Nemgine.getSide().isServer()) {
 			return;
 		}
 		if (Nemgine.isDebugMode()) {
@@ -85,17 +255,17 @@ public class FontManager {
 			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Registry.DEBUG_TEXT_OUTLINE_COLOR.getColorAsVector());
 			
 			Tessellator.start(Tessellator.LINES);
-			Tessellator.addVertex(x, y);
-			Tessellator.addVertex(x + (float)bounds.getWidth(), y);
+			Tessellator.addVertex(x, y - font.heightPx);
+			Tessellator.addVertex(x + (float)bounds.getWidth(), y - font.heightPx);
 
-			Tessellator.addVertex(x, y - (float)bounds.getHeight());
-			Tessellator.addVertex(x + (float)bounds.getWidth(), y - (float)bounds.getHeight());
+			Tessellator.addVertex(x, y - font.heightPx + (float)bounds.getHeight());
+			Tessellator.addVertex(x + (float)bounds.getWidth(), y - font.heightPx + (float)bounds.getHeight());
 			
-			Tessellator.addVertex(x, y);
-			Tessellator.addVertex(x, y - (float)bounds.getHeight());
+			Tessellator.addVertex(x, y - font.heightPx);
+			Tessellator.addVertex(x, y - font.heightPx + (float)bounds.getHeight());
 			
-			Tessellator.addVertex(x + (float)bounds.getWidth(), y);
-			Tessellator.addVertex(x + (float)bounds.getWidth(), y - (float)bounds.getHeight());
+			Tessellator.addVertex(x + (float)bounds.getWidth(), y - font.heightPx);
+			Tessellator.addVertex(x + (float)bounds.getWidth(), y - font.heightPx + (float)bounds.getHeight());
 			Tessellator.finish();
 			
 			ShaderManager.unbindShader();
@@ -107,8 +277,19 @@ public class FontManager {
 		ShaderManager.loadVector4(ShaderManager.getFontShaderID(), Registry.FONT_SHADER_COLOR_ATTRIBUTE, color.getColorAsVector());
 		GLHelper.enableBlending();
 		Tessellator.start(Tessellator.QUADS);
+		float beginX = x;
 		
 		for (char c : string.toCharArray()) {
+			if (c == '\r' || c == '\b' || c == '\f' || c == '\0') {
+				continue;
+			}else if (c == '\n') {
+				y += font.heightPx;
+				x = beginX;
+				continue;
+			}else if (c == '\t') {
+				x += font.tabWidthPx;
+				continue;
+			}
 			GLCharacter glchar = font.chars.get(c);
 			if (glchar == null) {
 				continue;
@@ -134,39 +315,50 @@ public class FontManager {
 	public static int getStringHeight(int fontId, String string) {
 		Font font = fonts.get(fontId);
 		
-		if (font.state == Registry.INVALID || Nemgine.getSide().isServer()) {
+		if (font == null || font.state == Registry.INVALID || Nemgine.getSide().isServer() || string.length() == 0) {
 			return Registry.INVALID;
 		}
-		int height = Registry.INVALID;
+		int height = font.heightPx;
+		int lines = 1;
 		
 		for (char c : string.toCharArray()) {
-			GLCharacter glc = font.chars.get(c);
-			if (glc == null) {
-				return Registry.INVALID;
-			}
-			int cHeight = glc.height;
-			if (cHeight > height) {
-				height = cHeight;
+			if (c == '\n') {
+				lines++;
 			}
 		}
 		
-		return height;
+		return height * lines;
 	}
 	
 	public static int getStringWidth(int fontId, String string) {
 		Font font = fonts.get(fontId);
 		
-		if (font.state == Registry.INVALID || Nemgine.getSide().isServer()) {
+		if (font == null || font.state == Registry.INVALID || Nemgine.getSide().isServer()) {
 			return Registry.INVALID;
 		}
 		int width = 0;
+		int tempWidth = 0;
 		
 		for (char c : string.toCharArray()) {
-			GLCharacter glc = font.chars.get(c);
-			if (glc == null) {
-				return Registry.INVALID;
+			if (c == '\r' || c == '\b' || c == '\f' || c == '\0') {
+				continue;
+			}else if (c == '\n') {
+				if (tempWidth > width) {
+					width = tempWidth;
+				}
+				tempWidth = 0;
+				continue;
+			}else if (c == '\t') {
+				tempWidth += font.tabWidthPx;
+				continue;
 			}
-			width += glc.width;
+			GLCharacter glc = font.chars.get(c);
+			if (glc != null) {
+				tempWidth += glc.width;
+			}
+		}
+		if (tempWidth > width) {
+			width = tempWidth;
 		}
 		
 		return width;
@@ -175,24 +367,38 @@ public class FontManager {
 	public static Rectangle getStringBounds(int fontId, String string) {
 		Font font = fonts.get(fontId);
 		
-		if (font.state == Registry.INVALID || Nemgine.getSide().isServer()) {
+		if (font == null || font.state == Registry.INVALID || Nemgine.getSide().isServer() || string.length() == 0) {
 			return new Rectangle(Registry.INVALID, Registry.INVALID);
 		}
 		int width = 0;
-		int height = Registry.INVALID;
+		int tempWidth = 0;
+		int height = font.heightPx;
+		int lines = 1;
 		
 		for (char c : string.toCharArray()) {
-			GLCharacter glc = font.chars.get(c);
-			if (glc == null) {
-				return new Rectangle(Registry.INVALID, Registry.INVALID);
+			if (c == '\r' || c == '\b' || c == '\f' || c == '\0') {
+				continue;
+			}else if (c == '\n') {
+				lines++;
+				if (tempWidth > width) {
+					width = tempWidth;
+				}
+				tempWidth = 0;
+				continue;
+			}else if (c == '\t') {
+				tempWidth += font.tabWidthPx;
+				continue;
 			}
-			width += glc.width;
-			if (glc.height > height) {
-				height = glc.height;
+			GLCharacter glc = font.chars.get(c);
+			if (glc != null) {
+				tempWidth += glc.width;
 			}
 		}
+		if (tempWidth > width) {
+			width = tempWidth;
+		}
 		
-		return new Rectangle(width, height);
+		return new Rectangle(width, height * lines);
 	}
 	
 	public static boolean initializeFont(int id, String name, int style, int size) {
@@ -233,6 +439,8 @@ public class FontManager {
 		if (Loader.loading()) {
 			Loader.stepLoader();
 		}
+		int avgWidth = 0;
+		int charCount = 0;
 		
 		for (int i = 0; i < 0xFFFF; i++) {
 			if (font.canDisplay(i)) {
@@ -248,17 +456,21 @@ public class FontManager {
 					currX = 0;
 					currY += highest;
 				}
-				GLCharacter glchar = new GLCharacter((char)i, currX, currY, tempGraphics.getFontMetrics().charWidth((char)i), highest + tempGraphics.getFontMetrics().getDescent(), currentTexture);
+				int charWidth = tempGraphics.getFontMetrics().charWidth((char)i);
+				GLCharacter glchar = new GLCharacter((char)i, currX, currY, charWidth, highest + tempGraphics.getFontMetrics().getDescent(), currentTexture);
 				charMap.put(glchar.character, glchar);
 				currX += r.getWidth();
 				if (currX + 1 > width) {
 					width = currX + 1;
 				}
+				charCount++;
+				avgWidth += charWidth;
 			}
 		}
 		if (Loader.loading()) {
 			Loader.stepLoader();
 		}
+		avgWidth /= charCount;
 		height = currY + highest;
 		textures.add(currentTexture);
 		
@@ -291,7 +503,7 @@ public class FontManager {
 			TextureManager.initializeTextureImageGrayscale(tId, images.get(tId));
 		}
 		Loader.silent = false;
-		nFont.initializeFont(charMap, new FontMetrics(font.getFamily(), font.getFontName(), font.getSize(), font.getStyle()));
+		nFont.initializeFont(charMap, new FontMetrics(font.getFamily(), font.getFontName(), font.getSize(), font.getStyle()), highest / 2, avgWidth * Registry.FONT_TAB_WIDTH_IN_CHARS);
 		if (Loader.loading()) {
 			Loader.fontLoaded();
 		}

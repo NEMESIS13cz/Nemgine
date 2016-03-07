@@ -11,6 +11,7 @@ public class InputCharacter {
 	public static final int BACKSPACE = 0x3;
 	public static final int DELETE = 0x4;
 	public static final int INSERT = 0x5;
+	public static final int TABULATOR = 0x6;
 	
 	private char c;
 	private int code;
@@ -37,6 +38,9 @@ public class InputCharacter {
 			break;
 		case GLFW.GLFW_KEY_DELETE:
 			code = DELETE;
+			break;
+		case GLFW.GLFW_KEY_TAB:
+			code = TABULATOR;
 			break;
 		}
 	}

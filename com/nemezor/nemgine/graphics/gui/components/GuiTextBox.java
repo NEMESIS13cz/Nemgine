@@ -1,5 +1,7 @@
 package com.nemezor.nemgine.graphics.gui.components;
 
+import java.awt.Rectangle;
+
 import org.lwjgl.util.vector.Matrix4f;
 
 import com.nemezor.nemgine.graphics.FontManager;
@@ -20,6 +22,7 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 
 	private int left, right, top, bottom;
 	private int x, y, width, height;
+	private int nonMultilineHeight;
 	private int fontId = FontManager.getDefaultFontID();
 	private Color fontColor = Registry.GUI_DEFAULT_FONT_COLOR, hoverColor = Registry.GUI_DEFAULT_FONT_COLOR, pressedColor = Registry.GUI_DEFAULT_FONT_COLOR;
 	private String text = "";
@@ -27,6 +30,8 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 	private IGuiListener listener;
 	private boolean pressedLeft = false, pressedRight = false;
 	private boolean hover = false;
+	private boolean multiline = false;
+	private boolean ellipsize = false;
 	
 	public GuiTextBox(int x, int y, int width, int height, int rasterWidth, int rasterHeight) {
 		left = x;
@@ -37,10 +42,12 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 		this.y = y;
 		this.width = width;
 		this.height = height;
+		nonMultilineHeight = FontManager.getFontHeight(fontId);
 	}
 	
 	public void setFont(int id) {
 		this.fontId = id;
+		nonMultilineHeight = FontManager.getFontHeight(fontId);
 	}
 	
 	public void setText(String text) {
@@ -59,6 +66,14 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 		this.pressedColor = c.clone();
 	}
 	
+	public void setMultiline(boolean multiline) {
+		this.multiline = multiline;
+	}
+	
+	public void setEllipsize(boolean ellipsize) {
+		this.ellipsize = ellipsize;
+	}
+	
 	@Override
 	public void setListener(IGuiListener listener) {
 		this.listener = listener;
@@ -66,6 +81,8 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 	
 	@Override
 	public void render(Display window) {
+		int height = multiline ? this.height : nonMultilineHeight + 1;
+		
 		ShaderManager.bindShader(ShaderManager.getColorShaderID());
 		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "transformation", new Matrix4f());
 		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "projection", window.get2DOrthographicProjectionMatrix());
@@ -108,17 +125,17 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 		
 		ShaderManager.unbindShader();
 		if (pressedLeft || pressedRight) {
-			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, pressedColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix());
+			FontManager.drawStringInBounds(fontId, x, y + nonMultilineHeight, text, new Rectangle(width, height), pressedColor, ellipsize, new Matrix4f(), window.get2DOrthographicProjectionMatrix());
 		}else if (hover) {
-			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, hoverColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix());
+			FontManager.drawStringInBounds(fontId, x, y + nonMultilineHeight, text, new Rectangle(width, height), hoverColor, ellipsize, new Matrix4f(), window.get2DOrthographicProjectionMatrix());
 		}else{
-			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, fontColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix());
+			FontManager.drawStringInBounds(fontId, x, y + nonMultilineHeight, text, new Rectangle(width, height), fontColor, ellipsize, new Matrix4f(), window.get2DOrthographicProjectionMatrix());
 		}
 	}
 
 	@Override
 	public void update(int mouseX, int mouseY, boolean leftButton, boolean rightButton) {
-		if (mouseX > x + width || mouseX < x || mouseY < y || mouseY > y + height) {
+		if (mouseX > x + width || mouseX < x || mouseY < y || mouseY > y + (multiline ? height : nonMultilineHeight)) {
 			if (hover && listener != null) {
 				listener.onExit();
 			}
@@ -203,6 +220,12 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 		if (c.getCode() != Registry.INVALID) {
 			if (c.getCode() == InputCharacter.BACKSPACE && text.length() > 0) {
 				text = text.substring(0, text.length() - 1);
+			}
+			if (c.getCode() == InputCharacter.ENTER && multiline) {
+				text += '\n';
+			}
+			if (c.getCode() == InputCharacter.TABULATOR) {
+				text += "\t";
 			}
 		}else{
 			text += c.getChar();
