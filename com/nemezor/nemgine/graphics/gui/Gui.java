@@ -81,7 +81,7 @@ public abstract class Gui {
 		boolean left = Mouse.isButtonDown(window, 0);
 		boolean right = Mouse.isButtonDown(window, 1);
 		for (IGuiComponent c : components.values()) {
-			c.update((int)mouse.getX(), (int)mouse.getY(), left, right);
+			c.update(window, (int)mouse.getX(), (int)mouse.getY(), left, right);
 		}
 	}
 	

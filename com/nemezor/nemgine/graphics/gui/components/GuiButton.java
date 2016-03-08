@@ -115,7 +115,7 @@ public class GuiButton implements IGuiComponent {
 	}
 
 	@Override
-	public void update(int mouseX, int mouseY, boolean leftButton, boolean rightButton) {
+	public void update(Display window, int mouseX, int mouseY, boolean leftButton, boolean rightButton) {
 		if (mouseX > x + width || mouseX < x || mouseY < y || mouseY > y + height) {
 			if (hover && listener != null) {
 				listener.onExit();

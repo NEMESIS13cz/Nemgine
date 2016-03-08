@@ -72,7 +72,7 @@ public class GuiLabel implements IGuiComponent {
 	}
 
 	@Override
-	public void update(int mouseX, int mouseY, boolean leftButton, boolean rightButton) {
+	public void update(Display window, int mouseX, int mouseY, boolean leftButton, boolean rightButton) {
 		if (mouseX > x + bounds.getWidth() || mouseX < x || mouseY < y || mouseY > y + bounds.getHeight()) {
 			if (hover && listener != null) {
 				listener.onExit();

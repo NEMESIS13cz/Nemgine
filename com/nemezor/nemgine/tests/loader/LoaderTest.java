@@ -21,6 +21,7 @@ import com.nemezor.nemgine.main.IMainRenderLoop;
 import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.Color;
 import com.nemezor.nemgine.misc.Platform;
+import com.nemezor.nemgine.misc.Registry;
 
 public class LoaderTest implements IMainRenderLoop {
 
@@ -139,7 +140,7 @@ public class LoaderTest implements IMainRenderLoop {
 
 		ModelManager.renderModel(logo, 0, logoShader, logoTransform, window.getPerspectiveProjectionMatrix(), "transformation", "projection");
 		
-		FontManager.drawString(FontManager.getDefaultFontID(), 20, 40, (Platform.getUsedMemory() / 1048576) + "/" + (Platform.getAllocatedMemory() / 1048576) + "MB", currColor.invert(), new Matrix4f(), GLHelper.initOrthographicProjectionMatrix(0, window.getWidth(), 0, window.getHeight(), 0, 1));
+		FontManager.drawString(FontManager.getDefaultFontID(), 20, 40, (Platform.getUsedMemory() / 1048576) + "/" + (Platform.getAllocatedMemory() / 1048576) + "MB", currColor.invert(), new Matrix4f(), GLHelper.initOrthographicProjectionMatrix(0, window.getWidth(), 0, window.getHeight(), 0, 1), Registry.INVALID, Registry.INVALID);
 		
 		ModelManager.finishRendering();
 		angle++;

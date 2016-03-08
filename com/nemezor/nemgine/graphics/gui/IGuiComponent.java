@@ -7,7 +7,7 @@ import com.nemezor.nemgine.misc.IGuiListener;
 public interface IGuiComponent {
 	
 	void render(Display window);
-	void update(int mouseX, int mouseY, boolean leftButton, boolean rightButton);
+	void update(Display window, int mouseX, int mouseY, boolean leftButton, boolean rightButton);
 	void resize(Display window);
 	void anchor(Anchors anchor);
 	void setListener(IGuiListener listener);

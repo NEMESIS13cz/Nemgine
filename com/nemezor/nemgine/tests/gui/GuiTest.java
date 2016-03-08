@@ -20,9 +20,9 @@ public class GuiTest implements IMainRenderLoop {
 	public void entry() {
 		int thread = Nemgine.generateThreads("Main", false);
 		Nemgine.printThreadKeepUpWarnings(false);
-		Nemgine.debug(true);
 		Nemgine.bindRenderLoop(thread, this);
 		Nemgine.startThread(thread);
+		Nemgine.debug(true);
 	}
 	
 	@OpenGLResources

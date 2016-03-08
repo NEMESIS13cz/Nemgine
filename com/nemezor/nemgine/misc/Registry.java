@@ -44,6 +44,7 @@ public final class Registry {
 	public static final int FONT_DEFAULT_FONT_SIZE = 20;
 	public static final int FONT_DEFAULT_FONT_STYLE = Font.PLAIN;
 	public static final int FONT_TAB_WIDTH_IN_CHARS = 4;
+	public static final Color FONT_HIGHLIGHT_COLOR = new Color(0x0078D780);
 	
 	// GUI
 	public static final int GUI_DEFAULT_RASTER_WIDTH = 1600;
@@ -55,6 +56,9 @@ public final class Registry {
 	public static final Color GUI_DEFAULT_PRIMARY_ACCENT_COLOR = new Color(0xE5F1FBFF);
 	public static final Color GUI_DEFAULT_SECONDARY_ACCENT_COLOR = new Color(0x0078D7FF);
 	public static final Color GUI_DEFAULT_FONT_COLOR = new Color(0x000000FF);
+	public static final int GUI_CARET_WIDTH = 2;
+	public static final int GUI_CARET_BLINK_SPEED = 1;
+	public static final int GUI_CARET_PADDING = 1;
 	
 	////////////////////////////////////////////////////////////////////////////////////////
 

@@ -13,9 +13,7 @@ public class TestGui extends Gui {
 	public void populate(int rasterWidth, int rasterHeight) {
 		GuiTextBox button = new GuiTextBox(300, 80, 200, 50, rasterWidth, rasterHeight);
 		
-		button.setMultiline(false);
 		button.anchor(Anchors.LEFT_RIGHT_TOP_BOTTOM);
-		button.setText("test text");
 		
 		button.setListener(new IGuiListener() {
 			public void onPressed(MouseButton button) {

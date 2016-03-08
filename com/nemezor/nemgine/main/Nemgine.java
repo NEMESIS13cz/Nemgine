@@ -19,6 +19,7 @@ import com.nemezor.nemgine.graphics.ShaderManager;
 import com.nemezor.nemgine.graphics.TextureManager;
 import com.nemezor.nemgine.graphics.util.GLResourceEvent;
 import com.nemezor.nemgine.graphics.util.OpenGLResources;
+import com.nemezor.nemgine.input.Mouse;
 import com.nemezor.nemgine.misc.InputParams;
 import com.nemezor.nemgine.misc.Logger;
 import com.nemezor.nemgine.misc.Platform;
@@ -116,6 +117,7 @@ public class Nemgine {
 					}
 					Loader.beginLoadSequence(resources, instance);
 					Loader.finish();
+					Mouse.initialize();
 					GL11.glFinish();
 					debug = tempDebug;
 				}
@@ -151,6 +153,7 @@ public class Nemgine {
 				ModelManager.disposeAll();
 				FrameBufferManager.disposeAll();
 				DisplayManager.disposeAll();
+				Mouse.disposeAll();
 				GLFW.glfwTerminate();
 			}
 			Thread exitThread = new Thread() {
