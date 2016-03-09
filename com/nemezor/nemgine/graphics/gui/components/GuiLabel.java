@@ -63,11 +63,11 @@ public class GuiLabel implements IGuiComponent {
 	@Override
 	public void render(Display window) {
 		if (pressedLeft || pressedRight) {
-			FontManager.drawString(fontId, x, y + (int)bounds.getHeight(), text, pressedColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix());
+			FontManager.drawString(fontId, x, y + (int)bounds.getHeight(), text, pressedColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
 		}else if (hover) {
-			FontManager.drawString(fontId, x, y + (int)bounds.getHeight(), text, hoverColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix());
+			FontManager.drawString(fontId, x, y + (int)bounds.getHeight(), text, hoverColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
 		}else{
-			FontManager.drawString(fontId, x, y + (int)bounds.getHeight(), text, fontColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix());
+			FontManager.drawString(fontId, x, y + (int)bounds.getHeight(), text, fontColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
 		}
 	}
 

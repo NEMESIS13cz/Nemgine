@@ -73,6 +73,24 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 		updateCaretPositionAndOffset();
 	}
 	
+	public void clear() {
+		this.text = "";
+		caretPos = text.length();
+		hoverPos = caretPos;
+		updateCaretPositionAndOffset();
+	}
+	
+	public String getText() {
+		return text;
+	}
+	
+	public void appendText(String text) {
+		this.text += text;
+		caretPos = text.length();
+		hoverPos = caretPos;
+		updateCaretPositionAndOffset();
+	}
+	
 	public void setColor(Color c) {
 		this.fontColor = c.clone();
 	}
@@ -206,8 +224,10 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 	@Override
 	public void update(Display window, int mouseX, int mouseY, boolean leftButton, boolean rightButton) {
 		if (mouseX > x + width || mouseX < x || mouseY < y || mouseY > y + (multiline ? height : nonMultilineHeight)) {
-			if (hover && listener != null) {
-				listener.onExit();
+			if (hover) {
+				if (listener != null) {
+					listener.onExit();
+				}
 				Mouse.setCursor(window, defaultCursor);
 			}
 			pressedRight = false;
@@ -219,14 +239,18 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 				hoverPos = caretPos;
 			}
 		}else{
-			if (!hover && listener != null) {
-				listener.onEnter();
+			if (!hover) {
+				if (listener != null) {
+					listener.onEnter();
+				}
 				Mouse.setCursor(window, hoverCursor);
 			}
 			hover = true;
 			if (leftButton) {
-				if (!pressedLeft && listener != null) {
-					listener.onPressed(MouseButton.LEFT);
+				if (!pressedLeft) {
+					if (listener != null) {
+						listener.onPressed(MouseButton.LEFT);
+					}
 					if (multiline) {
 						if (mouseY > y + height) {
 							return;
@@ -248,8 +272,10 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 				}
 				pressedLeft = true;
 			}else{
-				if (pressedLeft && listener != null) {
-					listener.onReleased(MouseButton.LEFT);
+				if (pressedLeft) {
+					if (listener != null) {
+						listener.onReleased(MouseButton.LEFT);
+					}
 					dragging = false;
 				}
 				pressedLeft = false;

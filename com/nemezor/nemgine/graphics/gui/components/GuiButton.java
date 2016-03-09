@@ -106,11 +106,11 @@ public class GuiButton implements IGuiComponent {
 		
 		ShaderManager.unbindShader();
 		if (pressedLeft || pressedRight) {
-			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, pressedColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix());
+			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, pressedColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
 		}else if (hover) {
-			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, hoverColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix());
+			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, hoverColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
 		}else{
-			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, fontColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix());
+			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, fontColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
 		}
 	}
 

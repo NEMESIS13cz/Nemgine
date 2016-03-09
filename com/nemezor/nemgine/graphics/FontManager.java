@@ -295,9 +295,11 @@ public class FontManager {
 			ShaderManager.unbindShader();
 		}
 
-		ShaderManager.bindShader(ShaderManager.getColorShaderID());
-		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "transformation", transformation);
-		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "projection", projection);
+		if (highlightBegin != highlightEnd) {
+			ShaderManager.bindShader(ShaderManager.getColorShaderID());
+			ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "transformation", transformation);
+			ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "projection", projection);
+		}
 		ShaderManager.bindShader(ShaderManager.getFontShaderID());
 		ShaderManager.loadMatrix4(ShaderManager.getFontShaderID(), Registry.FONT_SHADER_TRANSFORMATION_ATTRIBUTE, transformation);
 		ShaderManager.loadMatrix4(ShaderManager.getFontShaderID(), Registry.FONT_SHADER_PROJECTION_ATTRIBUTE, projection);
