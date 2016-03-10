@@ -1,6 +1,7 @@
 package com.nemezor.nemgine.misc;
 
 import java.awt.GraphicsEnvironment;
+import java.lang.management.ManagementFactory;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
@@ -10,6 +11,7 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.nemezor.nemgine.exceptions.WindowException;
 import com.nemezor.nemgine.main.Nemgine;
+import com.sun.management.OperatingSystemMXBean;
 
 public class Platform {
 	
@@ -30,8 +32,16 @@ public class Platform {
 	private static volatile long usedMem;
 	private static volatile long allocMem;
 	private static volatile long maxMem;
+	private static volatile long totalPhysicalMemory;
+	private static volatile long freePhysicalMemory;
+	private static volatile long usedPhysicalMemory;
+	private static volatile long totalSwapMemory;
+	private static volatile long freeSwapMemory;
+	private static volatile long usedSwapMemory;
+	private static volatile double cpuUsage;
 	
 	private static Runtime runtime = Runtime.getRuntime();
+	private static OperatingSystemMXBean sys;
 	
 	private static boolean initialized = false;
 	
@@ -87,6 +97,8 @@ public class Platform {
 		
 		GraphicsEnvironment e = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		availableFonts = e.getAvailableFontFamilyNames();
+		sys = (OperatingSystemMXBean)ManagementFactory.getOperatingSystemMXBean();
+		totalPhysicalMemory = sys.getTotalPhysicalMemorySize();
 		
 		Thread t = new Thread() {
 			
@@ -109,6 +121,12 @@ public class Platform {
 		maxMem = runtime.maxMemory();
 		allocMem = runtime.totalMemory();
 		usedMem = allocMem - freeMem;
+		cpuUsage = sys.getSystemCpuLoad();
+		freePhysicalMemory = sys.getFreePhysicalMemorySize();
+		usedPhysicalMemory = totalPhysicalMemory - freePhysicalMemory;
+		totalSwapMemory = sys.getTotalSwapSpaceSize();
+		freeSwapMemory = sys.getFreeSwapSpaceSize();
+		usedSwapMemory = totalSwapMemory - freeSwapMemory;
 	}
 	
 	public static GLVersion getOpenGLVersion() {
@@ -177,6 +195,34 @@ public class Platform {
 
 	public static void freeUpMemory() {
 		runtime.gc();
+	}
+	
+	public static long getTotalPhysicalMemory() {
+		return totalPhysicalMemory;
+	}
+	
+	public static long getFreePhysicalMemory() {
+		return freePhysicalMemory;
+	}
+	
+	public static long getUsedPhysicalMemory() {
+		return usedPhysicalMemory;
+	}
+	
+	public static long getTotalSwapMemory() {
+		return totalSwapMemory;
+	}
+	
+	public static long getFreeSwapMemory() {
+		return freeSwapMemory;
+	}
+	
+	public static long getUsedSwapMemory() {
+		return usedSwapMemory;
+	}
+	
+	public static double getCPUUsage() {
+		return cpuUsage;
 	}
 	
 	public static void setDefaultGLFWWindowConfigurations() {

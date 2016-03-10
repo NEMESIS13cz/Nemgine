@@ -360,6 +360,7 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 			}
 			if (c.getCode() == InputCharacter.DELETE && caretPos < text.length()) {
 				text = text.substring(0, lower) + text.substring(higher + (lower == higher ? 1 : 0));
+				hoverPos = caretPos;
 				updateCaretPositionAndOffset();
 			}
 			if (c.getCode() == InputCharacter.ENTER && multiline) {
@@ -369,8 +370,13 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 				updateCaretPositionAndOffset();
 			}
 			if (c.getCode() == InputCharacter.TABULATOR) {
-				text = text.substring(0, lower) + "\t" + text.substring(higher + (lower != higher ? 1 : 0));
-				caretPos++;
+				if (lower == higher) {
+					text = text.substring(0, lower) + "\t" + text.substring(lower);
+					caretPos++;
+				}else{
+					text = text.substring(0, lower) + "\t" + text.substring(higher + 1 > text.length() ? higher : higher + 1);
+					caretPos = lower + 1;
+				}
 				hoverPos = caretPos;
 				updateCaretPositionAndOffset();
 			}
@@ -389,8 +395,13 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 				}
 			}
 		}else{
-			text = text.substring(0, lower) + c.getChar() + text.substring(higher + (lower != higher ? 1 : 0));
-			caretPos++;
+			if (lower == higher) {
+				text = text.substring(0, lower) + c.getChar() + text.substring(lower);
+				caretPos++;
+			}else{
+				text = text.substring(0, lower) + c.getChar() + text.substring(higher + 1 > text.length() ? higher : higher + 1);
+				caretPos = lower + 1;
+			}
 			hoverPos = caretPos;
 			updateCaretPositionAndOffset();
 		}

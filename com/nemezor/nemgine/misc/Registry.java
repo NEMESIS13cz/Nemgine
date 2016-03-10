@@ -16,7 +16,7 @@ public final class Registry {
 	public static final int INVALID = -1;
 	public static final int COLOR_NORMALIZER_VALUE = 255;
 	public static final Color DEBUG_TEXT_OUTLINE_COLOR = new Color(0xFF0000FF);
-	public static final int PLATFORM_MEMORY_POLL_REFRESH = 10;
+	public static final int PLATFORM_MEMORY_POLL_REFRESH = 1;
 	
 	// Threads
 	public static final int DEFAULT_FRAMESKIP_TRESHOLD = 5;

@@ -1,8 +1,10 @@
 package com.nemezor.nemgine.graphics;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -281,7 +283,7 @@ public class FontManager {
 			Tessellator.start(Tessellator.LINES);
 			Tessellator.addVertex(x, y - font.heightPx);
 			Tessellator.addVertex(x + (float)bounds_.getWidth(), y - font.heightPx);
-
+			
 			Tessellator.addVertex(x, y - font.heightPx + (float)bounds_.getHeight());
 			Tessellator.addVertex(x + (float)bounds_.getWidth(), y - font.heightPx + (float)bounds_.getHeight());
 			
@@ -676,12 +678,14 @@ public class FontManager {
 		
 		tempGraphics.dispose();
 		HashMap<Integer, BufferedImage> images = new HashMap<Integer, BufferedImage>();
-		HashMap<Integer, Graphics> graphics = new HashMap<Integer, Graphics>();
+		HashMap<Integer, Graphics2D> graphics = new HashMap<Integer, Graphics2D>();
 		for (int i = 0; i < textures.size(); i++) {
 			BufferedImage img = new BufferedImage(width, i + 1 == textures.size() ? height : Platform.getOpenGLTextureSize(), BufferedImage.TYPE_BYTE_GRAY);
 			images.put(textures.get(i), img);
-			graphics.put(textures.get(i), img.createGraphics());
-			graphics.get(textures.get(i)).setFont(font);
+			Graphics2D g = img.createGraphics();
+			graphics.put(textures.get(i), g);
+			g.setFont(font);
+			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		}
 		if (Loader.loading()) {
 			Loader.stepLoader();
