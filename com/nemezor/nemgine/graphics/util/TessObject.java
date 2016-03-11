@@ -62,6 +62,12 @@ public class TessObject {
 			GL11.glDrawElements(GL11.GL_LINES, indicesLength, GL11.GL_UNSIGNED_INT, 0);
 		}else if (mode == Tessellator.POINTS) {
 			GL11.glDrawElements(GL11.GL_POINTS, indicesLength, GL11.GL_UNSIGNED_INT, 0);
+		}else if (mode == Tessellator.LINE_STRIP) {
+			GL11.glDrawElements(GL11.GL_LINE_STRIP, indicesLength, GL11.GL_UNSIGNED_INT, 0);
+		}else if (mode == Tessellator.LINE_LOOP) {
+			GL11.glDrawElements(GL11.GL_LINE_LOOP, indicesLength, GL11.GL_UNSIGNED_INT, 0);
+		}else if (mode == Tessellator.POLYGONS) {
+			GL11.glDrawElements(GL11.GL_POLYGON, indicesLength, GL11.GL_UNSIGNED_INT, 0);
 		}
 		GL20.glDisableVertexAttribArray(0);
 		if (textured) {

@@ -97,6 +97,7 @@ public class Loader {
 		update();
 		
 		ShaderManager.generateDefaultShaderIDs();
+		FontManager.generateDefaultFontIDs();
 		
 		return GLFW.glfwGetCurrentContext();
 	}
@@ -140,6 +141,7 @@ public class Loader {
 			ShaderManager.loadDefaultShaders();
 			resources.invoke(instance, GLResourceEvent.LOAD_SHADERS);
 			segment.nextSubsegment();
+			FontManager.loadDefaultFonts();
 			resources.invoke(instance, GLResourceEvent.LOAD_FONTS);
 			segment = null;
 		} catch (Exception e) {
@@ -215,7 +217,7 @@ public class Loader {
 		
 		Tessellator.finish();
 		
-		FontManager.drawString(FontManager.getDefaultFontID(), 0.098f * Registry.LOADING_SCREEN_WIDTH, (0.595f + offset) * Registry.LOADING_SCREEN_HEIGHT, segment.getLabel(), Registry.LOADING_SCREEN_FONT_COLOR, new Matrix4f(), textProjection, Registry.INVALID, Registry.INVALID);
+		FontManager.drawString(FontManager.getDefaultFontID20(), 0.098f * Registry.LOADING_SCREEN_WIDTH, (0.595f + offset) * Registry.LOADING_SCREEN_HEIGHT, segment.getLabel(), Registry.LOADING_SCREEN_FONT_COLOR, new Matrix4f(), textProjection, Registry.INVALID, Registry.INVALID);
 		
 		if (segment.getSubsegment() != null) {
 			renderSegment(segment.getSubsegment(), offset + 0.14f);

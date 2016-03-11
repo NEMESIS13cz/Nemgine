@@ -17,6 +17,9 @@ public class Tessellator {
 	public static final int TRIANGLES = 0x2;
 	public static final int QUADS = 0x3;
 	public static final int LINES = 0x4;
+	public static final int LINE_STRIP = 0x5;
+	public static final int LINE_LOOP = 0x6;
+	public static final int POLYGONS = 0x7;
 	
 	private static HashMap<Integer, ArrayList<TessObject>> objects = new HashMap<Integer, ArrayList<TessObject>>();
 	private static HashMap<Integer, Integer> index = new HashMap<Integer, Integer>();

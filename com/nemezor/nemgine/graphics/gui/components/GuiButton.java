@@ -18,7 +18,7 @@ public class GuiButton implements IGuiComponent {
 
 	private int left, right, top, bottom;
 	private int x, y, width, height;
-	private int fontId = FontManager.getDefaultFontID();
+	private int fontId = FontManager.getDefaultFontID20();
 	private Color fontColor = Registry.GUI_DEFAULT_FONT_COLOR, hoverColor = Registry.GUI_DEFAULT_FONT_COLOR, pressedColor = Registry.GUI_DEFAULT_FONT_COLOR;
 	private String text = "";
 	private Anchors anch = Anchors.TOP_LEFT;

@@ -17,7 +17,7 @@ public class GuiLabel implements IGuiComponent {
 
 	private int right, bottom;
 	private int x, y;
-	private int fontId = FontManager.getDefaultFontID();
+	private int fontId = FontManager.getDefaultFontID20();
 	private Color fontColor = Registry.GUI_DEFAULT_FONT_COLOR, hoverColor = Registry.GUI_DEFAULT_FONT_COLOR, pressedColor = Registry.GUI_DEFAULT_FONT_COLOR;
 	private String text = "";
 	private Anchors anch = Anchors.TOP_LEFT;

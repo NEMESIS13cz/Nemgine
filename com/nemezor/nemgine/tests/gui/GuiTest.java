@@ -1,9 +1,6 @@
 package com.nemezor.nemgine.tests.gui;
 
-import org.lwjgl.util.vector.Matrix4f;
-
 import com.nemezor.nemgine.graphics.DisplayManager;
-import com.nemezor.nemgine.graphics.FontManager;
 import com.nemezor.nemgine.graphics.gui.Gui;
 import com.nemezor.nemgine.graphics.util.Display;
 import com.nemezor.nemgine.graphics.util.GLResourceEvent;
@@ -12,8 +9,6 @@ import com.nemezor.nemgine.input.IKeyInput;
 import com.nemezor.nemgine.main.Application;
 import com.nemezor.nemgine.main.IMainRenderLoop;
 import com.nemezor.nemgine.main.Nemgine;
-import com.nemezor.nemgine.misc.Color;
-import com.nemezor.nemgine.misc.Platform;
 
 public class GuiTest implements IMainRenderLoop {
 
@@ -38,7 +33,7 @@ public class GuiTest implements IMainRenderLoop {
 	public static void main(String[] args) {
 		Nemgine.start(args, GuiTest.class);
 	}
-
+	
 	@Override
 	public void render() {
 		DisplayManager.switchDisplay(windowID);
@@ -47,11 +42,6 @@ public class GuiTest implements IMainRenderLoop {
 		}
 		window.prepareRender();
 		window.fill(Gui.primaryColor);
-		
-		FontManager.drawString(FontManager.getDefaultFontID(), 10, 300, Platform.getTotalPhysicalMemory() / 1048576 + "MB", new Color(0x000000FF), new Matrix4f(), window.get2DOrthographicProjectionMatrix(), 0, 0);
-		FontManager.drawString(FontManager.getDefaultFontID(), 10, 330, Platform.getUsedPhysicalMemory() / 1048576 + "MB", new Color(0x000000FF), new Matrix4f(), window.get2DOrthographicProjectionMatrix(), 0, 0);
-		FontManager.drawString(FontManager.getDefaultFontID(), 10, 360, Platform.getTotalSwapMemory() / 1048576 + "MB", new Color(0x000000FF), new Matrix4f(), window.get2DOrthographicProjectionMatrix(), 0, 0);
-		FontManager.drawString(FontManager.getDefaultFontID(), 10, 390, Platform.getUsedSwapMemory() / 1048576 + "MB", new Color(0x000000FF), new Matrix4f(), window.get2DOrthographicProjectionMatrix(), 0, 0);
 		
 		gui.render(window);
 		

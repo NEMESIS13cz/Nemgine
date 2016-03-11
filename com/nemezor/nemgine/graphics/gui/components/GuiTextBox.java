@@ -26,7 +26,7 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 	private int left, right, top, bottom;
 	private int x, y, width, height;
 	private int nonMultilineHeight;
-	private int fontId = FontManager.getDefaultFontID();
+	private int fontId = FontManager.getDefaultFontID20();
 	private Color fontColor = Registry.GUI_DEFAULT_FONT_COLOR, hoverColor = Registry.GUI_DEFAULT_FONT_COLOR, pressedColor = Registry.GUI_DEFAULT_FONT_COLOR;
 	private Color caretColor = Registry.GUI_DEFAULT_FONT_COLOR;
 	private String text = "";
@@ -70,14 +70,12 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 		this.text = text;
 		caretPos = text.length();
 		hoverPos = caretPos;
-		updateCaretPositionAndOffset();
 	}
 	
 	public void clear() {
 		this.text = "";
 		caretPos = text.length();
 		hoverPos = caretPos;
-		updateCaretPositionAndOffset();
 	}
 	
 	public String getText() {
@@ -88,7 +86,6 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 		this.text += text;
 		caretPos = text.length();
 		hoverPos = caretPos;
-		updateCaretPositionAndOffset();
 	}
 	
 	public void setColor(Color c) {
@@ -353,7 +350,7 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 		int higher = hoverPos < caretPos ? caretPos : hoverPos;
 		if (c.getCode() != Registry.INVALID) {
 			if (c.getCode() == InputCharacter.BACKSPACE && text.length() > 0 && caretPos > 0) {
-				text = text.substring(0, lower - (lower == higher ? 1 : 0)) + text.substring(higher);
+				text = text.substring(0, lower - (lower == higher ? 1 : 0)) + text.substring(higher > text.length() ? text.length() : higher);
 				caretPos--;
 				hoverPos = caretPos;
 				updateCaretPositionAndOffset();

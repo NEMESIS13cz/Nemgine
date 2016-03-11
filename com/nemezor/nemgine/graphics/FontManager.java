@@ -27,7 +27,8 @@ public class FontManager {
 
 	private static HashMap<Integer, Font> fonts = new HashMap<Integer, Font>();
 	private static int fontCounter = 0;
-	private static int defaultFont;
+	private static int defaultFont20;
+	private static int defaultFont12;
 	
 	private FontManager() {}
 	
@@ -257,6 +258,14 @@ public class FontManager {
 		}
 		int height = getStringHeight(fontId, string);
 		drawString(fontId, x, y + font.heightPx - height / 2, string, color, transformation, projection, null, highlightBegin, highlightEnd);
+	}
+
+	public static void drawStringFromLeft(int fontId, float x, float y, String string, Matrix4f transformation, Matrix4f projection, int highlightBegin, int highlightEnd) {
+		drawStringFromLeft(fontId, x, y, string, Registry.FONT_DEFAULT_COLOR, transformation, projection, highlightBegin, highlightEnd);
+	}
+	
+	public static void drawStringFromLeft(int fontId, float x, float y, String string, Color color, Matrix4f transformation, Matrix4f projection, int highlightBegin, int highlightEnd) {
+		drawString(fontId, x - getStringWidth(fontId, string), y, string, color, transformation, projection, null, highlightBegin, highlightEnd);
 	}
 	
 	public static void drawString(int fontId, float x, float y, String string, Matrix4f transformation, Matrix4f projection, int highlightBegin, int highlightEnd) {
@@ -715,13 +724,25 @@ public class FontManager {
 		return true;
 	}
 	
-	public static int getDefaultFontID() {
-		return defaultFont;
+	public static int getDefaultFontID20() {
+		return defaultFont20;
+	}
+	
+	public static int getDefaultFontID12() {
+		return defaultFont12;
 	}
 	
 	protected static void initializeDefaultFont() {
 		Loader.silent = true;
-		defaultFont = FontManager.generateFonts();
-		FontManager.initializeFont(defaultFont, Registry.FONT_FALLBACK_FONT, Registry.FONT_DEFAULT_FONT_STYLE, Registry.FONT_DEFAULT_FONT_SIZE);
+		defaultFont20 = FontManager.generateFonts();
+		FontManager.initializeFont(defaultFont20, Registry.FONT_FALLBACK_FONT, Registry.FONT_DEFAULT_FONT_STYLE_20, Registry.FONT_DEFAULT_FONT_SIZE_20);
+	}
+	
+	protected static void generateDefaultFontIDs() {
+		defaultFont12 = generateFonts();
+	}
+	
+	protected static void loadDefaultFonts() {
+		FontManager.initializeFont(defaultFont12, Registry.FONT_FALLBACK_FONT, Registry.FONT_DEFAULT_FONT_STYLE_12, Registry.FONT_DEFAULT_FONT_SIZE_12);
 	}
 }

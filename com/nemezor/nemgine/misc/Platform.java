@@ -42,6 +42,7 @@ public class Platform {
 	
 	private static Runtime runtime = Runtime.getRuntime();
 	private static OperatingSystemMXBean sys;
+	private static int memRefreshCounter;
 	
 	private static boolean initialized = false;
 	
@@ -107,7 +108,7 @@ public class Platform {
 				while (Nemgine.isRunning()) {
 					refreshCPUAndMemory();
 					try {
-						Thread.sleep(Registry.ONE_SECOND_IN_MILLIS * Registry.PLATFORM_MEMORY_POLL_REFRESH);
+						Thread.sleep(Registry.PLATFORM_RESOURCES_POLL);
 					} catch (InterruptedException e) {}
 				}
 			}
@@ -116,17 +117,23 @@ public class Platform {
 	}
 	
 	private static void refreshCPUAndMemory() {
-		cpuCores = runtime.availableProcessors();
-		freeMem = runtime.freeMemory();
-		maxMem = runtime.maxMemory();
-		allocMem = runtime.totalMemory();
-		usedMem = allocMem - freeMem;
+		if (memRefreshCounter == 4) {
+			memRefreshCounter = 0;
+			
+			cpuCores = runtime.availableProcessors();
+			freeMem = runtime.freeMemory();
+			maxMem = runtime.maxMemory();
+			allocMem = runtime.totalMemory();
+			usedMem = allocMem - freeMem;
+			freePhysicalMemory = sys.getFreePhysicalMemorySize();
+			usedPhysicalMemory = totalPhysicalMemory - freePhysicalMemory;
+			totalSwapMemory = sys.getTotalSwapSpaceSize();
+			freeSwapMemory = sys.getFreeSwapSpaceSize();
+			usedSwapMemory = totalSwapMemory - freeSwapMemory;
+		}
 		cpuUsage = sys.getSystemCpuLoad();
-		freePhysicalMemory = sys.getFreePhysicalMemorySize();
-		usedPhysicalMemory = totalPhysicalMemory - freePhysicalMemory;
-		totalSwapMemory = sys.getTotalSwapSpaceSize();
-		freeSwapMemory = sys.getFreeSwapSpaceSize();
-		usedSwapMemory = totalSwapMemory - freeSwapMemory;
+		
+		memRefreshCounter++;
 	}
 	
 	public static GLVersion getOpenGLVersion() {

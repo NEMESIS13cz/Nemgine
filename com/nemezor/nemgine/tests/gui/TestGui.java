@@ -4,6 +4,7 @@ import java.util.Random;
 
 import com.nemezor.nemgine.graphics.gui.Gui;
 import com.nemezor.nemgine.graphics.gui.components.GuiButton;
+import com.nemezor.nemgine.graphics.gui.components.GuiResourceMonitor;
 import com.nemezor.nemgine.graphics.gui.components.GuiTextBox;
 import com.nemezor.nemgine.misc.Anchors;
 import com.nemezor.nemgine.misc.IGuiListener;
@@ -19,11 +20,15 @@ public class TestGui extends Gui {
 		GuiTextBox input = new GuiTextBox(10, 10, rasterWidth - 20, 50, rasterWidth, rasterHeight);
 		GuiTextBox output = new GuiTextBox(10, 40, rasterWidth - 20, 50, rasterWidth, rasterHeight);
 		GuiButton button = new GuiButton(10, 70, 150, 40, rasterWidth, rasterHeight);
+		GuiResourceMonitor res = new GuiResourceMonitor(rasterWidth - 410, rasterHeight - 110, 400, 100, rasterWidth, rasterHeight);
 		
 		input.anchor(Anchors.TOP_LEFT_RIGHT);
 		output.anchor(Anchors.TOP_LEFT_RIGHT);
 		button.anchor(Anchors.TOP_LEFT);
-
+		res.anchor(Anchors.LEFT_RIGHT_TOP_BOTTOM);
+		
+		res.setDisplayMode(true, false);
+		
 		button.setText("Generate");
 		button.setListener(new IGuiListener() {
 			public void onPressed(MouseButton button) {
@@ -56,5 +61,6 @@ public class TestGui extends Gui {
 		add("inputTextbox", input);
 		add("outputTextbox", output);
 		add("generateButton", button);
+		add("resourceMonitor", res);
 	}
 }

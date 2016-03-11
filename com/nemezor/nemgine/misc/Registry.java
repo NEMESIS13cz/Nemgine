@@ -16,7 +16,7 @@ public final class Registry {
 	public static final int INVALID = -1;
 	public static final int COLOR_NORMALIZER_VALUE = 255;
 	public static final Color DEBUG_TEXT_OUTLINE_COLOR = new Color(0xFF0000FF);
-	public static final int PLATFORM_MEMORY_POLL_REFRESH = 1;
+	public static final int PLATFORM_RESOURCES_POLL = 250;
 	
 	// Threads
 	public static final int DEFAULT_FRAMESKIP_TRESHOLD = 5;
@@ -41,8 +41,10 @@ public final class Registry {
 	
 	// Fonts
 	public static final Color FONT_DEFAULT_COLOR = new Color(0xFFFFFFFF);
-	public static final int FONT_DEFAULT_FONT_SIZE = 20;
-	public static final int FONT_DEFAULT_FONT_STYLE = Font.PLAIN;
+	public static final int FONT_DEFAULT_FONT_SIZE_20 = 20;
+	public static final int FONT_DEFAULT_FONT_STYLE_20 = Font.PLAIN;
+	public static final int FONT_DEFAULT_FONT_SIZE_12 = 12;
+	public static final int FONT_DEFAULT_FONT_STYLE_12 = Font.PLAIN;
 	public static final int FONT_TAB_WIDTH_IN_CHARS = 4;
 	public static final Color FONT_HIGHLIGHT_COLOR = new Color(0x0078D780);
 	

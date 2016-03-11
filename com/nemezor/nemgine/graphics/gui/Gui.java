@@ -40,11 +40,9 @@ public abstract class Gui {
 		update(window);
 
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
-		GLHelper.enableBlending();
 		for (IGuiComponent c : components.values()) {
 			c.render(window);
 		}
-		GLHelper.disableBlending();
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 	}
 	
