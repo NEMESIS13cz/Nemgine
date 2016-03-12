@@ -17,6 +17,20 @@ public final class Registry {
 	public static final int COLOR_NORMALIZER_VALUE = 255;
 	public static final Color DEBUG_TEXT_OUTLINE_COLOR = new Color(0xFF0000FF);
 	public static final int PLATFORM_RESOURCES_POLL = 250;
+	public static final long ONE_BYTE_IN_BYTES = 1L;
+	public static final long ONE_KILOBYTE_IN_BYTES = 1000L;
+	public static final long ONE_MEGABYTE_IN_BYTES = 1000000L;
+	public static final long ONE_GIGABYTE_IN_BYTES = 1000000000L;
+	public static final long ONE_TERABYTE_IN_BYTES = 1000000000000L;
+	public static final long ONE_PETABYTE_IN_BYTES = 1000000000000000L;
+	public static final long ONE_EXABYTE_IN_BYTES  = 1000000000000000000L;
+	
+	public static final long ONE_KIBIBYTE_IN_BYTES = 1024L;
+	public static final long ONE_MEBIBYTE_IN_BYTES = 1048576L;
+	public static final long ONE_GIBIBYTE_IN_BYTES = 1073741824L;
+	public static final long ONE_TEBIBYTE_IN_BYTES = 1099511627776L;
+	public static final long ONE_PEBIBYTE_IN_BYTES = 1125899906842624L;
+	public static final long ONE_EXBIBYTE_IN_BYTES = 1152921504606846976L;
 	
 	// Threads
 	public static final int DEFAULT_FRAMESKIP_TRESHOLD = 5;

@@ -7,7 +7,6 @@ import java.util.HashMap;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
-import com.nemezor.nemgine.graphics.GLHelper;
 import com.nemezor.nemgine.graphics.util.Display;
 import com.nemezor.nemgine.input.InputCharacter;
 import com.nemezor.nemgine.input.Mouse;
@@ -33,8 +32,7 @@ public abstract class Gui {
 		if (firstRender) {
 			resize(window);
 			firstRender = false;
-		}
-		if (window.displayResized()) {
+		}else if (window.displayResized()) {
 			resize(window);
 		}
 		update(window);
