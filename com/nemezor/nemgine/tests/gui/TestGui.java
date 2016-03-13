@@ -22,22 +22,29 @@ public class TestGui extends Gui {
 		GuiTextBox output = new GuiTextBox(10, 40, rasterWidth - 20, 50, rasterWidth, rasterHeight);
 		GuiButton button = new GuiButton(10, 70, 150, 40, rasterWidth, rasterHeight);
 		GuiResourceMonitor res = new GuiResourceMonitor(rasterWidth - 410, rasterHeight - 110, 400, 100, rasterWidth, rasterHeight);
-		GuiGridLayout grid = new GuiGridLayout(10, 150, 300, 200, rasterWidth, rasterHeight);
-		GuiGridLayout grid2 = new GuiGridLayout(10, 10, 280, 180, 300, 200);
-		GuiButton gridButton = new GuiButton(10, 90, 260, 80, 280, 180);
+		GuiGridLayout grid = new GuiGridLayout(10, 150, 300, 200, rasterWidth, rasterHeight, 1, 2);
+		GuiGridLayout grid2 = new GuiGridLayout(0, 0, 150, 200, 150, 200, 2, 1);
+		GuiButton gridButton = new GuiButton(10, 10, 130, 80, 150, 100);
 		
 		input.anchor(Anchors.TOP_LEFT_RIGHT);
 		output.anchor(Anchors.TOP_LEFT_RIGHT);
 		button.anchor(Anchors.TOP_LEFT);
 		res.anchor(Anchors.BOTTOM_RIGHT);
 		grid.anchor(Anchors.LEFT_RIGHT_TOP_BOTTOM);
-		grid2.anchor(Anchors.RIGHT_TOP_BOTTOM);
-		gridButton.anchor(Anchors.BOTTOM_LEFT_RIGHT);
+		grid2.anchor(Anchors.LEFT_RIGHT_TOP_BOTTOM);
+		gridButton.anchor(Anchors.LEFT_RIGHT_TOP_BOTTOM);
 		
 		output.setEditable(false);
 		
 		grid.setVisible(true);
+		grid.setRowProperties(0, 100, true);
+		grid.setColumnProperties(0, 50, true);
+		grid.setColumnProperties(1, 50, true);
+		
 		grid2.setVisible(true);
+		grid2.setRowProperties(0, 50, true);
+		grid2.setRowProperties(1, 50, true);
+		grid2.setColumnProperties(0, 100, true);
 		
 		gridButton.setText("test");
 		
@@ -72,9 +79,9 @@ public class TestGui extends Gui {
 			}
 		});
 		
-		grid2.add("button", gridButton);
+		grid2.add("button", gridButton, 1, 0);
 		
-		grid.add("nestedGrid", grid2);
+		grid.add("nestedGrid", grid2, 0, 1);
 		
 		add("inputTextbox", input);
 		add("outputTextbox", output);

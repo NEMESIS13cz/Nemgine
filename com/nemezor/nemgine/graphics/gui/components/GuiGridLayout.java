@@ -1,30 +1,28 @@
 package com.nemezor.nemgine.graphics.gui.components;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import com.nemezor.nemgine.graphics.ShaderManager;
 import com.nemezor.nemgine.graphics.Tessellator;
+import com.nemezor.nemgine.graphics.gui.GridCell;
 import com.nemezor.nemgine.graphics.gui.Gui;
 import com.nemezor.nemgine.graphics.gui.IGuiComponent;
 import com.nemezor.nemgine.graphics.gui.IGuiKeyListener;
 import com.nemezor.nemgine.graphics.util.Display;
-import com.nemezor.nemgine.graphics.util.FakeDisplay;
 import com.nemezor.nemgine.input.InputCharacter;
 import com.nemezor.nemgine.misc.Anchors;
 import com.nemezor.nemgine.misc.IGuiListener;
 
-public class GuiGridLayout implements IGuiComponent, IGuiKeyListener { // TODO add columns/rows to this so that its actually useful...
+public class GuiGridLayout implements IGuiComponent, IGuiKeyListener {
 
-	private HashMap<String, IGuiComponent> components = new HashMap<String, IGuiComponent>();
 	private ArrayList<IGuiKeyListener> keyListeners = new ArrayList<IGuiKeyListener>();
+	private GridCell[][] cells;
 	private int left, right, top, bottom;
 	private int x, y, width, height;
 	private Anchors anch = Anchors.TOP_LEFT;
 	private boolean invisible = true;
-	private FakeDisplay display;
 	
-	public GuiGridLayout(int x, int y, int width, int height, int rasterWidth, int rasterHeight) {
+	public GuiGridLayout(int x, int y, int width, int height, int rasterWidth, int rasterHeight, int rows, int columns) {
 		left = x;
 		top = y;
 		right = rasterWidth - (x + width);
@@ -33,17 +31,22 @@ public class GuiGridLayout implements IGuiComponent, IGuiKeyListener { // TODO a
 		this.y = y;
 		this.width = width;
 		this.height = height;
-		display = new FakeDisplay(width, height, 0, 0, 0);
-		display.setTranslation(x, y);
+		this.cells = new GridCell[rows][columns];
+		for (int row = 0; row < cells.length; row++) {
+			for (int col = 0; col < cells[row].length; col++) {
+				cells[row][col] = new GridCell(row, col, (float)width / (float)columns, (float)height / (float)rows);
+			}
+		}
 	}
 	
 	public void setVisible(boolean visible) {
 		invisible = !visible;
 	}
 	
-	public boolean remove(String name, IGuiComponent component) {
-		if (components.containsKey(name)) {
-			IGuiComponent c = components.remove(name);
+	public boolean remove(String name, IGuiComponent component, int row, int column) {
+		GridCell cell = cells[row][column];
+		if (cell != null && cell.components.containsKey(name)) {
+			IGuiComponent c = cell.components.remove(name);
 			if (c instanceof IGuiKeyListener) {
 				keyListeners.remove((IGuiKeyListener)c);
 			}
@@ -52,17 +55,39 @@ public class GuiGridLayout implements IGuiComponent, IGuiKeyListener { // TODO a
 		return false;
 	}
 
-	public boolean add(String name, IGuiComponent component) {
-		if (components.containsKey(name)) {
+	public boolean add(String name, IGuiComponent component, int row, int column) {
+		GridCell cell = cells[row][column];
+		if (cell == null || cell.components.containsKey(name)) {
 			return false;
 		}
-		components.put(name, component);
+		cell.components.put(name, component);
 		if (component instanceof IGuiKeyListener) {
 			keyListeners.add((IGuiKeyListener)component);
 		}
 		return true;
 	}
 
+	public void setRowProperties(int row, float height, boolean percentageBased) {
+		if (row >= cells.length) {
+			return;
+		}
+		for (GridCell cell : cells[row]) {
+			cell.height = height;
+			cell.percRow = percentageBased;
+		}
+	}
+
+	public void setColumnProperties(int column, float width, boolean percentageBased) {
+		if (column >= cells[0].length) {
+			return;
+		}
+		for (GridCell[] row : cells) {
+			GridCell cell = row[column];
+			cell.width = width;
+			cell.percCol = percentageBased;
+		}
+	}
+	
 	@Override
 	public void setListener(IGuiListener listener) {
 		
@@ -101,19 +126,27 @@ public class GuiGridLayout implements IGuiComponent, IGuiKeyListener { // TODO a
 			Tessellator.finish();
 			ShaderManager.unbindShader();
 		}
-		display.recalcTransform(window);
-		
-		for (IGuiComponent c : components.values()) {
-			c.render(display);
+		for (int row = 0; row < cells.length; row++) {
+			for (int col = 0; col < cells[row].length; col++) {
+				cells[row][col].display.recalcTransform(window);
+				for (IGuiComponent c : cells[row][col].components.values()) {
+					c.render(cells[row][col].display);
+				}
+			}
 		}
 	}
 
 	@Override
 	public void update(Display window, int mouseX, int mouseY, boolean leftButton, boolean rightButton) {
-		mouseX = mouseX - x;
-		mouseY = mouseY - y;
-		for (IGuiComponent c : components.values()) {
-			c.update(display, mouseX, mouseY, leftButton, rightButton);
+		for (int row = 0; row < cells.length; row++) {
+			for (int col = 0; col < cells[row].length; col++) {
+				GridCell cell = cells[row][col];
+				int mX = mouseX - (int)cell.display.getX();
+				int mY = mouseY - (int)cell.display.getY();
+				for (IGuiComponent c : cell.components.values()) {
+					c.update(cell.display, mX, mY, leftButton, rightButton);
+				}
+			}
 		}
 	}
 
@@ -153,10 +186,42 @@ public class GuiGridLayout implements IGuiComponent, IGuiKeyListener { // TODO a
 		default:
 			break;
 		}
-		display.setTranslation(x, y);
-		display.setSize(width, height);
-		for (IGuiComponent c : components.values()) {
-			c.resize(display);
+		float setWidth = 0;
+		float setHeight = 0;
+		for (int row = 0; row < cells.length; row++) {
+			if (!cells[row][0].percRow) {
+				setHeight += cells[row][0].height;
+			}
+		}
+		for (int col = 0; col < cells[0].length; col++) {
+			if (!cells[0][col].percCol) {
+				setWidth += cells[0][col].width;
+			}
+		}
+		float onePercentW = (width - setWidth) / 100;
+		float onePercentH = (height - setHeight) / 100;
+		float cellX = x;
+		float cellY = y;
+		float lastHeight = 0;
+		for (int row = 0; row < cells.length; row++) {
+			for (int col = 0; col < cells[row].length; col++) {
+				GridCell cell = cells[row][col];
+				float cellW = cell.percCol ? cell.width * onePercentW : cell.width;
+				float cellH = cell.percRow ? cell.height * onePercentH : cell.height;
+				cell.display.setTranslation(cellX, cellY);
+				cell.display.setSize(cellW, cellH);
+				cellX += cellW;
+				lastHeight = cellH;
+			}
+			cellX = x;
+			cellY += lastHeight;
+		}
+		for (int row = 0; row < cells.length; row++) {
+			for (int col = 0; col < cells[row].length; col++) {
+				for (IGuiComponent c : cells[row][col].components.values()) {
+					c.resize(cells[row][col].display);
+				}
+			}
 		}
 	}
 	

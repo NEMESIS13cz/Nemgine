@@ -14,9 +14,9 @@ public class FakeDisplay extends Display {
 	private float width, height;
 	private float zNear, zFar;
 	private Matrix4f persp, ortho, ortho2D, transform;
-	private int x, y;
+	private float x, y;
 	
-	public FakeDisplay(int w, int h, float fieldOfView, float zn, float zf) {
+	public FakeDisplay(float w, float h, float fieldOfView, float zn, float zf) {
 		super(Registry.INVALID);
 		FOV = fieldOfView;
 		zNear = zn;
@@ -38,16 +38,24 @@ public class FakeDisplay extends Display {
 		return false;
 	}
 	
-	public void setSize(int w, int h) {
+	public void setSize(float w, float h) {
 		this.width = w;
 		this.height = h;
 		resize();
 	}
 	
-	public void setTranslation(int x, int y) {
+	public void setTranslation(float x, float y) {
 		this.x = x;
 		this.y = y;
 		resize();
+	}
+	
+	public float getX() {
+		return x;
+	}
+	
+	public float getY() {
+		return y;
 	}
 	
 	public void setStatus(int s) {
