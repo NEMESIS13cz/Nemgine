@@ -40,6 +40,7 @@ public class Display {
 	private Matrix4f persp;
 	private Matrix4f ortho;
 	private Matrix4f ortho2D;
+	private Matrix4f transform;
 	private GLFWWindowSizeCallback sizeCallback;
 	private GLFWKeyCallback keyCallback;
 	private GLFWCharCallback charCallback;
@@ -165,6 +166,10 @@ public class Display {
 		return ortho2D;
 	}
 	
+	public Matrix4f getTransformationMatrix() {
+		return transform;
+	}
+	
 	public void prepareRender() {
 		if (resized) {
 			resize();
@@ -231,6 +236,7 @@ public class Display {
 		persp = GLHelper.initPerspectiveProjectionMatrix(FOV, width, height, zNear, zFar);
 		ortho = GLHelper.initOrthographicProjectionMatrix(-width / 2, width / 2, -height / 2, height / 2, zNear, zFar);
 		ortho2D = GLHelper.initOrthographicProjectionMatrix(0, width, 0, height, 0, 1);
+		transform = new Matrix4f();
 	}
 	
 	public boolean displayResized() {

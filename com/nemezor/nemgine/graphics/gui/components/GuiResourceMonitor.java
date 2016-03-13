@@ -86,7 +86,7 @@ public class GuiResourceMonitor implements IGuiComponent {
 	@Override
 	public void render(Display window) {
 		ShaderManager.bindShader(ShaderManager.getColorShaderID());
-		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "transformation", new Matrix4f());
+		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "transformation", window.getTransformationMatrix());
 		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "projection", window.get2DOrthographicProjectionMatrix());
 		if (!enabled) {
 			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.tertiaryColor.getColorAsVector());
@@ -264,7 +264,7 @@ public class GuiResourceMonitor implements IGuiComponent {
 			height = window.getHeight() - bottom - top;
 			break;
 		case RIGHT_TOP_BOTTOM:
-			x = window.getHeight() - right - width;
+			x = window.getWidth() - right - width;
 		case LEFT_TOP_BOTTOM:
 		case TOP_BOTTOM:
 			height = window.getHeight() - bottom - top;

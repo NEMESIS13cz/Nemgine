@@ -1,7 +1,5 @@
 package com.nemezor.nemgine.graphics.gui.components;
 
-import org.lwjgl.util.vector.Matrix4f;
-
 import com.nemezor.nemgine.graphics.FontManager;
 import com.nemezor.nemgine.graphics.ShaderManager;
 import com.nemezor.nemgine.graphics.Tessellator;
@@ -70,7 +68,7 @@ public class GuiButton implements IGuiComponent {
 	@Override
 	public void render(Display window) {
 		ShaderManager.bindShader(ShaderManager.getColorShaderID());
-		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "transformation", new Matrix4f());
+		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "transformation", window.getTransformationMatrix());
 		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "projection", window.get2DOrthographicProjectionMatrix());
 		if (!enabled) {
 			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.tertiaryColor.getColorAsVector());
@@ -115,13 +113,13 @@ public class GuiButton implements IGuiComponent {
 		
 		ShaderManager.unbindShader();
 		if (!enabled) {
-			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, Gui.quaternaryColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
+			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, Gui.quaternaryColor, window.getTransformationMatrix(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
 		}else if (pressedLeft || pressedRight) {
-			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, pressedColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
+			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, pressedColor, window.getTransformationMatrix(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
 		}else if (hover) {
-			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, hoverColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
+			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, hoverColor, window.getTransformationMatrix(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
 		}else{
-			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, fontColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
+			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, fontColor, window.getTransformationMatrix(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
 		}
 	}
 
@@ -185,7 +183,7 @@ public class GuiButton implements IGuiComponent {
 			height = window.getHeight() - bottom - top;
 			break;
 		case RIGHT_TOP_BOTTOM:
-			x = window.getHeight() - right - width;
+			x = window.getWidth() - right - width;
 		case LEFT_TOP_BOTTOM:
 		case TOP_BOTTOM:
 			height = window.getHeight() - bottom - top;

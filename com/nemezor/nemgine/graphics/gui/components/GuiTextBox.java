@@ -4,7 +4,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Matrix4f;
 
 import com.nemezor.nemgine.graphics.FontManager;
 import com.nemezor.nemgine.graphics.ShaderManager;
@@ -139,7 +138,7 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 		int height = multiline ? this.height : nonMultilineHeight;
 		
 		ShaderManager.bindShader(ShaderManager.getColorShaderID());
-		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "transformation", new Matrix4f());
+		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "transformation", window.getTransformationMatrix());
 		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "projection", window.get2DOrthographicProjectionMatrix());
 		if (!enabled) {
 			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.tertiaryColor.getColorAsVector());
@@ -209,24 +208,24 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 		ShaderManager.unbindShader();
 		if (multiline) {
 			if (!enabled) {
-				FontManager.drawStringInBounds(fontId, x, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), Gui.quaternaryColor, ellipsize, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
+				FontManager.drawStringInBounds(fontId, x, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), Gui.quaternaryColor, ellipsize, window.getTransformationMatrix(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
 			}else if (pressedLeft || pressedRight) {
-				FontManager.drawStringInBounds(fontId, x, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), pressedColor, ellipsize, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
+				FontManager.drawStringInBounds(fontId, x, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), pressedColor, ellipsize, window.getTransformationMatrix(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
 			}else if (hover) {
-				FontManager.drawStringInBounds(fontId, x, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), hoverColor, ellipsize, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
+				FontManager.drawStringInBounds(fontId, x, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), hoverColor, ellipsize, window.getTransformationMatrix(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
 			}else{
-				FontManager.drawStringInBounds(fontId, x, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), fontColor, ellipsize, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
+				FontManager.drawStringInBounds(fontId, x, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), fontColor, ellipsize, window.getTransformationMatrix(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
 			}
 		}else{
 			int offset = hasFocus ? lineOffset : 0;
 			if (!enabled) {
-				FontManager.drawStringInBoundsSingleLine(fontId, x - offset, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), Gui.quaternaryColor, ellipsize, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
+				FontManager.drawStringInBoundsSingleLine(fontId, x - offset, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), Gui.quaternaryColor, ellipsize, window.getTransformationMatrix(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
 			}else if (pressedLeft || pressedRight) {
-				FontManager.drawStringInBoundsSingleLine(fontId, x - offset, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), pressedColor, ellipsize, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
+				FontManager.drawStringInBoundsSingleLine(fontId, x - offset, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), pressedColor, ellipsize, window.getTransformationMatrix(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
 			}else if (hover) {
-				FontManager.drawStringInBoundsSingleLine(fontId, x - offset, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), hoverColor, ellipsize, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
+				FontManager.drawStringInBoundsSingleLine(fontId, x - offset, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), hoverColor, ellipsize, window.getTransformationMatrix(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
 			}else{
-				FontManager.drawStringInBoundsSingleLine(fontId, x - offset, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), fontColor, ellipsize, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
+				FontManager.drawStringInBoundsSingleLine(fontId, x - offset, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), fontColor, ellipsize, window.getTransformationMatrix(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
 			}
 		}
 	}
@@ -335,7 +334,7 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 			height = window.getHeight() - bottom - top;
 			break;
 		case RIGHT_TOP_BOTTOM:
-			x = window.getHeight() - right - width;
+			x = window.getWidth() - right - width;
 		case LEFT_TOP_BOTTOM:
 		case TOP_BOTTOM:
 			height = window.getHeight() - bottom - top;

@@ -2,8 +2,6 @@ package com.nemezor.nemgine.graphics.gui.components;
 
 import java.awt.Rectangle;
 
-import org.lwjgl.util.vector.Matrix4f;
-
 import com.nemezor.nemgine.graphics.FontManager;
 import com.nemezor.nemgine.graphics.gui.IGuiComponent;
 import com.nemezor.nemgine.graphics.util.Display;
@@ -63,11 +61,11 @@ public class GuiLabel implements IGuiComponent {
 	@Override
 	public void render(Display window) {
 		if (pressedLeft || pressedRight) {
-			FontManager.drawString(fontId, x, y + (int)bounds.getHeight(), text, pressedColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
+			FontManager.drawString(fontId, x, y + (int)bounds.getHeight(), text, pressedColor, window.getTransformationMatrix(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
 		}else if (hover) {
-			FontManager.drawString(fontId, x, y + (int)bounds.getHeight(), text, hoverColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
+			FontManager.drawString(fontId, x, y + (int)bounds.getHeight(), text, hoverColor, window.getTransformationMatrix(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
 		}else{
-			FontManager.drawString(fontId, x, y + (int)bounds.getHeight(), text, fontColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
+			FontManager.drawString(fontId, x, y + (int)bounds.getHeight(), text, fontColor, window.getTransformationMatrix(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
 		}
 	}
 
