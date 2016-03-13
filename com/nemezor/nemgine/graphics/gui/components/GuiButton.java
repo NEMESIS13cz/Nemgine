@@ -25,6 +25,7 @@ public class GuiButton implements IGuiComponent {
 	private IGuiListener listener;
 	private boolean pressedLeft = false, pressedRight = false;
 	private boolean hover = false;
+	private boolean enabled = true;
 	
 	public GuiButton(int x, int y, int width, int height, int rasterWidth, int rasterHeight) {
 		left = x;
@@ -57,6 +58,10 @@ public class GuiButton implements IGuiComponent {
 		this.pressedColor = c.clone();
 	}
 	
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+	
 	@Override
 	public void setListener(IGuiListener listener) {
 		this.listener = listener;
@@ -67,7 +72,9 @@ public class GuiButton implements IGuiComponent {
 		ShaderManager.bindShader(ShaderManager.getColorShaderID());
 		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "transformation", new Matrix4f());
 		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "projection", window.get2DOrthographicProjectionMatrix());
-		if (pressedLeft || pressedRight) {
+		if (!enabled) {
+			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.tertiaryColor.getColorAsVector());
+		}else if (pressedLeft || pressedRight) {
 			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.primaryAccentColor.getColorAsVector());
 		}else if (hover) {
 			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.primaryAccentColor.getColorAsVector());
@@ -84,7 +91,9 @@ public class GuiButton implements IGuiComponent {
 		
 		Tessellator.finish();
 		
-		if (pressedLeft || pressedRight) {
+		if (!enabled) {
+			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.quaternaryColor.getColorAsVector());
+		}else if (pressedLeft || pressedRight) {
 			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.secondaryAccentColor.getColorAsVector());
 		}else{
 			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.quaternaryColor.getColorAsVector());
@@ -105,7 +114,9 @@ public class GuiButton implements IGuiComponent {
 		Tessellator.finish();
 		
 		ShaderManager.unbindShader();
-		if (pressedLeft || pressedRight) {
+		if (!enabled) {
+			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, Gui.quaternaryColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
+		}else if (pressedLeft || pressedRight) {
 			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, pressedColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
 		}else if (hover) {
 			FontManager.drawCenteredString(fontId, x + width / 2, y + height / 2, text, hoverColor, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), Registry.INVALID, Registry.INVALID);
@@ -129,23 +140,23 @@ public class GuiButton implements IGuiComponent {
 			}
 			hover = true;
 			if (leftButton) {
-				if (!pressedLeft && listener != null) {
+				if (!pressedLeft && listener != null && enabled) {
 					listener.onPressed(MouseButton.LEFT);
 				}
 				pressedLeft = true;
 			}else{
-				if (pressedLeft && listener != null) {
+				if (pressedLeft && listener != null && enabled) {
 					listener.onReleased(MouseButton.LEFT);
 				}
 				pressedLeft = false;
 			}
 			if (rightButton) {
-				if (!pressedRight && listener != null) {
+				if (!pressedRight && listener != null && enabled) {
 					listener.onPressed(MouseButton.RIGHT);
 				}
 				pressedRight = true;
 			}else{
-				if (pressedRight && listener != null) {
+				if (pressedRight && listener != null && enabled) {
 					listener.onReleased(MouseButton.RIGHT);
 				}
 				pressedRight = false;

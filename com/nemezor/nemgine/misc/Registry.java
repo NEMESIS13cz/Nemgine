@@ -24,7 +24,6 @@ public final class Registry {
 	public static final long ONE_TERABYTE_IN_BYTES = 1000000000000L;
 	public static final long ONE_PETABYTE_IN_BYTES = 1000000000000000L;
 	public static final long ONE_EXABYTE_IN_BYTES  = 1000000000000000000L;
-	
 	public static final long ONE_KIBIBYTE_IN_BYTES = 1024L;
 	public static final long ONE_MEBIBYTE_IN_BYTES = 1048576L;
 	public static final long ONE_GIBIBYTE_IN_BYTES = 1073741824L;
@@ -107,6 +106,19 @@ public final class Registry {
 	public static final String LOGO_IMAGE_PATH = "com/nemezor/nemgine/resources/logo.png";
 	public static final String LOGO_IMAGE_LOAD_ERROR = "Failed to load logo image!";
 	public static final String PLATFORM_NAME = "Platform";
+	public static final String BYTE_SUFFIX = "B";
+	public static final String KILOBYTE_SUFFIX = "kB";
+	public static final String MEGABYTE_SUFFIX = "MB";
+	public static final String GIGABYTE_SUFFIX = "GB";
+	public static final String TERABYTE_SUFFIX = "TB";
+	public static final String PETABYTE_SUFFIX = "PB";
+	public static final String EXABYTE_SUFFIX  = "EB";
+	public static final String KIBIBYTE_SUFFIX = "KiB";
+	public static final String MEBIBYTE_SUFFIX = "MiB";
+	public static final String GIBIBYTE_SUFFIX = "GiB";
+	public static final String TEBIBYTE_SUFFIX = "TiB";
+	public static final String PEBIBYTE_SUFFIX = "PiB";
+	public static final String EXBIBYTE_SUFFIX = "EiB";
 	
 	// Logging
 	public static final String LOG_FILE_PATH = "/logs";

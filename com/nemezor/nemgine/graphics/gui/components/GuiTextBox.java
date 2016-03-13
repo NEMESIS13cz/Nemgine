@@ -48,6 +48,7 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 	private int lineOffset = 0;
 	private int hoverPos = 0;
 	private boolean dragging = false;
+	private boolean enabled = true;
 	
 	public GuiTextBox(int x, int y, int width, int height, int rasterWidth, int rasterHeight) {
 		left = x;
@@ -124,6 +125,10 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 		this.hoverCursor = cursor;
 	}
 	
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+	
 	@Override
 	public void setListener(IGuiListener listener) {
 		this.listener = listener;
@@ -136,7 +141,9 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 		ShaderManager.bindShader(ShaderManager.getColorShaderID());
 		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "transformation", new Matrix4f());
 		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "projection", window.get2DOrthographicProjectionMatrix());
-		if (pressedLeft || pressedRight || hover) {
+		if (!enabled) {
+			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.tertiaryColor.getColorAsVector());
+		}else if (pressedLeft || pressedRight || hover) {
 			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.primaryAccentColor.getColorAsVector());
 		}else if (hasFocus) {
 			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.secondaryColor.getColorAsVector());
@@ -153,7 +160,9 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 		
 		Tessellator.finish();
 		
-		if (pressedLeft || pressedRight || hasFocus) {
+		if (!enabled) {
+			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.quaternaryColor.getColorAsVector());
+		}else if (pressedLeft || pressedRight || hasFocus) {
 			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.secondaryAccentColor.getColorAsVector());
 		}else{
 			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.quaternaryColor.getColorAsVector());
@@ -199,7 +208,9 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 		
 		ShaderManager.unbindShader();
 		if (multiline) {
-			if (pressedLeft || pressedRight) {
+			if (!enabled) {
+				FontManager.drawStringInBounds(fontId, x, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), Gui.quaternaryColor, ellipsize, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
+			}else if (pressedLeft || pressedRight) {
 				FontManager.drawStringInBounds(fontId, x, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), pressedColor, ellipsize, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
 			}else if (hover) {
 				FontManager.drawStringInBounds(fontId, x, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), hoverColor, ellipsize, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
@@ -208,7 +219,9 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 			}
 		}else{
 			int offset = hasFocus ? lineOffset : 0;
-			if (pressedLeft || pressedRight) {
+			if (!enabled) {
+				FontManager.drawStringInBoundsSingleLine(fontId, x - offset, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), Gui.quaternaryColor, ellipsize, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
+			}else if (pressedLeft || pressedRight) {
 				FontManager.drawStringInBoundsSingleLine(fontId, x - offset, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), pressedColor, ellipsize, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
 			}else if (hover) {
 				FontManager.drawStringInBoundsSingleLine(fontId, x - offset, y + nonMultilineHeight, text, new Rectangle(x, y, width, height), hoverColor, ellipsize, new Matrix4f(), window.get2DOrthographicProjectionMatrix(), caretPos > hoverPos ? hoverPos : caretPos, caretPos < hoverPos ? hoverPos : caretPos);
@@ -225,7 +238,9 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 				if (listener != null) {
 					listener.onExit();
 				}
-				Mouse.setCursor(window, defaultCursor);
+				if (enabled) {
+					Mouse.setCursor(window, defaultCursor);
+				}
 			}
 			pressedRight = false;
 			pressedLeft = false;
@@ -240,11 +255,13 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 				if (listener != null) {
 					listener.onEnter();
 				}
-				Mouse.setCursor(window, hoverCursor);
+				if (enabled) {
+					Mouse.setCursor(window, hoverCursor);
+				}
 			}
 			hover = true;
 			if (leftButton) {
-				if (!pressedLeft) {
+				if (!pressedLeft && enabled) {
 					if (listener != null) {
 						listener.onPressed(MouseButton.LEFT);
 					}
@@ -270,7 +287,7 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 				pressedLeft = true;
 			}else{
 				if (pressedLeft) {
-					if (listener != null) {
+					if (listener != null && enabled) {
 						listener.onReleased(MouseButton.LEFT);
 					}
 					dragging = false;
@@ -278,17 +295,17 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 				pressedLeft = false;
 			}
 			if (rightButton) {
-				if (!pressedRight && listener != null) {
+				if (!pressedRight && listener != null && enabled) {
 					listener.onPressed(MouseButton.RIGHT);
 				}
 				pressedRight = true;
 			}else{
-				if (pressedRight && listener != null) {
+				if (pressedRight && listener != null && enabled) {
 					listener.onReleased(MouseButton.RIGHT);
 				}
 				pressedRight = false;
 			}
-			if (dragging) {
+			if (dragging && enabled) {
 				int tempCaretPos = FontManager.getCharIndexFromPosition(fontId, text, mouseX - x + (multiline ? 0 : lineOffset), mouseY - y, multiline ? width : Integer.MAX_VALUE);
 				if (tempCaretPos != Registry.INVALID) {
 					hoverPos = tempCaretPos;
@@ -343,64 +360,69 @@ public class GuiTextBox implements IGuiComponent, IGuiKeyListener {
 
 	@Override
 	public void charEvent(InputCharacter c) {
-		if (!editable || !hasFocus) {
+		if (!editable || !hasFocus || !enabled) {
 			return;
 		}
-		int lower = hoverPos > caretPos ? caretPos : hoverPos;
-		int higher = hoverPos < caretPos ? caretPos : hoverPos;
-		if (c.getCode() != Registry.INVALID) {
-			if (c.getCode() == InputCharacter.BACKSPACE && text.length() > 0 && caretPos > 0) {
-				text = text.substring(0, lower - (lower == higher ? 1 : 0)) + text.substring(higher > text.length() ? text.length() : higher);
-				caretPos--;
-				hoverPos = caretPos;
-				updateCaretPositionAndOffset();
-			}
-			if (c.getCode() == InputCharacter.DELETE && caretPos < text.length()) {
-				text = text.substring(0, lower) + text.substring(higher + (lower == higher ? 1 : 0));
-				hoverPos = caretPos;
-				updateCaretPositionAndOffset();
-			}
-			if (c.getCode() == InputCharacter.ENTER && multiline) {
-				text = text.substring(0, lower) + "\n" + text.substring(higher + (lower != higher ? 1 : 0));
-				caretPos++;
-				hoverPos = caretPos;
-				updateCaretPositionAndOffset();
-			}
-			if (c.getCode() == InputCharacter.TABULATOR) {
+		try{
+			int lower = hoverPos > caretPos ? caretPos : hoverPos;
+			int higher = hoverPos < caretPos ? caretPos : hoverPos;
+			if (c.getCode() != Registry.INVALID) {
+				if (c.getCode() == InputCharacter.BACKSPACE && text.length() > 0 && caretPos > 0) {
+					text = text.substring(0, lower - (lower == higher ? 1 : 0)) + text.substring(higher > text.length() ? text.length() : higher);
+					caretPos--;
+					hoverPos = caretPos;
+					updateCaretPositionAndOffset();
+				}
+				if (c.getCode() == InputCharacter.DELETE && caretPos < text.length()) {
+					text = text.substring(0, lower) + text.substring(higher + (lower == higher ? 1 : 0));
+					hoverPos = caretPos;
+					updateCaretPositionAndOffset();
+				}
+				if (c.getCode() == InputCharacter.ENTER && multiline) {
+					text = text.substring(0, lower) + "\n" + text.substring(higher + (lower != higher ? 1 : 0));
+					caretPos++;
+					hoverPos = caretPos;
+					updateCaretPositionAndOffset();
+				}
+				if (c.getCode() == InputCharacter.TABULATOR) {
+					if (lower == higher) {
+						text = text.substring(0, lower) + "\t" + text.substring(lower);
+						caretPos++;
+					}else{
+						text = text.substring(0, lower) + "\t" + text.substring(higher + 1 > text.length() ? higher : higher + 1);
+						caretPos = lower + 1;
+					}
+					hoverPos = caretPos;
+					updateCaretPositionAndOffset();
+				}
+				if (c.getCode() == InputCharacter.ARROW_LEFT) {
+					if (caretPos > 0) {
+						caretPos--;
+						hoverPos = caretPos;
+						updateCaretPositionAndOffset();
+					}
+				}
+				if (c.getCode() == InputCharacter.ARROW_RIGHT) {
+					if (caretPos < text.length()) {
+						caretPos++;
+						hoverPos = caretPos;
+						updateCaretPositionAndOffset();
+					}
+				}
+			}else{
 				if (lower == higher) {
-					text = text.substring(0, lower) + "\t" + text.substring(lower);
+					text = text.substring(0, lower) + c.getChar() + text.substring(lower);
 					caretPos++;
 				}else{
-					text = text.substring(0, lower) + "\t" + text.substring(higher + 1 > text.length() ? higher : higher + 1);
+					text = text.substring(0, lower) + c.getChar() + text.substring(higher + 1 > text.length() ? higher : higher + 1);
 					caretPos = lower + 1;
 				}
 				hoverPos = caretPos;
 				updateCaretPositionAndOffset();
 			}
-			if (c.getCode() == InputCharacter.ARROW_LEFT) {
-				if (caretPos > 0) {
-					caretPos--;
-					hoverPos = caretPos;
-					updateCaretPositionAndOffset();
-				}
-			}
-			if (c.getCode() == InputCharacter.ARROW_RIGHT) {
-				if (caretPos < text.length()) {
-					caretPos++;
-					hoverPos = caretPos;
-					updateCaretPositionAndOffset();
-				}
-			}
-		}else{
-			if (lower == higher) {
-				text = text.substring(0, lower) + c.getChar() + text.substring(lower);
-				caretPos++;
-			}else{
-				text = text.substring(0, lower) + c.getChar() + text.substring(higher + 1 > text.length() ? higher : higher + 1);
-				caretPos = lower + 1;
-			}
-			hoverPos = caretPos;
-			updateCaretPositionAndOffset();
+		}catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Fix me!");
 		}
 	}
 	

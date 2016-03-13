@@ -13,6 +13,7 @@ import com.nemezor.nemgine.graphics.gui.IGuiComponent;
 import com.nemezor.nemgine.graphics.util.Display;
 import com.nemezor.nemgine.misc.Anchors;
 import com.nemezor.nemgine.misc.Color;
+import com.nemezor.nemgine.misc.Data;
 import com.nemezor.nemgine.misc.IGuiListener;
 import com.nemezor.nemgine.misc.MouseButton;
 import com.nemezor.nemgine.misc.Platform;
@@ -33,10 +34,12 @@ public class GuiResourceMonitor implements IGuiComponent {
 	private ArrayList<Float> memData;
 	private ArrayList<Float> swapData;
 	private int cpuDataStr;
-	private int memDataStr;
-	private int swapDataStr;
+	private long memDataStr;
+	private long swapDataStr;
 	private long lastUpdate;
 	private long lastStrUpdate;
+	private boolean enabled = true;
+	private Data scale = Data.MEBIBYTE;
 	
 	public GuiResourceMonitor(int x, int y, int width, int height, int rasterWidth, int rasterHeight) {
 		left = x;
@@ -64,6 +67,17 @@ public class GuiResourceMonitor implements IGuiComponent {
 		this.fontId = id;
 	}
 	
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+	
+	public void setDataUnit(Data data) {
+		if (data == null) {
+			return;
+		}
+		this.scale = data;
+	}
+	
 	@Override
 	public void setListener(IGuiListener listener) {
 		this.listener = listener;
@@ -74,7 +88,9 @@ public class GuiResourceMonitor implements IGuiComponent {
 		ShaderManager.bindShader(ShaderManager.getColorShaderID());
 		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "transformation", new Matrix4f());
 		ShaderManager.loadMatrix4(ShaderManager.getColorShaderID(), "projection", window.get2DOrthographicProjectionMatrix());
-		if (pressedLeft || pressedRight) {
+		if (!enabled) {
+			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.tertiaryColor.getColorAsVector());
+		}else if (pressedLeft || pressedRight) {
 			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.primaryAccentColor.getColorAsVector());
 		}else if (hover) {
 			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.primaryAccentColor.getColorAsVector());
@@ -90,65 +106,66 @@ public class GuiResourceMonitor implements IGuiComponent {
 		Tessellator.addVertex(x, y + height);
 		
 		Tessellator.finish();
-		
-		GLHelper.enableBlending();
-		ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", new Color(0xFF660040).getColorAsVector());
-		Tessellator.start(Tessellator.LINES);
-		
-		for (int i = cpuData.size() - 1; i > -1; i--) {
-			Tessellator.addVertex(x + i, y + height);
-			Tessellator.addVertex(x + i, y + height - cpuData.get(i) * height);
-		}
-		
-		Tessellator.finish();
-		GLHelper.disableBlending();
-		ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", new Color(0xFF6600FF).getColorAsVector());
-		Tessellator.start(Tessellator.LINE_STRIP);
-		
-		for (int i = cpuData.size() - 1; i > -1; i--) {
-			Tessellator.addVertex(x + i, y + height - cpuData.get(i) * height);
-		}
-		
-		Tessellator.finish();
-		GLHelper.enableBlending();
-		ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", new Color(0x008AFF40).getColorAsVector());
-		Tessellator.start(Tessellator.LINES);
-		
-		for (int i = memData.size() - 1; i > -1; i--) {
-			Tessellator.addVertex(x + width / 2 + i, y + height);
-			Tessellator.addVertex(x + width / 2 + i, y + height - memData.get(i) * height);
-		}
-		
-		Tessellator.finish();
-		GLHelper.disableBlending();
-		ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", new Color(0x008AFFFF).getColorAsVector());
-		Tessellator.start(Tessellator.LINE_STRIP);
-		
-		for (int i = memData.size() - 1; i > -1; i--) {
-			Tessellator.addVertex(x + width / 2 + i, y + height - memData.get(i) * height);
-		}
-		
-		Tessellator.finish();
-		GLHelper.enableBlending();
-		ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", new Color(0x15B30040).getColorAsVector());
-		Tessellator.start(Tessellator.LINES);
-		
-		for (int i = swapData.size() - 1; i > -1; i--) {
-			Tessellator.addVertex(x + width / 2 + i, y + height);
-			Tessellator.addVertex(x + width / 2 + i, y + height - swapData.get(i) * height);
-		}
-		
-		Tessellator.finish();
-		GLHelper.disableBlending();
-		ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", new Color(0x15B300FF).getColorAsVector());
-		Tessellator.start(Tessellator.LINE_STRIP);
-		
-		for (int i = swapData.size() - 1; i > -1; i--) {
-			Tessellator.addVertex(x + width / 2 + i, y + height - swapData.get(i) * height);
-		}
-		
-		Tessellator.finish();
 
+		if (graph) {
+			GLHelper.enableBlending();
+			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", new Color(0xFF660040).getColorAsVector());
+			Tessellator.start(Tessellator.LINES);
+			
+			for (int i = cpuData.size() - 1; i > -1; i--) {
+				Tessellator.addVertex(x + i, y + height);
+				Tessellator.addVertex(x + i, y + height - cpuData.get(i) * height);
+			}
+			
+			Tessellator.finish();
+			GLHelper.disableBlending();
+			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", new Color(0xFF6600FF).getColorAsVector());
+			Tessellator.start(Tessellator.LINE_STRIP);
+			
+			for (int i = cpuData.size() - 1; i > -1; i--) {
+				Tessellator.addVertex(x + i, y + height - cpuData.get(i) * height);
+			}
+			
+			Tessellator.finish();
+			GLHelper.enableBlending();
+			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", new Color(0x008AFF40).getColorAsVector());
+			Tessellator.start(Tessellator.LINES);
+			
+			for (int i = memData.size() - 1; i > -1; i--) {
+				Tessellator.addVertex(x + width / 2 + i, y + height);
+				Tessellator.addVertex(x + width / 2 + i, y + height - memData.get(i) * height);
+			}
+			
+			Tessellator.finish();
+			GLHelper.disableBlending();
+			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", new Color(0x008AFFFF).getColorAsVector());
+			Tessellator.start(Tessellator.LINE_STRIP);
+			
+			for (int i = memData.size() - 1; i > -1; i--) {
+				Tessellator.addVertex(x + width / 2 + i, y + height - memData.get(i) * height);
+			}
+			
+			Tessellator.finish();
+			GLHelper.enableBlending();
+			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", new Color(0x15B30040).getColorAsVector());
+			Tessellator.start(Tessellator.LINES);
+			
+			for (int i = swapData.size() - 1; i > -1; i--) {
+				Tessellator.addVertex(x + width / 2 + i, y + height);
+				Tessellator.addVertex(x + width / 2 + i, y + height - swapData.get(i) * height);
+			}
+			
+			Tessellator.finish();
+			GLHelper.disableBlending();
+			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", new Color(0x15B300FF).getColorAsVector());
+			Tessellator.start(Tessellator.LINE_STRIP);
+			
+			for (int i = swapData.size() - 1; i > -1; i--) {
+				Tessellator.addVertex(x + width / 2 + i, y + height - swapData.get(i) * height);
+			}
+			
+			Tessellator.finish();
+		}
 		ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.quaternaryColor.getColorAsVector());
 
 		Tessellator.start(Tessellator.LINES);
@@ -156,7 +173,7 @@ public class GuiResourceMonitor implements IGuiComponent {
 		Tessellator.addVertex(x + width / 2, y + height);
 		Tessellator.finish();
 		
-		if (pressedLeft || pressedRight) {
+		if (enabled && (pressedLeft || pressedRight)) {
 			ShaderManager.loadVector4(ShaderManager.getColorShaderID(), "color", Gui.secondaryAccentColor.getColorAsVector());
 		}
 		
@@ -175,9 +192,11 @@ public class GuiResourceMonitor implements IGuiComponent {
 		Tessellator.finish();
 		ShaderManager.unbindShader();
 		
-		FontManager.drawStringFromLeft(fontId, x + width / 2 - 4, y + FontManager.getFontHeight(fontId) + 4, cpuDataStr + "%", new Color(0xFF6600FF),  new Matrix4f(), window.get2DOrthographicProjectionMatrix(), 0, 0);
-		FontManager.drawStringFromLeft(fontId, x + width - 4, y + FontManager.getFontHeight(fontId) + 4, swapDataStr + "MB", new Color(0x15B300FF),  new Matrix4f(), window.get2DOrthographicProjectionMatrix(), 0, 0);
-		FontManager.drawStringFromLeft(fontId, x + width - FontManager.getStringWidth(fontId, swapDataStr + "MB ") - 4, y + FontManager.getFontHeight(fontId) + 4, memDataStr + "MB", new Color(0x008AFFFF),  new Matrix4f(), window.get2DOrthographicProjectionMatrix(), 0, 0);
+		if (text) {
+			FontManager.drawStringFromLeft(fontId, x + width / 2 - 4, y + FontManager.getFontHeight(fontId) + 4, cpuDataStr + "%", new Color(0xFF6600FF),  new Matrix4f(), window.get2DOrthographicProjectionMatrix(), 0, 0);
+			FontManager.drawStringFromLeft(fontId, x + width - 4, y + FontManager.getFontHeight(fontId) + 4, swapDataStr + scale.suffix, new Color(0x15B300FF),  new Matrix4f(), window.get2DOrthographicProjectionMatrix(), 0, 0);
+			FontManager.drawStringFromLeft(fontId, x + width - FontManager.getStringWidth(fontId, swapDataStr + scale.suffix + " ") - 4, y + FontManager.getFontHeight(fontId) + 4, memDataStr + scale.suffix, new Color(0x008AFFFF),  new Matrix4f(), window.get2DOrthographicProjectionMatrix(), 0, 0);
+		}
 	}
 
 	@Override
@@ -195,23 +214,23 @@ public class GuiResourceMonitor implements IGuiComponent {
 			}
 			hover = true;
 			if (leftButton) {
-				if (!pressedLeft && listener != null) {
+				if (!pressedLeft && listener != null && enabled) {
 					listener.onPressed(MouseButton.LEFT);
 				}
 				pressedLeft = true;
 			}else{
-				if (pressedLeft && listener != null) {
+				if (pressedLeft && listener != null && enabled) {
 					listener.onReleased(MouseButton.LEFT);
 				}
 				pressedLeft = false;
 			}
 			if (rightButton) {
-				if (!pressedRight && listener != null) {
+				if (!pressedRight && listener != null && enabled) {
 					listener.onPressed(MouseButton.RIGHT);
 				}
 				pressedRight = true;
 			}else{
-				if (pressedRight && listener != null) {
+				if (pressedRight && listener != null && enabled) {
 					listener.onReleased(MouseButton.RIGHT);
 				}
 				pressedRight = false;
@@ -284,8 +303,8 @@ public class GuiResourceMonitor implements IGuiComponent {
 			lastStrUpdate = 0;
 			
 			cpuDataStr = (int)(Platform.getCPUUsage() * 100);
-			swapDataStr = (int)(Platform.getUsedSwapMemory() / (1024L * 1024L));
-			memDataStr = (int)(Platform.getUsedPhysicalMemory() / (1024L * 1024L));
+			swapDataStr = Platform.getUsedSwapMemory() / scale.amount;
+			memDataStr = Platform.getUsedPhysicalMemory() / scale.amount;
 		}
 		lastStrUpdate++;
 	}

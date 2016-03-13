@@ -27,7 +27,9 @@ public class TestGui extends Gui {
 		button.anchor(Anchors.TOP_LEFT);
 		res.anchor(Anchors.LEFT_RIGHT_TOP_BOTTOM);
 		
-		res.setDisplayMode(true, false);
+		output.setEditable(false);
+		
+		res.setEnabled(false);
 		
 		button.setText("Generate");
 		button.setListener(new IGuiListener() {
