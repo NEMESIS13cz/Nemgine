@@ -70,6 +70,10 @@ public class GLHelper {
 		return mat;
 	}
 	
+	public static Matrix4f init2DOrthographicProjectionMatrix(float width, float height) {
+		return initOrthographicProjectionMatrix(0, width, 0, height, 0, 1);
+	}
+	
 	public static Matrix4f initOrthographicProjectionMatrix(float left, float right, float top, float bottom, float zNear, float zFar) {
 		Matrix4f mat = new Matrix4f();
 		

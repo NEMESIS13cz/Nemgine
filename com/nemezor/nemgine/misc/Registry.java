@@ -74,6 +74,7 @@ public final class Registry {
 	public static final int GUI_CARET_WIDTH = 2;
 	public static final int GUI_CARET_BLINK_SPEED = 1;
 	public static final int GUI_CARET_PADDING = 1;
+	public static final int GUI_PANEL_FBO_RESIZE_TRESHOLD = 1000;
 	
 	////////////////////////////////////////////////////////////////////////////////////////
 
