@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -256,7 +255,7 @@ public class TextureManager {
 			data[i] = alpha << 24 | blue << 16 | green << 8 | red;
 		}
 
-		IntBuffer res = ByteBuffer.allocateDirect(data.length * 4).order(ByteOrder.nativeOrder()).asIntBuffer();
+		IntBuffer res = BufferUtils.createIntBuffer(data.length * 4);
 		res.put(data).flip();
 
 		invalidTexture = GL11.glGenTextures();

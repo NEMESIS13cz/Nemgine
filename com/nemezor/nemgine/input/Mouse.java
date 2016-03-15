@@ -1,13 +1,23 @@
 package com.nemezor.nemgine.input;
 
 import java.awt.Point;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.util.HashMap;
+import java.util.Iterator;
+
+import javax.imageio.ImageIO;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWImage;
 
 import com.nemezor.nemgine.graphics.util.Display;
+import com.nemezor.nemgine.main.Nemgine;
+import com.nemezor.nemgine.misc.Registry;
 
 public class Mouse {
 
@@ -24,9 +34,11 @@ public class Mouse {
 	private static HashMap<Long, Integer> x = new HashMap<Long, Integer>();
 	private static HashMap<Long, Integer> y = new HashMap<Long, Integer>();
 	private static HashMap<Long, Integer> cursor = new HashMap<Long, Integer>();
+	private static HashMap<Integer, Long> cursors = new HashMap<Integer, Long>();
 	private static DoubleBuffer b1 = BufferUtils.createDoubleBuffer(1);
 	private static DoubleBuffer b2 = BufferUtils.createDoubleBuffer(1);
 	private static boolean initialized = false;
+	private static int cursorCounter = 0x5;
 	private static long normalCursor;
 	private static long textCursor;
 	private static long vresizeCursor;
@@ -35,6 +47,45 @@ public class Mouse {
 	private static long crosshairCursor;
 	
 	private Mouse() {}
+	
+	public static synchronized int generateCursors() {
+		cursorCounter++;
+		cursors.put(cursorCounter, (long)Registry.INVALID);
+		return cursorCounter;
+	}
+	
+	public static boolean initializeCursor(int id, String file, int hotX, int hotY) {
+		long glfwId = cursors.get(id);
+		if (glfwId == 0 || glfwId != Registry.INVALID) {
+			return false;
+		}
+		BufferedImage image = null;
+		try {
+			InputStream stream = Nemgine.class.getResourceAsStream("/" + file);
+			image = ImageIO.read(stream);
+			stream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		int[] pixels = image.getRGB(0, 0, image.getWidth(), image.getHeight(), new int[image.getWidth() * image.getHeight()], 0, image.getWidth());
+		byte[] pixels_ = new byte[pixels.length * 4];
+		
+		for (int i = 0; i < pixels.length; i++) {
+			pixels_[i * 4] = (byte)((pixels[i] & 0xFF0000) >> 16);
+			pixels_[i * 4 + 1] = (byte)((pixels[i] & 0xFF00) >> 8);
+			pixels_[i * 4 + 2] = (byte)(pixels[i] & 0xFF);
+			pixels_[i * 4 + 3] = (byte)((pixels[i] & 0xFF000000) >> 24);
+		}
+		ByteBuffer res = BufferUtils.createByteBuffer(pixels_.length);
+		res.put(pixels_).flip();
+		GLFWImage img = new GLFWImage(res);
+		img.width(image.getWidth());
+		img.height(image.getHeight());
+		img.pixels(res);
+		cursors.put(id, GLFW.glfwCreateCursor(img, hotX, hotY));
+		return true;
+	}
 	
 	public static void initialize() {
 		if (initialized) {
@@ -86,6 +137,8 @@ public class Mouse {
 	
 	private static long getGLFWCursor(int cursor) {
 		switch (cursor) {
+		case CURSOR_NORMAL:
+			return normalCursor;
 		case CURSOR_TEXT:
 			return textCursor;
 		case CURSOR_VRESIZE:
@@ -97,11 +150,21 @@ public class Mouse {
 		case CURSOR_CROSSHAIR:
 			return crosshairCursor;
 		default:
-			return normalCursor;
+			long l = cursors.get(cursor);
+			if (l == 0) {
+				return normalCursor;
+			}else{
+				return l;
+			}
 		}
 	}
 	
 	public static void disposeAll() {
+		Iterator<Long> i = cursors.values().iterator();
+		while (i.hasNext()) {
+			GLFW.glfwDestroyCursor(i.next());
+		}
+		cursors.clear();
 		GLFW.glfwDestroyCursor(normalCursor);
 		GLFW.glfwDestroyCursor(textCursor);
 		GLFW.glfwDestroyCursor(vresizeCursor);

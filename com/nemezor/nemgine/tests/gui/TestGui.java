@@ -14,6 +14,7 @@ import com.nemezor.nemgine.graphics.gui.components.GuiGridLayout;
 import com.nemezor.nemgine.graphics.gui.components.GuiPanel;
 import com.nemezor.nemgine.graphics.gui.components.GuiResourceMonitor;
 import com.nemezor.nemgine.graphics.gui.components.GuiTextBox;
+import com.nemezor.nemgine.input.Mouse;
 import com.nemezor.nemgine.misc.Anchors;
 import com.nemezor.nemgine.misc.Color;
 import com.nemezor.nemgine.misc.IGuiListener;
@@ -23,9 +24,13 @@ import com.nemezor.nemgine.misc.Registry;
 public class TestGui extends Gui {
 
 	private Random rand = new Random();
+	private int cursor;
 	
 	@Override
 	public void populate(int rasterWidth, int rasterHeight) {
+		cursor = Mouse.generateCursors();
+		Mouse.initializeCursor(cursor, "com/nemezor/nemgine/tests/gui/cursor.png", 0, 0);
+		
 		GuiTextBox input = new GuiTextBox(10, 10, rasterWidth - 20, 50, rasterWidth, rasterHeight);
 		GuiTextBox output = new GuiTextBox(10, 40, rasterWidth - 20, 50, rasterWidth, rasterHeight);
 		GuiButton button = new GuiButton(10, 70, 150, 40, rasterWidth, rasterHeight);
@@ -59,6 +64,8 @@ public class TestGui extends Gui {
 		gridButton.setText("test");
 		
 		res.setEnabled(false);
+		
+		input.setHoverCursor(cursor);
 		
 		button.setText("Generate");
 		button.setListener(new IGuiListener() {
