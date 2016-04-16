@@ -49,8 +49,8 @@ public final class Registry {
 	public static final int IP_ADDRESS_MAXIMUM_PORT_VALUE = 65535;
 	public static final int IP_ADDRESS_MINIMUM_PORT_VALUE = 0;
 	public static final int SOCKET_DEFAULT_TIMEOUT = 5000;
-	public static final int RSA_ENCRYPTION_KEY_LENGTH = 4096;
-	public static final int AES_ENCRYPTION_KEY_LENGTH = 256;
+	public static final int RSA_ENCRYPTION_KEY_LENGTH = 2048;
+	public static final int AES_ENCRYPTION_KEY_LENGTH = 128;
 	
 	// Fonts
 	public static final Color FONT_DEFAULT_COLOR = new Color(0xFFFFFFFF);
