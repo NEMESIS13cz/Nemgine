@@ -317,7 +317,7 @@ public class GuiResourceMonitor implements IGuiComponent {
 		lastStrUpdate++;
 	}
 	
-	public void updateUsages(double cpu, int ram, int ramInstalled, int swap, int swapInstalled) {
+	public void updateUsages(double cpu, long ram, long ramInstalled, long swap, long swapInstalled) {
 		if (!local) {
 			return;
 		}
