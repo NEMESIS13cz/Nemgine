@@ -40,6 +40,12 @@ public class GuiResourceMonitor implements IGuiComponent {
 	private long lastStrUpdate;
 	private boolean enabled = true;
 	private Data scale = Data.MEBIBYTE;
+	private boolean local = true;
+	
+	public GuiResourceMonitor(int x, int y, int width, int height, int rasterWidth, int rasterHeight, boolean local) {
+		this(x, y, width, height, rasterWidth, rasterHeight);
+		this.local = local;
+	}
 	
 	public GuiResourceMonitor(int x, int y, int width, int height, int rasterWidth, int rasterHeight) {
 		left = x;
@@ -237,9 +243,11 @@ public class GuiResourceMonitor implements IGuiComponent {
 			}
 		}
 		
-		if (lastUpdate + Registry.PLATFORM_RESOURCES_POLL < System.currentTimeMillis()) {
-			updateUsages();
-			lastUpdate = System.currentTimeMillis();
+		if (local) {
+			if (lastUpdate + Registry.PLATFORM_RESOURCES_POLL < System.currentTimeMillis()) {
+				updateUsages();
+				lastUpdate = System.currentTimeMillis();
+			}
 		}
 	}
 
@@ -305,6 +313,32 @@ public class GuiResourceMonitor implements IGuiComponent {
 			cpuDataStr = (int)(Platform.getCPUUsage() * 100);
 			swapDataStr = Platform.getUsedSwapMemory() / scale.amount;
 			memDataStr = Platform.getUsedPhysicalMemory() / scale.amount;
+		}
+		lastStrUpdate++;
+	}
+	
+	public void updateUsages(double cpu, int ram, int ramInstalled, int swap, int swapInstalled) {
+		if (!local) {
+			return;
+		}
+		for (int i = cpuData.size() - 1, j = 0; i > -1; i--, j++) {
+			if (j >= width / 2) {
+				cpuData.remove(i);
+				memData.remove(i);
+				swapData.remove(i);
+				i--;
+			}
+		}
+		cpuData.add((float)cpu);
+		swapData.add((float)swap / (float)swapInstalled);
+		memData.add((float)ram / (float)ramInstalled);
+		
+		if (lastStrUpdate == 4) {
+			lastStrUpdate = 0;
+			
+			cpuDataStr = (int)(cpu * 100);
+			swapDataStr = swap / scale.amount;
+			memDataStr = ram / scale.amount;
 		}
 		lastStrUpdate++;
 	}
