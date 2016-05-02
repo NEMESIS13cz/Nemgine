@@ -97,7 +97,7 @@ public class GLFWTest implements IMainRenderLoop {
 		FontManager.drawString(FontManager.getDefaultFontID20(), 20, 40, (Platform.getUsedMemory() / 1048576) + "/" + (Platform.getAllocatedMemory() / 1048576) + "MB", new Color(0xFFFFFFFF), new Matrix4f(), GLHelper.initOrthographicProjectionMatrix(0, window.getWidth(), 0, window.getHeight(), 0, 1), Registry.INVALID, Registry.INVALID);
 		
 		ModelManager.finishRendering();
-		angle++;
+		angle += 2;
 		
 		handleInput();
 		
