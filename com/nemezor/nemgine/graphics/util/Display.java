@@ -199,6 +199,7 @@ public class Display {
 	
 	public void fill(Color c) {
 		GL11.glClearColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 	}
 	
 	public int getWidth() {
@@ -241,5 +242,21 @@ public class Display {
 	
 	public boolean displayResized() {
 		return lastFrameResized;
+	}
+	
+	public float getAspectRatio() {
+		return width / height;
+	}
+	
+	public float getFieldOfView() {
+		return FOV;
+	}
+	
+	public float getZNear() {
+		return zNear;
+	}
+	
+	public float getZFar() {
+		return zFar;
 	}
 }

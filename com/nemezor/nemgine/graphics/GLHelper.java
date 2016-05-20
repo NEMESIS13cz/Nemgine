@@ -87,6 +87,16 @@ public class GLHelper {
 		return mat;
 	}
 	
+	public static Matrix4f initOrthographicProjectionMatrix(float width, float height, float length) {
+		Matrix4f mat = new Matrix4f();
+		
+		mat.m00 = 2.0f / width;
+		mat.m11 = 2.0f / height;
+		mat.m22 = -2.0f / length;
+		
+		return mat;
+	}
+	
 	public static Matrix4f initBasicOrthographicProjectionMatrix() {
 		return initOrthographicProjectionMatrix(0, 1, 0, 1, -1, 1);
 	}

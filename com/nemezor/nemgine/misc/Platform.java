@@ -57,6 +57,23 @@ public class Platform {
 		operatingSystem = System.getProperty("os.name");
 		architecture = System.getProperty("os.arch");
 		systemVersion = System.getProperty("os.version");
+
+		sys = (OperatingSystemMXBean)ManagementFactory.getOperatingSystemMXBean();
+		totalPhysicalMemory = sys.getTotalPhysicalMemorySize();
+		
+		Thread t = new Thread() {
+			
+			public void run() {
+				setName(Registry.PLATFORM_NAME);
+				while (Nemgine.isRunning()) {
+					refreshCPUAndMemory();
+					try {
+						Thread.sleep(Registry.PLATFORM_RESOURCES_POLL);
+					} catch (InterruptedException e) {}
+				}
+			}
+		};
+		t.start();
 		
 		if (headless) {
 			return;
@@ -98,22 +115,6 @@ public class Platform {
 		
 		GraphicsEnvironment e = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		availableFonts = e.getAvailableFontFamilyNames();
-		sys = (OperatingSystemMXBean)ManagementFactory.getOperatingSystemMXBean();
-		totalPhysicalMemory = sys.getTotalPhysicalMemorySize();
-		
-		Thread t = new Thread() {
-			
-			public void run() {
-				setName(Registry.PLATFORM_NAME);
-				while (Nemgine.isRunning()) {
-					refreshCPUAndMemory();
-					try {
-						Thread.sleep(Registry.PLATFORM_RESOURCES_POLL);
-					} catch (InterruptedException e) {}
-				}
-			}
-		};
-		t.start();
 	}
 	
 	private static void refreshCPUAndMemory() {

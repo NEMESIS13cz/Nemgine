@@ -111,17 +111,29 @@ public class GuiLabel implements IGuiComponent {
 	@Override
 	public void resize(Display window) {
 		switch (anch) {
-		case BOTTOM_RIGHT:
-			x = window.getWidth() - right;
+		case BOTTOM_LEFT_RIGHT:
 		case BOTTOM:
 		case BOTTOM_LEFT:
-		case BOTTOM_LEFT_RIGHT:
 			y = window.getHeight() - bottom;
 			break;
-		case RIGHT:
+		case BOTTOM_RIGHT:
+			y = window.getHeight() - bottom;
+			x = window.getWidth() - right;
+			break;
+		case LEFT_RIGHT:
+			break;
+		case LEFT_RIGHT_TOP_BOTTOM:
+			break;
 		case RIGHT_TOP_BOTTOM:
+			x = window.getWidth() - right;
+		case LEFT_TOP_BOTTOM:
+		case TOP_BOTTOM:
+			break;
+		case RIGHT:
 		case TOP_RIGHT:
 			x = window.getWidth() - right;
+			break;
+		case TOP_LEFT_RIGHT:
 			break;
 		default:
 			break;

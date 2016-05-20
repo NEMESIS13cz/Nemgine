@@ -198,7 +198,7 @@ public class GuiPanel implements IGuiComponent {
 			break;
 		case RIGHT:
 		case TOP_RIGHT:
-			x = window.getHeight() - right - width;
+			x = window.getWidth() - right - width;
 			resized = true;
 			break;
 		case TOP_LEFT_RIGHT:

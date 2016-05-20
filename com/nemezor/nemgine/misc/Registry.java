@@ -49,8 +49,8 @@ public final class Registry {
 	public static final int IP_ADDRESS_MAXIMUM_PORT_VALUE = 65535;
 	public static final int IP_ADDRESS_MINIMUM_PORT_VALUE = 0;
 	public static final int SOCKET_DEFAULT_TIMEOUT = 5000;
-	public static final int RSA_ENCRYPTION_KEY_LENGTH = 2048;
-	public static final int AES_ENCRYPTION_KEY_LENGTH = 128;
+	public static final int RSA_ENCRYPTION_KEY_LENGTH = 4096;
+	public static final int AES_ENCRYPTION_KEY_LENGTH = 256;
 	
 	// Fonts
 	public static final Color FONT_DEFAULT_COLOR = new Color(0xFFFFFFFF);
@@ -75,6 +75,10 @@ public final class Registry {
 	public static final int GUI_CARET_BLINK_SPEED = 1;
 	public static final int GUI_CARET_PADDING = 1;
 	public static final int GUI_PANEL_FBO_RESIZE_TRESHOLD = 1000;
+	
+	// Graphics
+	public static final int SHADOW_RENDER_DISTANCE = 200;
+	public static final int SHADOW_RENDER_OFFSET = 10;
 	
 	////////////////////////////////////////////////////////////////////////////////////////
 

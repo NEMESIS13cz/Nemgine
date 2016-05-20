@@ -11,6 +11,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.nemezor.nemgine.console.Console;
 import com.nemezor.nemgine.exceptions.ThreadException;
+import com.nemezor.nemgine.file.Directory;
 import com.nemezor.nemgine.graphics.DisplayManager;
 import com.nemezor.nemgine.graphics.FrameBufferManager;
 import com.nemezor.nemgine.graphics.Loader;
@@ -71,6 +72,7 @@ public class Nemgine {
 				}
 				
 				InputParams.resolve(args);
+				Directory.initialize();
 				boolean contained = InputParams.containsEntry(Registry.PARAM_CONTAINED) ? InputParams.getBoolean(Registry.PARAM_CONTAINED) : ann.contained();
 				headless = InputParams.containsEntry(Registry.PARAM_SERVER) ? InputParams.getBoolean(Registry.PARAM_SERVER) : ann.side().isServer();
 				name = ann.name();

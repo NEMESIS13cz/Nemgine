@@ -190,7 +190,7 @@ public class GuiButton implements IGuiComponent {
 			break;
 		case RIGHT:
 		case TOP_RIGHT:
-			x = window.getHeight() - right - width;
+			x = window.getWidth() - right - width;
 			break;
 		case TOP_LEFT_RIGHT:
 			width = window.getWidth() - right - left;

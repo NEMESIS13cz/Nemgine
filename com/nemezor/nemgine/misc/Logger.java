@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.nemezor.nemgine.console.Console;
+import com.nemezor.nemgine.file.Directory;
 
 public class Logger {
 	
@@ -18,16 +19,18 @@ public class Logger {
 	private static String lastDate;
 	private static int fileNum = 1;
 	private static String appFile;
-
+	private static String lineSeparator;
+	
 	private Logger() {}
 	
 	public static void initialize(String appFilePath) {
+		lineSeparator = System.getProperty("line.separator");
 		appFile = appFilePath;
 		String path = appFile + Registry.LOG_FILE_PATH;
 		File dir = new File(path);
 		String curr = getCurrentLogName();
 		lastDate = getCurrentLogName();
-		File file = new File(path + "/" + curr + "." + fileNum + Registry.LOG_FILE_FORMAT);
+		File file = new File(path + Directory.getPathSeparator() + curr + "." + fileNum + Registry.LOG_FILE_FORMAT);
 		if (!dir.exists()) {
 			dir.mkdirs();
 		}
@@ -40,7 +43,7 @@ public class Logger {
 		}else{
 			while (file.exists()) {
 				fileNum++;
-				file = new File(path + "/" + curr + "." + fileNum + Registry.LOG_FILE_FORMAT);
+				file = new File(path + Directory.getPathSeparator() + curr + "." + fileNum + Registry.LOG_FILE_FORMAT);
 			}
 			try {
 				file.createNewFile();
@@ -104,6 +107,10 @@ public class Logger {
 				}
 			} catch (IOException e) {}
 		}
+	}
+	
+	public static String getLineSeparator() {
+		return lineSeparator;
 	}
 	
 	private static String getCurrentMessageTime() {

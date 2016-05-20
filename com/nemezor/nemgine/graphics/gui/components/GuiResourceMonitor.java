@@ -279,7 +279,7 @@ public class GuiResourceMonitor implements IGuiComponent {
 			break;
 		case RIGHT:
 		case TOP_RIGHT:
-			x = window.getHeight() - right - width;
+			x = window.getWidth() - right - width;
 			break;
 		case TOP_LEFT_RIGHT:
 			width = window.getWidth() - right - left;
@@ -318,7 +318,7 @@ public class GuiResourceMonitor implements IGuiComponent {
 	}
 	
 	public void updateUsages(double cpu, long ram, long ramInstalled, long swap, long swapInstalled) {
-		if (!local) {
+		if (local) {
 			return;
 		}
 		for (int i = cpuData.size() - 1, j = 0; i > -1; i--, j++) {

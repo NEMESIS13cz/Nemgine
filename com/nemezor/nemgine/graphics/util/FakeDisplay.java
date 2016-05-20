@@ -15,6 +15,7 @@ public class FakeDisplay extends Display {
 	private float zNear, zFar;
 	private Matrix4f persp, ortho, ortho2D, transform;
 	private float x, y;
+	private long parentWindow;
 	
 	public FakeDisplay(float w, float h, float fieldOfView, float zn, float zf) {
 		super(Registry.INVALID);
@@ -23,6 +24,7 @@ public class FakeDisplay extends Display {
 		zFar = zf;
 		width = w;
 		height = h;
+		parentWindow = Registry.INVALID;
 		resize();
 	}
 
@@ -88,6 +90,7 @@ public class FakeDisplay extends Display {
 		Vector3f scale = new Vector3f(1, 1, 1);
 		transform = Matrix4f.mul(masterWindow.getTransformationMatrix(), GLHelper.initTransformationMatrix(translate, rotate, scale), new Matrix4f());
 		ortho2D = masterWindow.get2DOrthographicProjectionMatrix();
+		parentWindow = masterWindow.getGLFWId();
 	}
 	
 	public void prepareRender() {
@@ -119,7 +122,7 @@ public class FakeDisplay extends Display {
 	}
 	
 	public long getGLFWId() {
-		return Registry.INVALID;
+		return parentWindow;
 	}
 	
 	public boolean isInvalid() {
