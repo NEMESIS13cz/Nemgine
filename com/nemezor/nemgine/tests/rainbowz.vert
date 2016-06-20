@@ -3,17 +3,15 @@
 in vec3 position;
 in vec3 normal;
 
-out vec4 depthFragment;
+out vec4 finalColor;
 
 uniform mat4 projection;
 uniform mat4 transformation;
+uniform vec4 color;
 
 void main() {
 
 	vec4 world = projection * (transformation * vec4(position, 1.0));
-	depthFragment = vec4((world.z + 1.0) * 0.5, 1, 0, 1);
-	if (world.z < -1.0) {
-		depthFragment.r = 0.0;
-	}
+	finalColor = color;
 	gl_Position = world;
 }

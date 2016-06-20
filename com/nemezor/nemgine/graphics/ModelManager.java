@@ -25,6 +25,7 @@ import com.nemezor.nemgine.graphics.util.Model;
 import com.nemezor.nemgine.graphics.util.ModelData;
 import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.Color;
+import com.nemezor.nemgine.misc.Debugger;
 import com.nemezor.nemgine.misc.Registry;
 import com.nemezor.nemgine.misc.Side;
 
@@ -111,6 +112,9 @@ public class ModelManager {
 			FrameBufferManager.bindFrameBufferTexture(frameBuffer, texture);
 		}
 		GL11.glDrawElements(GL11.GL_TRIANGLES, model.data.indices.length, GL11.GL_UNSIGNED_INT, 0);
+		Debugger.vertices += model.data.vertices.length / 3;
+		Debugger.normals += model.data.normals.length / 3;
+		Debugger.texCoords += model.data.textures.length / 2;
 		GL20.glDisableVertexAttribArray(0);
 		if (model.isTextured()) {
 			GL20.glDisableVertexAttribArray(1);
@@ -139,9 +143,12 @@ public class ModelManager {
 			TextureManager.bindTexture(textureID);
 		}
 		GL11.glDrawElements(GL11.GL_TRIANGLES, model.data.indices.length, GL11.GL_UNSIGNED_INT, 0);
+		Debugger.vertices += model.data.vertices.length / 3;
+		Debugger.normals += model.data.normals.length / 3;
 		GL20.glDisableVertexAttribArray(0);
 		if (model.isTextured()) {
 			GL20.glDisableVertexAttribArray(1);
+			Debugger.texCoords += model.data.textures.length / 2;
 		}
 		GL20.glDisableVertexAttribArray(2);
 		GL30.glBindVertexArray(0);
@@ -218,6 +225,7 @@ public class ModelManager {
 		}
 		if (Loader.loading()) {
 			Loader.stepLoader();
+			Loader.requestContext();
 		}
 		int VAOid = GL30.glGenVertexArrays();
 		GL30.glBindVertexArray(VAOid);
@@ -237,6 +245,7 @@ public class ModelManager {
 		
 		if (Loader.loading()) {
 			Loader.modelLoaded();
+			Loader.handOffContext();
 		}
 		return true;
 	}

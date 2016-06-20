@@ -7,7 +7,9 @@ import java.util.Iterator;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.system.MemoryUtil;
 
 import com.nemezor.nemgine.console.Console;
 import com.nemezor.nemgine.exceptions.ThreadException;
@@ -95,7 +97,7 @@ public class Nemgine {
 					System.exit(Registry.INVALID);
 				}
 				if (!headless) {
-					if (GLFW.glfwInit() == GLFW.GLFW_FALSE) {
+					if (!GLFW.glfwInit()) {
 						Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_FAILED_TO_INITIALIZE_GLFW, false);
 			            GLFW.glfwTerminate();
 						System.exit(Registry.INVALID);
@@ -109,18 +111,23 @@ public class Nemgine {
 					boolean tempDebug = debug;
 					debug = false;
 					context = Loader.initialize(name);
+					Loader.requestContext();
+					GL.createCapabilities(Registry.OPENGL_FORWARD_COMPATIBLE);
 					try {
 						resources.invoke(instance, GLResourceEvent.GENERATE_IDS);
 					} catch (Exception e) {
 						Logger.log(Registry.NEMGINE_NAME, Registry.LOADING_RESOURCES_GENERATE_IDS_FAILED, false);
 						e.printStackTrace();
+						Loader.abort();
 			            GLFW.glfwTerminate();
 						System.exit(Registry.INVALID);
 					}
+					Loader.handOffContext();
 					Loader.beginLoadSequence(resources, instance);
 					Loader.finish();
 					Mouse.initialize();
 					GL11.glFinish();
+					GLFW.glfwMakeContextCurrent(MemoryUtil.NULL);
 					debug = tempDebug;
 				}
 				Platform.freeUpMemory();
@@ -147,7 +154,7 @@ public class Nemgine {
 			Logger.log(Registry.NEMGINE_NAME, Registry.NEMGINE_SHUTDOWN_DISPOSE, false);
 			NetworkManager.disposeAll();
 			if (errCb != null) {
-				errCb.release();
+				errCb.free();
 			}
 			if (Nemgine.getSide() == Side.CLIENT) {
 				TextureManager.disposeAll();

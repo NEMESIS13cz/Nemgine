@@ -34,8 +34,8 @@ public class LightSource {
 	
 	public void updateMatrices() {
 		Matrix4f rotation = new Matrix4f();
-		rotation.rotate((float) Math.toRadians(-cam.getRotation().y), new Vector3f(0, 1, 0));
-		rotation.rotate((float) Math.toRadians(-cam.getRotation().x), new Vector3f(1, 0, 0));
+		rotation.rotate(-cam.getRotation().y, new Vector3f(0, 1, 0));
+		rotation.rotate(-cam.getRotation().x, new Vector3f(1, 0, 0));
 		Vector3f forward = new Vector3f(Matrix4f.transform(rotation, new Vector4f(0, 0, -1, 0), null));
 		
 		Vector3f toFar = new Vector3f(forward);
@@ -83,9 +83,9 @@ public class LightSource {
 		mat.setIdentity();
 		float pitch = (float) Math.acos(new Vector2f(dir.x, dir.z).length());
 		Matrix4f.rotate(pitch, new Vector3f(1, 0, 0), mat, mat);
-		float yaw = (float) Math.toDegrees(((float) Math.atan(dir.x / dir.z)));
-		yaw = dir.z > 0 ? yaw - 180 : yaw;
-		Matrix4f.rotate((float) -Math.toRadians(yaw), new Vector3f(0, 1, 0), mat, mat);
+		float yaw = (float) ((float) Math.atan(dir.x / dir.z));
+		yaw = dir.z > 0 ? yaw - (float)Math.PI : yaw;
+		Matrix4f.rotate((float) -yaw, new Vector3f(0, 1, 0), mat, mat);
 		Matrix4f.translate(center, mat, mat);
 	}
 	
@@ -139,5 +139,14 @@ public class LightSource {
 	
 	public void changeLocation(Vector3f location) {
 		this.lightDirection = location.negate(null);
+	}
+	
+	public Vector3f getPosition() {
+		return lightDirection.negate(null);
+	}
+	
+	public Vector3f getRotation() {
+		Vector3f pos = getPosition();
+		return new Vector3f((float)Math.tan(pos.y / pos.z), (float)Math.tan(pos.x / pos.z), 0);
 	}
 }

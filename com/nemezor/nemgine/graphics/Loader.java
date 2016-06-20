@@ -29,8 +29,6 @@ public class Loader {
 	private static int logoShader = 0;
 	private static int barShader = 0;
 	private static int texture = 0;
-	private static long frameskip = Registry.ONE_SECOND_IN_MILLIS / Registry.LOADING_SCREEN_REFRESHRATE;
-	private static long lastFrame = 0;
 	private static long window;
 	private static Matrix4f projection = GLHelper.initBasicOrthographicProjectionMatrix();
 	private static Matrix4f textProjection = GLHelper.initOrthographicProjectionMatrix(0, Registry.LOADING_SCREEN_WIDTH, 0, Registry.LOADING_SCREEN_HEIGHT, 0, 1);
@@ -42,6 +40,12 @@ public class Loader {
 	protected static int fontCounter = 0;
 	
 	protected static boolean silent = false;
+	
+	private static Thread loaderThread;
+	private static volatile long context = Registry.INVALID;
+	private static volatile boolean hasContext = true;
+	private static volatile boolean isContextLocked = false;
+	private static volatile boolean runThread = true;
 	
 	private Loader() {}
 	
@@ -55,7 +59,99 @@ public class Loader {
 			initialized = true;
 			return Registry.INVALID;
 		}
+		loaderThread = new Thread() {
+			
+			public void run() {
+				initLoaderThread();
+				
+				long lastRefresh = 0;
+				
+				while (runThread) {
+					if (lastRefresh + (Registry.ONE_SECOND_IN_MILLIS / Registry.LOADING_SCREEN_REFRESHRATE) < System.currentTimeMillis()) {
+						while (!hasContext);
+						isContextLocked = true;
+						update();
+						lastRefresh = System.currentTimeMillis();
+						isContextLocked = false;
+					}
+					try {
+						sleep(1);
+					} catch (InterruptedException e) {
+					}
+				}
+				while (!hasContext);
+				isContextLocked = true;
+				Loader.silent = true;
+				update();
+				GLHelper.enableBlending();
+				boolean first = true;
+				for (String s : Registry.LOADING_SCREEN_LOGOS) {
+					int id = TextureManager.generateTextures();
+					TextureManager.initializeTextureFile(id, s);
+					TextureManager.bindTexture(id);
+					ShaderManager.bindShader(ShaderManager.getTextureShaderID());
+					ShaderManager.loadMatrix4(ShaderManager.getTextureShaderID(), "projection", projection);
+					int increment = Registry.LOADING_SCREEN_FADE_SPEED;
+					int value = first ? 255 : 0;
+					int pause = 0;
+					first = false;
+					
+					while (value >= 0) {
+						GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+
+						ShaderManager.loadMatrix4(ShaderManager.getTextureShaderID(), "transformation", new Matrix4f());
+						ShaderManager.loadVector4(ShaderManager.getTextureShaderID(), "color", new Color(0xFFFFFF00 | value).getColorAsVector());
+						Tessellator.start(Tessellator.QUADS);
+						
+						Tessellator.addVertex(0, 0, 0);
+						Tessellator.addTexCoord(0, 0);
+						Tessellator.addVertex(1, 0, 0);
+						Tessellator.addTexCoord(1, 0);
+						Tessellator.addVertex(1, 1, 0);
+						Tessellator.addTexCoord(1, 1);
+						Tessellator.addVertex(0, 1, 0);
+						Tessellator.addTexCoord(0, 1);
+
+						Tessellator.finish();
+						GLFW.glfwSwapBuffers(window);
+						GLFW.glfwPollEvents();
+						
+						if (increment < 0 && pause < Registry.LOADING_SCREEN_FADE_PAUSE) {
+							pause++;
+						}else{
+							value += increment;
+						}
+						if (value >= Registry.COLOR_NORMALIZER_VALUE) {
+							value = Registry.COLOR_NORMALIZER_VALUE;
+							increment = -Registry.LOADING_SCREEN_FADE_SPEED;
+						}
+						try {
+							sleep(Registry.ONE_SECOND_IN_MILLIS / Registry.LOADING_SCREEN_REFRESHRATE);
+						} catch (InterruptedException e) {
+						}
+					}
+					
+					TextureManager.dispose(id);
+				}
+				GLHelper.disableBlending();
+				TextureManager.unbindTexture();
+				ShaderManager.unbindShader();
+				isContextLocked = false;
+			}
+		};
+		loaderThread.start();
 		
+		while (context == Registry.INVALID) {
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+			}
+		}
+		
+		return context;
+	}
+	
+	private static void initLoaderThread() {
 		Platform.setDefaultGLFWWindowConfigurations();
 		GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_FALSE);
 		GLFW.glfwWindowHint(GLFW.GLFW_DECORATED, GLFW.GLFW_FALSE);
@@ -73,7 +169,6 @@ public class Loader {
 		GLFW.glfwSetWindowPos(window, (mode.width() - Registry.LOADING_SCREEN_WIDTH) / 2, (mode.height() - Registry.LOADING_SCREEN_HEIGHT) / 2);
 		GLFW.glfwMakeContextCurrent(window);
 		GL.createCapabilities(Registry.OPENGL_FORWARD_COMPATIBLE);
-		GLFW.glfwShowWindow(window);
 		
 		GL11.glViewport(0, 0, Registry.LOADING_SCREEN_WIDTH, Registry.LOADING_SCREEN_HEIGHT);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -92,6 +187,7 @@ public class Loader {
 		ShaderManager.loadMatrix4(barShader, "transformation", new Matrix4f());
 		ShaderManager.loadFloat(barShader, "progress", 0);
 		ShaderManager.unbindShader();
+		GLFW.glfwShowWindow(window);
 		
 		initialized = true;
 		update();
@@ -99,7 +195,7 @@ public class Loader {
 		ShaderManager.generateDefaultShaderIDs();
 		FontManager.generateDefaultFontIDs();
 		
-		return GLFW.glfwGetCurrentContext();
+		context = GLFW.glfwGetCurrentContext();
 	}
 	
 	public static void finish() {
@@ -111,11 +207,23 @@ public class Loader {
 			return;
 		}
 		
+		runThread = false;
+		while (loaderThread.isAlive()) {
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+			}
+		}
+		requestContext();
 		GLFW.glfwHideWindow(window);
 		ShaderManager.dispose(logoShader);
 		ShaderManager.dispose(barShader);
 		TextureManager.dispose(texture);
 		isDone = true;
+	}
+	
+	public static void abort() {
+		runThread = false;
 	}
 	
 	public static void beginLoadSequence(Method resources, Object instance) {
@@ -147,20 +255,14 @@ public class Loader {
 		} catch (Exception e) {
 			Logger.log(Registry.NEMGINE_NAME, Registry.LOADING_RESOURCES_LOAD_FAILED, false);
 			e.printStackTrace();
+			requestContext();
+			abort();
             GLFW.glfwTerminate();
 			System.exit(Registry.INVALID);
 		}
 	}
 	
 	private static void update() {
-		if (lastFrame + frameskip > System.currentTimeMillis()) {
-			return;
-		}
-		
-		if (Nemgine.getSide() == Side.SERVER) {
-			lastFrame = System.currentTimeMillis();
-			return;
-		}
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		
 		ShaderManager.bindShader(logoShader);
@@ -186,7 +288,6 @@ public class Loader {
 		
 		GLFW.glfwSwapBuffers(window);
 		GLFW.glfwPollEvents();
-		lastFrame = System.currentTimeMillis();
 	}
 	
 	private static void renderSegment(LoaderSegment segment, float offset) {
@@ -228,53 +329,44 @@ public class Loader {
 		Logger.log(Registry.LOADING_SCREEN_NAME, "Loading Texture: " + name);
 		segment.setLabel(Registry.LOADING_PROGRESS_GFX_TEXTURES + " (" + name + ")");
 		segment.stepProgress();
-		update();
 	}
 	
 	protected static void textureLoaded() {
 		segment.stepProgress();
-		update();
 	}
 	
 	protected static void loadingShader(String name) {
 		Logger.log(Registry.LOADING_SCREEN_NAME, "Loading Shader: " + name);
 		segment.setLabel(Registry.LOADING_PROGRESS_GFX_SHADERS + " (" + name + ")");
 		segment.stepProgress();
-		update();
 	}
 	
 	protected static void shaderLoaded() {
 		segment.stepProgress();
-		update();
 	}
 	
 	protected static void loadingModel(String name) {
 		Logger.log(Registry.LOADING_SCREEN_NAME, "Loading Model: " + name);
 		segment.setLabel(Registry.LOADING_PROGRESS_GFX_MODELS + " (" + name + ")");
 		segment.stepProgress();
-		update();
 	}
 	
 	protected static void modelLoaded() {
 		segment.stepProgress();
-		update();
 	}
 	
 	protected static void loadingFont(String name) {
 		Logger.log(Registry.LOADING_SCREEN_NAME, "Loading Font: " + name);
 		segment.setLabel(Registry.LOADING_PROGRESS_GFX_FONTS + " (" + name + ")");
 		segment.stepProgress();
-		update();
 	}
 	
 	protected static void fontLoaded() {
 		segment.stepProgress();
-		update();
 	}
 	
 	protected static void stepLoader() {
 		segment.stepProgress();
-		update();
 	}
 	
 	protected static void failedToLoadResource(String message) {
@@ -283,5 +375,16 @@ public class Loader {
 	
 	public static boolean loading() {
 		return initialized ? isDone ? false : !silent : false;
+	}
+	
+	public static void handOffContext() {
+		GLFW.glfwMakeContextCurrent(MemoryUtil.NULL);
+		hasContext = true;
+	}
+	
+	public static void requestContext() {
+		hasContext = false;
+		while (isContextLocked);
+		GLFW.glfwMakeContextCurrent(context);
 	}
 }

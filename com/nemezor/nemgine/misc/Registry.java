@@ -44,6 +44,8 @@ public final class Registry {
 	public static final int LOADING_SCREEN_HEIGHT = 450;
 	public static final Color LOADING_SCREEN_FONT_COLOR = new Color(0xFFFFFFFF);
 	public static final int LOADING_SCREEN_REFRESHRATE = 60;
+	public static final int LOADING_SCREEN_FADE_SPEED = 5;
+	public static final int LOADING_SCREEN_FADE_PAUSE = 30;
 	
 	// Network
 	public static final int IP_ADDRESS_MAXIMUM_PORT_VALUE = 65535;
@@ -77,8 +79,7 @@ public final class Registry {
 	public static final int GUI_PANEL_FBO_RESIZE_TRESHOLD = 1000;
 	
 	// Graphics
-	public static final int SHADOW_RENDER_DISTANCE = 200;
-	public static final int SHADOW_RENDER_OFFSET = 10;
+	public static final int SHADOW_RENDER_DISTANCE = 150;
 	
 	////////////////////////////////////////////////////////////////////////////////////////
 
@@ -206,6 +207,7 @@ public final class Registry {
 	public static final String LOADING_PROGRESS_GFX_SHADERS = "Loading Shaders";
 	public static final String LOADING_PROGRESS_GFX_FONTS = "Loading Fonts";
 	public static final String LOADING_SCREEN_NAME = "Resource Loader";
+	public static final String[] LOADING_SCREEN_LOGOS = new String[] {"com/nemezor/nemgine/resources/logo.png", "com/nemezor/nemgine/resources/lwjgl.png", "com/nemezor/nemgine/resources/opengl.png"};
 	
 	// Network
 	public static final String NETWORK_MANAGER_NAME = "Nemgine Network Manager";

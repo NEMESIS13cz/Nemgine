@@ -157,7 +157,10 @@ public class TextureManager {
 		
 		ByteBuffer res = BufferUtils.createByteBuffer(pixels.length);
 		res.put(pixels).flip();
-
+		
+		if (Loader.loading()) {
+			Loader.requestContext();
+		}
 		int glid = GL11.glGenTextures();
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, glid);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
@@ -169,6 +172,7 @@ public class TextureManager {
 		textures.put(id, new Texture(glid, width, height));
 		if (Loader.loading()) {
 			Loader.textureLoaded();
+			Loader.handOffContext();
 		}
 		return true;
 	}
@@ -196,6 +200,9 @@ public class TextureManager {
 		IntBuffer res = BufferUtils.createIntBuffer(pixels.length);
 		res.put(pixels).flip();
 
+		if (Loader.loading()) {
+			Loader.requestContext();
+		}
 		int glid = GL11.glGenTextures();
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, glid);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
@@ -207,6 +214,7 @@ public class TextureManager {
 		textures.put(id, new Texture(glid, width, height));
 		if (Loader.loading()) {
 			Loader.textureLoaded();
+			Loader.handOffContext();
 		}
 		return true;
 	}
@@ -257,7 +265,7 @@ public class TextureManager {
 
 		IntBuffer res = BufferUtils.createIntBuffer(data.length * 4);
 		res.put(data).flip();
-
+		
 		invalidTexture = GL11.glGenTextures();
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, invalidTexture);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);

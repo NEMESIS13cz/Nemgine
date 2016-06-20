@@ -7,6 +7,7 @@ import java.awt.event.WindowListener;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 
+import com.nemezor.nemgine.graphics.Loader;
 import com.nemezor.nemgine.main.Nemgine;
 
 public class ErrorScreen {
@@ -63,6 +64,9 @@ public class ErrorScreen {
 			} catch (InterruptedException e1) {
 				e1.printStackTrace();
 			}
+		}
+		if (Loader.loading()) {
+			Loader.requestContext();
 		}
 		Nemgine.shutDown();
 		Nemgine.exit(Registry.INVALID);

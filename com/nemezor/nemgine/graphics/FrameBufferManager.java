@@ -2,6 +2,7 @@ package com.nemezor.nemgine.graphics;
 
 import java.awt.Dimension;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -19,8 +20,8 @@ import com.nemezor.nemgine.misc.Side;
 public class FrameBufferManager {
 	
 	private static HashMap<Integer, FrameBuffer> buffers = new HashMap<Integer, FrameBuffer>();
+	private static ArrayList<Integer> currentBufferTex = new ArrayList<Integer>();
 	private static int bufferCounter = 0;
-	private static int currentBufferTex = 0;
 	private static int currentBuffer = 0;
 	private static FrameBuffer currentBufferData = null;
 	
@@ -38,7 +39,7 @@ public class FrameBufferManager {
 	}
 	
 	public static void bindFrameBuffer(int id) {
-		if (currentBuffer == id || currentBufferTex == id) {
+		if (currentBuffer == id || currentBufferTex.contains(id)) {
 			return;
 		}
 		FrameBuffer buffer = buffers.get(id);
@@ -66,7 +67,7 @@ public class FrameBufferManager {
 	}
 	
 	public static void bindFrameBufferTexture(int id, int texture) {
-		if (currentBuffer == id || currentBufferTex == id) {
+		if (currentBuffer == id || currentBufferTex.contains(id)) {
 			return;
 		}
 		FrameBuffer buffer = buffers.get(id);
@@ -81,16 +82,15 @@ public class FrameBufferManager {
 		}else{
 			return;
 		}
-		TextureManager.unbindTexture();
-		currentBufferTex = id;
+		currentBufferTex.add(id);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texId);
 	}
 	
 	public static void unbindFrameBufferTexture() {
-		if (currentBufferTex == 0 || Nemgine.getSide() == Side.SERVER) {
+		if (currentBufferTex.size() == 0 || Nemgine.getSide() == Side.SERVER) {
 			return;
 		}
-		currentBufferTex = 0;
+		currentBufferTex.clear();
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 	}
 	

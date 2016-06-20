@@ -176,6 +176,13 @@ public class ShaderManager {
 		GL20.glUniform1f(currentShaderData.data.get(name), data ? 1.0f : 0.0f);
 	}
 	
+	public static void loadInteger(int id, String name, int data) {
+		if (id != currentShader || Nemgine.getSide() == Side.SERVER) {
+			return;
+		}
+		GL20.glUniform1i(currentShaderData.data.get(name), data);
+	}
+	
 	public static void loadVector4Array(int id, String name, Vector4f[] array) {
 		if (id != currentShader || Nemgine.getSide() == Side.SERVER) {
 			return;
@@ -275,6 +282,7 @@ public class ShaderManager {
 		}
 		if (Loader.loading()) {
 			Loader.stepLoader();
+			Loader.requestContext();
 		}
 		shader.progID = GL20.glCreateProgram();
 		GL20.glAttachShader(shader.progID, shader.vertID);
@@ -290,6 +298,7 @@ public class ShaderManager {
 		}
 		if (Loader.loading()) {
 			Loader.shaderLoaded();
+			Loader.handOffContext();
 		}
 		return true;
 	}
@@ -315,6 +324,9 @@ public class ShaderManager {
 			e.printStackTrace();
 			return Registry.INVALID;
 		}
+		if (Loader.loading()) {
+			Loader.requestContext();
+		}
 		int shaderID = GL20.glCreateShader(type.getGlShaderType());
 		GL20.glShaderSource(shaderID, shaderSrc);
 		GL20.glCompileShader(shaderID);
@@ -325,6 +337,9 @@ public class ShaderManager {
 			ex.printStackTrace();
 			Logger.log(null, GL20.glGetShaderInfoLog(shaderID, Registry.SHADER_ERROR_LOG_SIZE), false);
 			return Registry.INVALID;
+		}
+		if (Loader.loading()) {
+			Loader.handOffContext();
 		}
 		return shaderID;
 	}

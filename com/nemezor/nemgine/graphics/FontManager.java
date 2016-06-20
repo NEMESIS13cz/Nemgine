@@ -8,7 +8,6 @@ import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -630,69 +629,60 @@ public class FontManager {
 		if (Loader.loading()) {
 			Loader.loadingFont(font.getFontName());
 		}
-		HashMap<Character, GLCharacter> charMap = new HashMap<Character, GLCharacter>();
+		nFont.font = font;
 		
-		int currX = 0;
-		int currY = 0;
-		int highest = 0;
-		int width = 0;
-		int height = 0;
-		ArrayList<Integer> textures = new ArrayList<Integer>();
 		FontRenderContext context = new FontRenderContext(null, true, true);
 		BufferedImage temp = new BufferedImage(1, 1, BufferedImage.TYPE_4BYTE_ABGR);
 		Graphics tempGraphics = temp.getGraphics();
 		tempGraphics.setFont(font);
 		Rectangle2D r = font.getMaxCharBounds(context);
-		highest = (int)r.getHeight() + tempGraphics.getFontMetrics().getAscent();
+		nFont.highest = (int)r.getHeight() + tempGraphics.getFontMetrics().getAscent();
+		nFont.widest = (int)r.getWidth();
 		Loader.silent = true;
-		int currentTexture = TextureManager.generateTextures();
+		nFont.currentTexture = TextureManager.generateTextures();
 		Loader.silent = false;
 		if (Loader.loading()) {
 			Loader.stepLoader();
 		}
-		int avgWidth = 0;
-		int charCount = 0;
 		
 		for (int i = 0; i < 0xFFFF; i++) {
-			if (font.canDisplay(i)) {
-				if (currY + highest >= Platform.getOpenGLTextureSize()) {
-					textures.add(currentTexture);
+			if (nFont.font.canDisplay(i)) {
+				if (nFont.currY + nFont.highest >= Platform.getOpenGLTextureSize()) {
+					nFont.textures.add(nFont.currentTexture);
 					Loader.silent = true;
-					currentTexture = TextureManager.generateTextures();
+					nFont.currentTexture = TextureManager.generateTextures();
 					Loader.silent = false;
-					currY = 0;
-					currX = 0;
+					nFont.currY = 0;
+					nFont.currX = 0;
 				}
-				if (currX + r.getWidth() >= Platform.getOpenGLTextureSize()) {
-					currX = 0;
-					currY += highest;
+				if (nFont.currX + nFont.widest >= Platform.getOpenGLTextureSize()) {
+					nFont.currX = 0;
+					nFont.currY += nFont.highest;
 				}
 				int charWidth = tempGraphics.getFontMetrics().charWidth((char)i);
-				GLCharacter glchar = new GLCharacter((char)i, currX, currY, charWidth, highest + tempGraphics.getFontMetrics().getDescent(), currentTexture);
-				charMap.put(glchar.character, glchar);
-				currX += r.getWidth();
-				if (currX + 1 > width) {
-					width = currX + 1;
+				GLCharacter glchar = new GLCharacter((char)i, nFont.currX, nFont.currY, charWidth, nFont.highest + tempGraphics.getFontMetrics().getDescent(), nFont.currentTexture);
+				nFont.chars.put(glchar.character, glchar);
+				nFont.currX += nFont.widest;
+				if (nFont.currX + 1 > nFont.width) {
+					nFont.width = nFont.currX + 1;
 				}
-				charCount++;
-				avgWidth += charWidth;
+				nFont.charCount++;
 			}
 		}
 		if (Loader.loading()) {
 			Loader.stepLoader();
 		}
-		avgWidth /= charCount;
-		height = currY + highest;
-		textures.add(currentTexture);
+		nFont.height = nFont.currY + nFont.highest;
+		nFont.textures.add(nFont.currentTexture);
 		
 		tempGraphics.dispose();
 		HashMap<Integer, BufferedImage> images = new HashMap<Integer, BufferedImage>();
 		HashMap<Integer, Graphics2D> graphics = new HashMap<Integer, Graphics2D>();
-		for (int i = 0; i < textures.size(); i++) {
-			BufferedImage img = new BufferedImage(width, i + 1 == textures.size() ? height : Platform.getOpenGLTextureSize(), BufferedImage.TYPE_BYTE_GRAY);
-			images.put(textures.get(i), img);
+		for (int i = 0; i < nFont.textures.size(); i++) {
+			BufferedImage img = new BufferedImage(nFont.width, i + 1 == nFont.textures.size() ? nFont.height : Platform.getOpenGLTextureSize(), BufferedImage.TYPE_BYTE_GRAY);
+			images.put(nFont.textures.get(i), img);
 			Graphics2D g = img.createGraphics();
-			graphics.put(textures.get(i), g);
+			graphics.put(nFont.textures.get(i), g);
 			g.setFont(font);
 			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		}
@@ -700,26 +690,62 @@ public class FontManager {
 			Loader.stepLoader();
 		}
 		
-		Iterator<Character> iter = charMap.keySet().iterator();
+		Iterator<Character> iter = nFont.chars.keySet().iterator();
 		while (iter.hasNext()) {
-			GLCharacter c = charMap.get(iter.next());
+			GLCharacter c = nFont.chars.get(iter.next());
 			BufferedImage img = images.get(c.glTex);
-			graphics.get(c.glTex).drawString(String.valueOf(c.character), c.x, c.y + highest);
+			graphics.get(c.glTex).drawString(String.valueOf(c.character), c.x, c.y + nFont.highest);
 			c.initialize(img.getWidth(), img.getHeight());
 		}
 		if (Loader.loading()) {
 			Loader.stepLoader();
 		}
 		Loader.silent = true;
-		for (int tId : textures) {
+		for (int tId : nFont.textures) {
 			graphics.get(tId).dispose();
 			TextureManager.initializeTextureImageGrayscale(tId, images.get(tId));
 		}
 		Loader.silent = false;
-		nFont.initializeFont(charMap, new FontMetrics(font.getFamily(), font.getFontName(), font.getSize(), font.getStyle()), highest / 2, avgWidth * Registry.FONT_TAB_WIDTH_IN_CHARS);
+		nFont.initializeFont(new FontMetrics(font.getFamily(), font.getFontName(), font.getSize(), font.getStyle()), nFont.highest / 2, nFont.widest * Registry.FONT_TAB_WIDTH_IN_CHARS);
 		if (Loader.loading()) {
 			Loader.fontLoaded();
 		}
+		
+		return true;
+	}
+	
+	public static boolean ensureCharactersLoaded(int id, char[] chars) {
+		Font nFont = fonts.get(id);
+		if (nFont == null || nFont.state != Registry.INVALID) {
+			return false;
+		}
+		BufferedImage temp = new BufferedImage(1, 1, BufferedImage.TYPE_4BYTE_ABGR);
+		Graphics tempGraphics = temp.getGraphics();
+		for (char c : chars) {
+			if (nFont.font.canDisplay(c)) {
+				if (nFont.currY + nFont.highest >= Platform.getOpenGLTextureSize()) {
+					nFont.textures.add(nFont.currentTexture);
+					Loader.silent = true;
+					nFont.currentTexture = TextureManager.generateTextures();
+					Loader.silent = false;
+					nFont.currY = 0;
+					nFont.currX = 0;
+				}
+				if (nFont.currX + nFont.widest >= Platform.getOpenGLTextureSize()) {
+					nFont.currX = 0;
+					nFont.currY += nFont.highest;
+				}
+				int charWidth = tempGraphics.getFontMetrics().charWidth(c);
+				GLCharacter glchar = new GLCharacter(c, nFont.currX, nFont.currY, charWidth, nFont.highest + tempGraphics.getFontMetrics().getDescent(), nFont.currentTexture);
+				nFont.chars.put(glchar.character, glchar);
+				nFont.currX += nFont.widest;
+				if (nFont.currX + 1 > nFont.width) {
+					nFont.width = nFont.currX + 1;
+				}
+				nFont.charCount++;
+			}
+		}
+		
 		
 		return true;
 	}

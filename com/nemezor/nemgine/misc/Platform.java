@@ -112,6 +112,8 @@ public class Platform {
 		} catch (NumberFormatException e) {}
 
 		GLFW.glfwDestroyWindow(window);
+		GLFW.glfwMakeContextCurrent(MemoryUtil.NULL);
+		GL.setCapabilities(null);
 		
 		GraphicsEnvironment e = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		availableFonts = e.getAvailableFontFamilyNames();
@@ -240,7 +242,7 @@ public class Platform {
 		GLFW.glfwDefaultWindowHints();
 		GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
 		GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_FALSE);
-		GLFW.glfwWindowHint(GLFW.GLFW_DOUBLE_BUFFER, GLFW.GLFW_TRUE);
+		GLFW.glfwWindowHint(GLFW.GLFW_DOUBLEBUFFER, GLFW.GLFW_TRUE);
 		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, Registry.SUPPORTED_OPENGL_VERSION.getMajorVersion());
 		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, Registry.SUPPORTED_OPENGL_VERSION.getMinorVersion());
 	}

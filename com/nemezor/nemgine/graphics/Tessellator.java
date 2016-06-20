@@ -7,6 +7,7 @@ import java.util.Iterator;
 import com.nemezor.nemgine.graphics.util.ModelData;
 import com.nemezor.nemgine.graphics.util.TessObject;
 import com.nemezor.nemgine.main.Nemgine;
+import com.nemezor.nemgine.misc.Debugger;
 import com.nemezor.nemgine.misc.Logger;
 import com.nemezor.nemgine.misc.Registry;
 import com.nemezor.nemgine.misc.Utils;
@@ -103,6 +104,10 @@ public class Tessellator {
 		}else{
 			data = new ModelData(verData, norData, texData, Utils.range(0, verData.length / 3));
 		}
+		
+		Debugger.vertices += verData.length / 3;
+		Debugger.normals += norData.length / 3;
+		Debugger.texCoords += texData.length / 2;
 		ArrayList<TessObject> objs = objects.get(DisplayManager.getCurrentDisplayID());
 		if (objs == null) {
 			objs = new ArrayList<TessObject>();

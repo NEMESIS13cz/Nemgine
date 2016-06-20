@@ -2,6 +2,7 @@ package com.nemezor.nemgine.tests.glfw;
 
 import java.awt.Font;
 import java.awt.Point;
+import java.text.DecimalFormat;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.util.vector.Matrix4f;
@@ -22,6 +23,7 @@ import com.nemezor.nemgine.main.Application;
 import com.nemezor.nemgine.main.IMainRenderLoop;
 import com.nemezor.nemgine.main.Nemgine;
 import com.nemezor.nemgine.misc.Color;
+import com.nemezor.nemgine.misc.Debugger;
 import com.nemezor.nemgine.misc.Platform;
 import com.nemezor.nemgine.misc.Registry;
 
@@ -34,6 +36,9 @@ public class GLFWTest implements IMainRenderLoop {
 	private int logo;
 	private int angle = 330 * 15;
 	private int font;
+	private int fps;
+	private long time;
+	private int v, n, t;
 	
 	private Camera cam;
 	
@@ -94,7 +99,12 @@ public class GLFWTest implements IMainRenderLoop {
 		transform.translate(new Vector3f(-50000, 0, 0));
 		ModelManager.renderModel(model, 0, shader, transform, window.getPerspectiveProjectionMatrix(), "transformation", "projection");
 
-		FontManager.drawString(FontManager.getDefaultFontID20(), 20, 40, (Platform.getUsedMemory() / 1048576) + "/" + (Platform.getAllocatedMemory() / 1048576) + "MB", new Color(0xFFFFFFFF), new Matrix4f(), GLHelper.initOrthographicProjectionMatrix(0, window.getWidth(), 0, window.getHeight(), 0, 1), Registry.INVALID, Registry.INVALID);
+		FontManager.drawString(FontManager.getDefaultFontID20(), 20, 40, fps + " FPS - " + time + "ms", new Color(0xFF00FFFF), new Matrix4f(), GLHelper.initOrthographicProjectionMatrix(0, window.getWidth(), 0, window.getHeight(), 0, 1), Registry.INVALID, Registry.INVALID);
+		FontManager.drawString(FontManager.getDefaultFontID20(), 20, 70, "Mem: " + (Platform.getUsedMemory() / 1048576) + "/" + (Platform.getAllocatedMemory() / 1048576) + "MB", new Color(0xFF00FFFF), new Matrix4f(), GLHelper.initOrthographicProjectionMatrix(0, window.getWidth(), 0, window.getHeight(), 0, 1), Registry.INVALID, Registry.INVALID);
+		FontManager.drawString(FontManager.getDefaultFontID20(), 20, 100, "CPU: " + new DecimalFormat("#00.00").format(Platform.getCPUUsage() * 100.0d) + "%", new Color(0xFF00FFFF), new Matrix4f(), GLHelper.initOrthographicProjectionMatrix(0, window.getWidth(), 0, window.getHeight(), 0, 1), Registry.INVALID, Registry.INVALID);
+		FontManager.drawString(FontManager.getDefaultFontID20(), 20, 130, "Vertices: " + v, new Color(0xFF00FFFF), new Matrix4f(), GLHelper.initOrthographicProjectionMatrix(0, window.getWidth(), 0, window.getHeight(), 0, 1), Registry.INVALID, Registry.INVALID);
+		FontManager.drawString(FontManager.getDefaultFontID20(), 20, 160, "Normals: " + n, new Color(0xFF00FFFF), new Matrix4f(), GLHelper.initOrthographicProjectionMatrix(0, window.getWidth(), 0, window.getHeight(), 0, 1), Registry.INVALID, Registry.INVALID);
+		FontManager.drawString(FontManager.getDefaultFontID20(), 20, 190, "TexCoords: " + t, new Color(0xFF00FFFF), new Matrix4f(), GLHelper.initOrthographicProjectionMatrix(0, window.getWidth(), 0, window.getHeight(), 0, 1), Registry.INVALID, Registry.INVALID);
 		
 		ModelManager.finishRendering();
 		angle += 2;
@@ -102,6 +112,11 @@ public class GLFWTest implements IMainRenderLoop {
 		handleInput();
 		
 		window.finishRender();
+
+		v = Debugger.vertices;
+		n = Debugger.normals;
+		t = Debugger.texCoords;
+		Debugger.clear();
 	}
 
 	@Override
@@ -125,6 +140,8 @@ public class GLFWTest implements IMainRenderLoop {
 	@Override
 	public void updateRenderSecond(int frames, long averageInterval) {
 		window.changeTitle(Nemgine.getApplicationName() + " | FPS: " + frames);
+		fps = frames;
+		time = averageInterval;
 	}
 
 	@Override

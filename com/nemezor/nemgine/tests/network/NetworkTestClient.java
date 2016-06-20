@@ -71,7 +71,7 @@ public class NetworkTestClient implements IMainRenderLoop {
 			
 		}else if (e == GLResourceEvent.LOAD_MODELS) {
 			
-			ModelManager.initializeModel(model, "dragon.obj");
+			ModelManager.initializeModel(model, "text.obj");
 			ModelManager.initializeModel(logo, "nemgine.obj");
 			
 		}else if (e == GLResourceEvent.LOAD_SHADERS) {
@@ -125,20 +125,21 @@ public class NetworkTestClient implements IMainRenderLoop {
 		}
 		window.prepareRender();
 		
-		window.fill(new Color(0x0000FFFF));
+		window.fill(new Color(0x639b6cFF));
 		
-		Matrix4f transform = GLHelper.initTransformationMatrix(cam, new Vector3f(0, -5, -25), new Vector3f(0, (float)Math.toRadians(angle), 0), new Vector3f(1, 1, 1));
+		Matrix4f transform = GLHelper.initTransformationMatrix(cam, new Vector3f(0, -5, -25), new Vector3f((float)Math.PI / 2.0f, (float)Math.toRadians(angle), 0), new Vector3f(4, 4, 4));
 		Matrix4f logoTransform = GLHelper.initTransformationMatrix(cam, new Vector3f(-15, 10, -30), new Vector3f((float)Math.toRadians(15 + angle), (float)Math.toRadians(25 + angle), (float)Math.toRadians(15)), new Vector3f(1, 1, 1));
 		Matrix4f testTransform = GLHelper.initTransformationMatrix(new Vector3f(0.25f, 0.25f, 0), new Vector3f((float)Math.toRadians(90), 0, 0), new Vector3f(0.25f, 1, 0.25f));
 		
 		ShaderManager.bindShader(shader);
-		ShaderManager.loadVector4(shader, "lightColorIn", (currColor = colorizer.getNext(currColor)).getColorAsVector());
+		//ShaderManager.loadVector4(shader, "lightColorIn", (currColor = colorizer.getNext(currColor)).getColorAsVector());
+		ShaderManager.loadVector4(shader, "lightColorIn", new Color(0xd4a190FF).getColorAsVector());
 		ShaderManager.unbindShader();
 		
 		ModelManager.renderModel(model, 0, shader, transform, window.getPerspectiveProjectionMatrix(), "transformation", "projection");
 		ModelManager.renderModel(logo, 0, logoShader, logoTransform, window.getPerspectiveProjectionMatrix(), "transformation", "projection");
 		
-		ModelManager.renderModelWithColor(ModelManager.getSquareModelID(), testTexture, ShaderManager.getTextureShaderID(), testTransform, GLHelper.initBasicOrthographicProjectionMatrix(), new Color(1, 1, 1, 0.5f), "transformation", "projection", "color");
+		//ModelManager.renderModelWithColor(ModelManager.getSquareModelID(), testTexture, ShaderManager.getTextureShaderID(), testTransform, GLHelper.initBasicOrthographicProjectionMatrix(), new Color(1, 1, 1, 0.5f), "transformation", "projection", "color");
 		
 		ModelManager.finishRendering();
 		

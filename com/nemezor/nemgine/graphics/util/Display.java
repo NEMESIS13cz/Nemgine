@@ -131,7 +131,7 @@ public class Display {
 	}
 	
 	public boolean closeRequested() {
-		return GLFW.glfwWindowShouldClose(window) == GLFW.GLFW_TRUE;
+		return GLFW.glfwWindowShouldClose(window);
 	}
 	
 	public void setSize(int w, int h) {
@@ -188,7 +188,7 @@ public class Display {
 	
 	public void dispose() {
 		invalid = true;
-		Callbacks.glfwReleaseCallbacks(window);
+		Callbacks.glfwFreeCallbacks(window);
 		GLFW.glfwDestroyWindow(window);
 	}
 	
